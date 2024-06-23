@@ -22,6 +22,7 @@ struct ContentView: View {
                 .onEnded { value in
                     let dragAmount = value.translation.height
                     changeAmount = -Int(dragAmount / 3) // Adjust the divisor to control sensitivity
+                    changeAmount = max(min(changeAmount, 50), -50) // Limit changeAmount to [-50, 50]
                     startTimer()
                 }
         )
@@ -37,10 +38,22 @@ struct ContentView: View {
                 number -= 1
                 changeAmount += 1
             } else {
+                snapToNearestFive()
                 timer?.invalidate()
                 withAnimation(.interpolatingSpring(stiffness: 100, damping: 5)) {
                     number = number
                 }
+            }
+        }
+    }
+
+    func snapToNearestFive() {
+        let remainder = number % 5
+        if remainder != 0 {
+            if remainder >= 3 {
+                number += (5 - remainder)
+            } else {
+                number -= remainder
             }
         }
     }
