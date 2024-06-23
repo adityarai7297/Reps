@@ -8,17 +8,31 @@
 import SwiftUI
 
 struct ContentView: View {
+    @State private var number: Int = 0
+
     var body: some View {
-        VStack {
-            Image(systemName: "globe")
-                .imageScale(.large)
-                .foregroundStyle(.tint)
-            Text("Hello, world!")
-        }
-        .padding()
+        Text("\(number)")
+            .font(.largeTitle)
+            .fontWeight(.bold)
+            .padding()
+            .gesture(
+                DragGesture()
+                    .onEnded { value in
+                        if value.translation.height < 0 {
+                            // Swipe up
+                            number += 1
+                        } else if value.translation.height > 0 {
+                            // Swipe down
+                            number -= 1
+                        }
+                    }
+            )
     }
 }
 
-#Preview {
-    ContentView()
+struct ContentView_Previews: PreviewProvider {
+    static var previews: some View {
+        ContentView()
+    }
 }
+
