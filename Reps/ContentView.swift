@@ -11,22 +11,27 @@ struct ContentView: View {
     @State private var number: Int = 0
 
     var body: some View {
-        Text("\(number)")
-            .font(.largeTitle)
-            .fontWeight(.bold)
-            .padding()
-            .gesture(
-                DragGesture()
-                    .onEnded { value in
-                        if value.translation.height < 0 {
-                            // Swipe up
-                            number += 1
-                        } else if value.translation.height > 0 {
-                            // Swipe down
-                            number -= 1
-                        }
+        VStack {
+            Spacer()
+            Text("\(number)")
+                .font(.largeTitle)
+                .fontWeight(.bold)
+            Spacer()
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(Color.white)
+        .gesture(
+            DragGesture()
+                .onEnded { value in
+                    if value.translation.height < 0 {
+                        // Swipe up
+                        number += 1
+                    } else if value.translation.height > 0 {
+                        // Swipe down
+                        number -= 1
                     }
-            )
+                }
+        )
     }
 }
 
@@ -35,4 +40,3 @@ struct ContentView_Previews: PreviewProvider {
         ContentView()
     }
 }
-
