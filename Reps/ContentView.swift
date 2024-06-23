@@ -23,12 +23,10 @@ struct ContentView: View {
         .gesture(
             DragGesture()
                 .onEnded { value in
-                    if value.translation.height < 0 {
-                        // Swipe up
-                        number += 1
-                    } else if value.translation.height > 0 {
-                        // Swipe down
-                        number -= 1
+                    let dragAmount = value.translation.height
+                    let increment = Int(dragAmount / 10) // Adjust the divisor to control sensitivity
+                    if increment != 0 {
+                        number -= increment
                     }
                 }
         )
