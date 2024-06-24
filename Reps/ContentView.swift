@@ -4,17 +4,17 @@ struct ContentView: View {
     @State private var weightWheelConfig: WheelPicker.Config = .init(
         count: 100,
         steps: 20,
-        spacing: 10,
+        spacing: 8,
         multiplier: 10
     )
     @State private var repWheelConfig: WheelPicker.Config = .init(
-        count: 30,
+        count: 100,
         steps: 1,
         spacing: 50,
         multiplier: 1
     )
-    @State private var weightValue: CGFloat = 180
-    @State private var repValue: CGFloat = 1
+    @State private var weightValue: CGFloat = 100 // starting positions of wheel
+    @State private var repValue: CGFloat = 4 // starting positions of wheel
     @State private var storedValue1: CGFloat = 0
     @State private var storedValue2: CGFloat = 0
     var body: some View {
