@@ -66,7 +66,7 @@ struct ContentView: View {
                                     .cornerRadius(8)
                             }
                             
-                            Text("Stored Values: \(Int(storedValue1)) lbs,  \(Int(storedValue2)) reps")
+                            Text("Stored Values: \(String(format: "%.1f", storedValue1)) lbs, \(Int(storedValue2)) reps")
                                 .padding()
             }
         }
