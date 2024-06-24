@@ -18,6 +18,7 @@ struct ContentView: View {
     var body: some View {
         NavigationStack {
             VStack {
+                // write exercise name here
                 HStack(alignment: .lastTextBaseline, spacing: 5, content: {
                     Text(verbatim: "\(weightValue)")
                         .font(.largeTitle.bold())
