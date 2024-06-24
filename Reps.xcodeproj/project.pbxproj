@@ -11,9 +11,7 @@
 		13FEA2432C27C9D200D04BF2 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 13FEA2422C27C9D200D04BF2 /* ContentView.swift */; };
 		13FEA2452C27C9D300D04BF2 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13FEA2442C27C9D300D04BF2 /* Assets.xcassets */; };
 		13FEA2492C27C9D300D04BF2 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13FEA2482C27C9D300D04BF2 /* Preview Assets.xcassets */; };
-		13FEA2532C27C9D300D04BF2 /* RepsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 13FEA2522C27C9D300D04BF2 /* RepsTests.swift */; };
-		13FEA25D2C27C9D300D04BF2 /* RepsUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 13FEA25C2C27C9D300D04BF2 /* RepsUITests.swift */; };
-		13FEA25F2C27C9D300D04BF2 /* RepsUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 13FEA25E2C27C9D300D04BF2 /* RepsUITestsLaunchTests.swift */; };
+		13FEA26C2C27F9B400D04BF2 /* WheelPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 13FEA26B2C27F9B400D04BF2 /* WheelPicker.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -41,10 +39,8 @@
 		13FEA2462C27C9D300D04BF2 /* Reps.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Reps.entitlements; sourceTree = "<group>"; };
 		13FEA2482C27C9D300D04BF2 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		13FEA24E2C27C9D300D04BF2 /* RepsTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RepsTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		13FEA2522C27C9D300D04BF2 /* RepsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RepsTests.swift; sourceTree = "<group>"; };
 		13FEA2582C27C9D300D04BF2 /* RepsUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RepsUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		13FEA25C2C27C9D300D04BF2 /* RepsUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RepsUITests.swift; sourceTree = "<group>"; };
-		13FEA25E2C27C9D300D04BF2 /* RepsUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RepsUITestsLaunchTests.swift; sourceTree = "<group>"; };
+		13FEA26B2C27F9B400D04BF2 /* WheelPicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WheelPicker.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -76,8 +72,6 @@
 			isa = PBXGroup;
 			children = (
 				13FEA23F2C27C9D200D04BF2 /* Reps */,
-				13FEA2512C27C9D300D04BF2 /* RepsTests */,
-				13FEA25B2C27C9D300D04BF2 /* RepsUITests */,
 				13FEA23E2C27C9D200D04BF2 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -97,6 +91,7 @@
 			children = (
 				13FEA2402C27C9D200D04BF2 /* RepsApp.swift */,
 				13FEA2422C27C9D200D04BF2 /* ContentView.swift */,
+				13FEA26B2C27F9B400D04BF2 /* WheelPicker.swift */,
 				13FEA2442C27C9D300D04BF2 /* Assets.xcassets */,
 				13FEA2462C27C9D300D04BF2 /* Reps.entitlements */,
 				13FEA2472C27C9D300D04BF2 /* Preview Content */,
@@ -110,23 +105,6 @@
 				13FEA2482C27C9D300D04BF2 /* Preview Assets.xcassets */,
 			);
 			path = "Preview Content";
-			sourceTree = "<group>";
-		};
-		13FEA2512C27C9D300D04BF2 /* RepsTests */ = {
-			isa = PBXGroup;
-			children = (
-				13FEA2522C27C9D300D04BF2 /* RepsTests.swift */,
-			);
-			path = RepsTests;
-			sourceTree = "<group>";
-		};
-		13FEA25B2C27C9D300D04BF2 /* RepsUITests */ = {
-			isa = PBXGroup;
-			children = (
-				13FEA25C2C27C9D300D04BF2 /* RepsUITests.swift */,
-				13FEA25E2C27C9D300D04BF2 /* RepsUITestsLaunchTests.swift */,
-			);
-			path = RepsUITests;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -260,6 +238,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				13FEA2432C27C9D200D04BF2 /* ContentView.swift in Sources */,
+				13FEA26C2C27F9B400D04BF2 /* WheelPicker.swift in Sources */,
 				13FEA2412C27C9D200D04BF2 /* RepsApp.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -268,7 +247,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				13FEA2532C27C9D300D04BF2 /* RepsTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -276,8 +254,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				13FEA25F2C27C9D300D04BF2 /* RepsUITestsLaunchTests.swift in Sources */,
-				13FEA25D2C27C9D300D04BF2 /* RepsUITests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
