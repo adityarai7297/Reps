@@ -15,6 +15,8 @@ struct ContentView: View {
     )
     @State private var weightValue: CGFloat = 180
     @State private var repValue: CGFloat = 1
+    @State private var storedValue1: CGFloat = 0
+    @State private var storedValue2: CGFloat = 0
     var body: some View {
         NavigationStack {
             VStack {
@@ -35,24 +37,38 @@ struct ContentView: View {
                 
                 WheelPicker(config: weightWheelConfig, value: $weightValue)
                     .frame(height: 60)
-            }
-            
-            HStack(alignment: .lastTextBaseline, spacing: 5, content: {
-                Text(verbatim: "\(Int(repValue))")
-                    .font(.largeTitle.bold())
-                    .contentTransition(.numericText(value: repValue))
-                    .animation(.snappy, value: repValue)
                 
-                Text("reps")
-                    .font(.title2)
-                    .fontWeight(.semibold)
-                    .textScale(.secondary)
-                    .foregroundStyle(.gray)
-            })
-            .padding(.vertical, 30)
-            
-            WheelPicker(config: repWheelConfig, value: $repValue)
-                .frame(height: 60)
+                HStack(alignment: .lastTextBaseline, spacing: 5, content: {
+                    Text(verbatim: "\(Int(repValue))")
+                        .font(.largeTitle.bold())
+                        .contentTransition(.numericText(value: repValue))
+                        .animation(.snappy, value: repValue)
+                    
+                    Text("reps")
+                        .font(.title2)
+                        .fontWeight(.semibold)
+                        .textScale(.secondary)
+                        .foregroundStyle(.gray)
+                })
+                .padding(.vertical, 30)
+                
+                WheelPicker(config: repWheelConfig, value: $repValue)
+                    .frame(height: 60)
+                
+                Button(action: {
+                                storedValue1 = weightValue
+                                storedValue2 = repValue
+                            }) {
+                                Text("Store Value")
+                                    .padding()
+                                    .background(Color.blue)
+                                    .foregroundColor(.white)
+                                    .cornerRadius(8)
+                            }
+                            
+                            Text("Stored Values: \(Int(storedValue1)) lbs,  \(Int(storedValue2)) reps")
+                                .padding()
+            }
         }
             .navigationTitle("Wheel Picker")
         }
