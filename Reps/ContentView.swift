@@ -59,14 +59,15 @@ struct ContentView: View {
                                 storedValue1 = weightValue
                                 storedValue2 = repValue
                             }) {
-                                Text("Store Value")
+                                Text("SET")
                                     .padding()
-                                    .background(Color.blue)
+                                    .background(Color.green)
                                     .foregroundColor(.white)
-                                    .cornerRadius(8)
+                                    .cornerRadius(25)
                             }
+                            .padding(.vertical, 30)
                             
-                            Text("Stored Values: \(String(format: "%.1f", storedValue1)) lbs, \(Int(storedValue2)) reps")
+                            Text("\(String(format: "%.1f", storedValue1)) lbs, \(Int(storedValue2)) reps")
                                 .padding()
             }
         }
