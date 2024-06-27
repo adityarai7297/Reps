@@ -4,6 +4,7 @@ struct SetButton: View {
     @State var fb = false
     @GestureState var topG = false
     @State var showCheckmark = false
+    var action: () -> Void
 
     var body: some View {
         ZStack {
@@ -58,6 +59,8 @@ struct SetButton: View {
                         withAnimation(.spring(response: 0.5, dampingFraction: 0.6)) {
                             showCheckmark = true
                         }
+                        
+                        action()
                         
                         DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
                             withAnimation(.spring(response: 0.5, dampingFraction: 0.6)) {
