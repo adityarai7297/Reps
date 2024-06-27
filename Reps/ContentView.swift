@@ -107,7 +107,9 @@ struct ContentView: View {
                     })
                     Spacer().frame(width: 12)
                     Text("\(setCount)")
-                        .font(.title.bold())
+                        .font(.title)
+                        .opacity(setCount > 0 ? 1 : 0)
+                    
                 }
                 
             }
