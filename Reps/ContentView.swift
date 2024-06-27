@@ -35,7 +35,7 @@ struct ContentView: View {
                         .font(.largeTitle.bold())
                 
                     Rectangle()
-                        .frame(height: 1)
+                        .frame(height: 0.5)
                         .foregroundColor(.gray)
                     
                     Spacer().frame(height: 60)
