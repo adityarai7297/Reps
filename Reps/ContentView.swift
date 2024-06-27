@@ -25,8 +25,9 @@ struct ContentView: View {
     @State private var repValue: CGFloat = 4 // starting positions of wheel
     @State private var exertionValue: CGFloat = 50
     
-    @State private var storedValue1: CGFloat = 0
-    @State private var storedValue2: CGFloat = 0
+    @State private var storedWeightValue: CGFloat = 0
+    @State private var storedRepValue: CGFloat = 0
+    @State private var storedExertionValue: CGFloat = 0
     var body: some View {
         NavigationStack {
             VStack {
@@ -86,7 +87,7 @@ struct ContentView: View {
                         .contentTransition(.numericText(value: exertionValue))
                         .animation(.snappy, value: exertionValue)
                     
-                    Text("% RPE")
+                    Text("%  RPE")
                         .font(.title2)
                         .fontWeight(.semibold)
                         .textScale(.secondary)
@@ -99,7 +100,15 @@ struct ContentView: View {
                
                 Spacer().frame(height: 40)
                 
-                SetButton()
+                SetButton(action: {
+                    storedWeightValue = weightValue
+                    storedRepValue = repValue
+                    storedExertionValue = exertionValue
+                    
+                    print("Weight: \(weightValue) lbs")
+                    print("Reps: \(repValue)")
+                    print("Exertion: \(exertionValue) % RPE")
+                })
             }
         }
             .navigationTitle("Wheel Picker")
