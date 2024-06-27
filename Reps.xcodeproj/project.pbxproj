@@ -13,6 +13,7 @@
 		13FEA2492C27C9D300D04BF2 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13FEA2482C27C9D300D04BF2 /* Preview Assets.xcassets */; };
 		13FEA26F2C2943A000D04BF2 /* WheelPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 13FEA26E2C2943A000D04BF2 /* WheelPicker.swift */; };
 		13FEA2712C2C400600D04BF2 /* SetButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 13FEA2702C2C400600D04BF2 /* SetButton.swift */; };
+		13FEA2732C2D483400D04BF2 /* ExerciseView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 13FEA2722C2D483400D04BF2 /* ExerciseView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -43,6 +44,7 @@
 		13FEA2582C27C9D300D04BF2 /* RepsUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RepsUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		13FEA26E2C2943A000D04BF2 /* WheelPicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WheelPicker.swift; sourceTree = "<group>"; };
 		13FEA2702C2C400600D04BF2 /* SetButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetButton.swift; sourceTree = "<group>"; };
+		13FEA2722C2D483400D04BF2 /* ExerciseView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExerciseView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -93,6 +95,7 @@
 			children = (
 				13FEA26D2C29436C00D04BF2 /* View */,
 				13FEA2402C27C9D200D04BF2 /* RepsApp.swift */,
+				13FEA2722C2D483400D04BF2 /* ExerciseView.swift */,
 				13FEA2422C27C9D200D04BF2 /* ContentView.swift */,
 				13FEA2442C27C9D300D04BF2 /* Assets.xcassets */,
 				13FEA2462C27C9D300D04BF2 /* Reps.entitlements */,
@@ -252,6 +255,7 @@
 				13FEA26F2C2943A000D04BF2 /* WheelPicker.swift in Sources */,
 				13FEA2712C2C400600D04BF2 /* SetButton.swift in Sources */,
 				13FEA2412C27C9D200D04BF2 /* RepsApp.swift in Sources */,
+				13FEA2732C2D483400D04BF2 /* ExerciseView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
