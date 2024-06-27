@@ -13,14 +13,33 @@ struct ContentView: View {
         spacing: 50,
         multiplier: 1
     )
+    
+    @State private var exertionWheelConfig: WheelPicker.Config = .init(
+        count: 10,
+        steps: 1,
+        spacing: 50,
+        multiplier: 10
+    )
+    
     @State private var weightValue: CGFloat = 100 // starting positions of wheel
     @State private var repValue: CGFloat = 4 // starting positions of wheel
+    @State private var exertionValue: CGFloat = 50
+    
     @State private var storedValue1: CGFloat = 0
     @State private var storedValue2: CGFloat = 0
     var body: some View {
         NavigationStack {
             VStack {
-                // write exercise name here
+            
+                Text("Bench Press")
+                    .font(.largeTitle.bold())
+            
+                Rectangle()
+                    .frame(height: 1)
+                    .foregroundColor(.gray)
+                
+                Spacer().frame(height: 60)
+                
                 HStack(alignment: .lastTextBaseline, spacing: 5, content: {
                     Text(verbatim: "\(weightValue)")
                         .font(.largeTitle.bold())
@@ -33,10 +52,13 @@ struct ContentView: View {
                         .textScale(.secondary)
                         .foregroundStyle(.gray)
                 })
-                .padding(.vertical, 30)
                 
                 WheelPicker(config: weightWheelConfig, value: $weightValue)
                     .frame(height: 60)
+                
+                Spacer().frame(height: 40)
+                
+                
                 
                 HStack(alignment: .lastTextBaseline, spacing: 5, content: {
                     Text(verbatim: "\(Int(repValue))")
@@ -50,25 +72,34 @@ struct ContentView: View {
                         .textScale(.secondary)
                         .foregroundStyle(.gray)
                 })
-                .padding(.vertical, 30)
                 
                 WheelPicker(config: repWheelConfig, value: $repValue)
                     .frame(height: 60)
                 
-                Button(action: {
-                                storedValue1 = weightValue
-                                storedValue2 = repValue
-                            }) {
-                                Text("SET")
-                                    .padding()
-                                    .background(Color.green)
-                                    .foregroundColor(.white)
-                                    .cornerRadius(25)
-                            }
-                            .padding(.vertical, 30)
-                            
-                            Text("\(String(format: "%.1f", storedValue1)) lbs, \(Int(storedValue2)) reps")
-                                .padding()
+                Spacer().frame(height: 40)
+                
+                
+                
+                HStack(alignment: .lastTextBaseline, spacing: 5, content: {
+                    Text(verbatim: "\(Int(exertionValue))")
+                        .font(.largeTitle.bold())
+                        .contentTransition(.numericText(value: exertionValue))
+                        .animation(.snappy, value: exertionValue)
+                    
+                    Text("% RPE")
+                        .font(.title2)
+                        .fontWeight(.semibold)
+                        .textScale(.secondary)
+                        .foregroundStyle(.gray)
+                })
+                
+                WheelPicker(config: exertionWheelConfig, value: $exertionValue)
+                    .frame(height: 60)
+                
+               
+                Spacer().frame(height: 40)
+                
+                SetButton()
             }
         }
             .navigationTitle("Wheel Picker")
