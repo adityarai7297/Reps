@@ -1,41 +1,19 @@
 import SwiftUI
+import UIKit
 
 struct SetButton: View {
+    @Binding var showCheckmark: Bool
     @State var fb = false
     @GestureState var topG = false
-    @State var showCheckmark = false
-    var action: () -> Void
+    var action: () -> Void // Add this line to accept a closure
+
+    // Haptic feedback generator
+    private let feedbackGenerator = UIImpactFeedbackGenerator(style: .medium)
 
     var body: some View {
         ZStack {
-            
             VStack {
-                if showCheckmark {
-                    ZStack {
-                        RoundedRectangle(cornerRadius: 25)
-                            .fill(Color.green)
-                            .frame(width: 150, height: 50)
-                        
-                        HStack {
-                            Image(systemName: "checkmark.circle.fill")
-                                .resizable()
-                                .frame(width: 24, height: 24)
-                                .foregroundColor(.white)
-                            
-                            Text("Added!")
-                                .foregroundColor(.white)
-                                .fontWeight(.bold)
-                        }
-                    }
-                    .transition(.scale)
-                    .opacity(showCheckmark ? 1 : 0)
-                    .animation(.spring(response: 0.5, dampingFraction: 0.6), value: showCheckmark)
-                }
-                
-                Spacer().frame(height: 20) // Add padding between the checkmark and button
-                
                 ZStack {
-                    
                     Circle()
                         .stroke(lineWidth: 0.2)
                         .frame(width: 92, height: 92)
@@ -55,29 +33,60 @@ struct SetButton: View {
                 .gesture(LongPressGesture(minimumDuration: 0.4, maximumDistance: 1).updating($topG) { cstate, gstate, transition in
                     gstate = cstate
                 }
-                    .onEnded({ value in
+                .onEnded({ value in
+                    withAnimation(.spring(response: 0.5, dampingFraction: 0.6)) {
+                        showCheckmark = true
+                    }
+
+                    // Trigger haptic feedback
+                    feedbackGenerator.impactOccurred()
+
+                    // Call the closure to print the values
+                    action()
+                    
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
                         withAnimation(.spring(response: 0.5, dampingFraction: 0.6)) {
-                            showCheckmark = true
+                            showCheckmark = false
                         }
-                        
-                        action()
-                        
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
-                            withAnimation(.spring(response: 0.5, dampingFraction: 0.6)) {
-                                showCheckmark = false
-                            }
-                        }
-                    })
+                    }
+                })
                 )
                 .animation(.spring(response: 0.6, dampingFraction: 0.8), value: topG)
             }
+            if showCheckmark {
+                VStack {
+                    ZStack {
+                        RoundedRectangle(cornerRadius: 25)
+                            .fill(Color.green)
+                            .frame(width: 132, height: 50)
+                        
+                        HStack {
+                            Image(systemName: "checkmark.circle.fill")
+                                .resizable()
+                                .frame(width: 24, height: 24)
+                                .foregroundColor(.white)
+                            
+                            Text("Added!")
+                                .foregroundColor(.white)
+                                .fontWeight(.bold)
+                        }
+                    }
+                    .transition(.scale)
+                    .opacity(showCheckmark ? 1 : 0)
+                    .animation(.spring(response: 0.5, dampingFraction: 0.6), value: showCheckmark)
+                }
+                .offset(y: -90) // Adjust this value to move the checkmark higher
+            }
         }
         .ignoresSafeArea()
+        .onAppear {
+            feedbackGenerator.prepare()
+        }
     }
 }
 
-struct ContentView_Previews: PreviewProvider {
+struct SetButton_Previews: PreviewProvider {
     static var previews: some View {
-        ContentView()
+        SetButton(showCheckmark: .constant(false), action: { })
     }
 }
