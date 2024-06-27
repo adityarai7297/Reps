@@ -3,6 +3,7 @@ import UIKit
 
 struct SetButton: View {
     @Binding var showCheckmark: Bool
+    @Binding var setCount: Int
     @State var fb = false
     @GestureState var topG = false
     var action: () -> Void // Add this line to accept a closure
@@ -82,11 +83,5 @@ struct SetButton: View {
         .onAppear {
             feedbackGenerator.prepare()
         }
-    }
-}
-
-struct SetButton_Previews: PreviewProvider {
-    static var previews: some View {
-        SetButton(showCheckmark: .constant(false), action: { })
     }
 }

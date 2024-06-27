@@ -25,6 +25,7 @@ struct ContentView: View {
     @State private var repValue: CGFloat = 4 // starting positions of wheel
     @State private var exertionValue: CGFloat = 50
     @State private var showCheckmark: Bool = false
+    @State private var setCount: Int = 0
     
     var body: some View {
         NavigationStack {
@@ -95,11 +96,20 @@ struct ContentView: View {
                 
                 Spacer().frame(height: 40)
                 
-                SetButton(showCheckmark: $showCheckmark, action: {
-                    print("Weight: \(weightValue) lbs")
-                    print("Reps: \(repValue)")
-                    print("Exertion: \(exertionValue) % RPE")
-                })
+                HStack{
+                    Spacer().frame(width: 12)
+                    SetButton(showCheckmark: $showCheckmark, setCount: $setCount, action: {
+                        // this would be replaced by stateful operations
+                        setCount += 1
+                        print("Weight: \(weightValue) lbs")
+                        print("Reps: \(repValue)")
+                        print("Exertion: \(exertionValue) % RPE")
+                    })
+                    Spacer().frame(width: 12)
+                    Text("\(setCount)")
+                        .font(.title.bold())
+                }
+                
             }
         }
         .navigationTitle("Wheel Picker")
