@@ -12,7 +12,7 @@ struct ExerciseView: View {
     let exertionWheelConfig: WheelPicker.Config
 
     var body: some View {
-        VStack{
+        VStack {
             VStack {
                 Text(exerciseName)
                     .font(.largeTitle.bold())
@@ -94,10 +94,12 @@ struct ExerciseView: View {
             }
             
             Spacer().frame(height: 40)
-            
-            
-        }.frame(maxWidth: .infinity, maxHeight: .infinity)
-            
         }
-        
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .edgesIgnoringSafeArea(.all)
+    }
+}
+
+#Preview {
+    ContentView()
 }

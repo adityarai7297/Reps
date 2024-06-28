@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		1371B14F2C2ED42500A4254A /* VerticalPager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1371B14E2C2ED42500A4254A /* VerticalPager.swift */; };
 		13FEA2412C27C9D200D04BF2 /* RepsApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 13FEA2402C27C9D200D04BF2 /* RepsApp.swift */; };
 		13FEA2432C27C9D200D04BF2 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 13FEA2422C27C9D200D04BF2 /* ContentView.swift */; };
 		13FEA2452C27C9D300D04BF2 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13FEA2442C27C9D300D04BF2 /* Assets.xcassets */; };
@@ -34,6 +35,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		1371B14E2C2ED42500A4254A /* VerticalPager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VerticalPager.swift; sourceTree = "<group>"; };
 		13FEA23D2C27C9D200D04BF2 /* Reps.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Reps.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		13FEA2402C27C9D200D04BF2 /* RepsApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RepsApp.swift; sourceTree = "<group>"; };
 		13FEA2422C27C9D200D04BF2 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -95,7 +97,6 @@
 			children = (
 				13FEA26D2C29436C00D04BF2 /* View */,
 				13FEA2402C27C9D200D04BF2 /* RepsApp.swift */,
-				13FEA2722C2D483400D04BF2 /* ExerciseView.swift */,
 				13FEA2422C27C9D200D04BF2 /* ContentView.swift */,
 				13FEA2442C27C9D300D04BF2 /* Assets.xcassets */,
 				13FEA2462C27C9D300D04BF2 /* Reps.entitlements */,
@@ -116,7 +117,9 @@
 			isa = PBXGroup;
 			children = (
 				13FEA26E2C2943A000D04BF2 /* WheelPicker.swift */,
+				13FEA2722C2D483400D04BF2 /* ExerciseView.swift */,
 				13FEA2702C2C400600D04BF2 /* SetButton.swift */,
+				1371B14E2C2ED42500A4254A /* VerticalPager.swift */,
 			);
 			path = View;
 			sourceTree = "<group>";
@@ -254,6 +257,7 @@
 				13FEA2432C27C9D200D04BF2 /* ContentView.swift in Sources */,
 				13FEA26F2C2943A000D04BF2 /* WheelPicker.swift in Sources */,
 				13FEA2712C2C400600D04BF2 /* SetButton.swift in Sources */,
+				1371B14F2C2ED42500A4254A /* VerticalPager.swift in Sources */,
 				13FEA2412C27C9D200D04BF2 /* RepsApp.swift in Sources */,
 				13FEA2732C2D483400D04BF2 /* ExerciseView.swift in Sources */,
 			);
