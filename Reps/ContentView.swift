@@ -22,10 +22,10 @@ struct ContentView: View {
     )
     
     @State private var exerciseStates: [ExerciseState] = [
-        ExerciseState(weightValue: 100, repValue: 4, exertionValue: 50, setCount: 0, showCheckmark: false),
-        ExerciseState(weightValue: 100, repValue: 4, exertionValue: 50, setCount: 0, showCheckmark: false),
-        ExerciseState(weightValue: 100, repValue: 4, exertionValue: 50, setCount: 0, showCheckmark: false),
-        ExerciseState(weightValue: 100, repValue: 4, exertionValue: 50, setCount: 0, showCheckmark: false)
+        ExerciseState(exerciseName: "Bench Press", lastWeightValue: 100, lastRepValue: 4, lastRPEValue: 50, setCount: 0, showCheckmark: false),
+        ExerciseState(exerciseName: "Squat", lastWeightValue: 100, lastRepValue: 4, lastRPEValue: 50, setCount: 0, showCheckmark: false),
+        ExerciseState(exerciseName: "Deadlift", lastWeightValue: 100, lastRepValue: 4, lastRPEValue: 50, setCount: 0, showCheckmark: false),
+        ExerciseState(exerciseName: "Bicep Curl", lastWeightValue: 100, lastRepValue: 4, lastRPEValue: 50, setCount: 0, showCheckmark: false)
     ]
     
     @State private var currentIndex: Int = 0
@@ -35,16 +35,16 @@ struct ContentView: View {
                                Color(hex: "f6f4d2"),
                                Color(hex: "cbdfbd"),
                                Color(hex: "f19c79")]
-        let exerciseNames = ["Bench Press", "Squat", "Deadlift", "Bicep Curl"]
+        //let exerciseNames = ["Bench Press", "Squat", "Deadlift", "Bicep Curl"]
 
         VerticalPager(pageCount: exerciseStates.count, currentIndex: $currentIndex) {
             ForEach(exerciseStates.indices, id: \.self) { index in
                 ExerciseView(
-                    exerciseName: exerciseNames[index],
                     state: $exerciseStates[index],
+                    exerciseName: $exerciseStates[index].exerciseName,
                     weightWheelConfig: weightWheelConfig,
                     repWheelConfig: repWheelConfig,
-                    exertionWheelConfig: exertionWheelConfig,
+                    RPEWheelConfig: exertionWheelConfig,
                     color: colors[index]
                 )
             }

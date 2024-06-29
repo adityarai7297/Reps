@@ -16,7 +16,7 @@ struct SetButton: View {
             VStack {
                 ZStack {
                     Circle()
-                        .stroke(lineWidth: 0.2)
+                        .stroke(lineWidth: 0.5)
                         .frame(width: 92, height: 92)
                     
                     Text("SET")
@@ -84,4 +84,8 @@ struct SetButton: View {
             feedbackGenerator.prepare()
         }
     }
+}
+
+#Preview {
+    ContentView()
 }
