@@ -21,70 +21,25 @@ struct ContentView: View {
         multiplier: 10
     )
     
-    // TODO: Initialization configs will be loaded from firebase eventually
-    // load username
-    // load exercise card data
-    // last stored value variable
-    @State private var weightValue: CGFloat = 100
-    @State private var repValue: CGFloat = 4
-    @State private var exertionValue: CGFloat = 50
-    @State private var showCheckmark: Bool = false
-    @State private var setCount: Int = 0
+    @State private var exerciseStates: [ExerciseState] = [
+        ExerciseState(weightValue: 100, repValue: 4, exertionValue: 50, setCount: 0, showCheckmark: false),
+        ExerciseState(weightValue: 100, repValue: 4, exertionValue: 50, setCount: 0, showCheckmark: false),
+        ExerciseState(weightValue: 100, repValue: 4, exertionValue: 50, setCount: 0, showCheckmark: false),
+        ExerciseState(weightValue: 100, repValue: 4, exertionValue: 50, setCount: 0, showCheckmark: false)
+    ]
+    
     @State private var currentIndex: Int = 0
-    
-    var exercises: [ExerciseView] {
-        [
-            ExerciseView(
-                exerciseName: "Bench Press",
-                weightValue: $weightValue,
-                repValue: $repValue,
-                exertionValue: $exertionValue,
-                setCount: $setCount,
-                showCheckmark: $showCheckmark,
-                weightWheelConfig: weightWheelConfig,
-                repWheelConfig: repWheelConfig,
-                exertionWheelConfig: exertionWheelConfig
-            ),
-            ExerciseView(
-                exerciseName: "Squat",
-                weightValue: $weightValue,
-                repValue: $repValue,
-                exertionValue: $exertionValue,
-                setCount: $setCount,
-                showCheckmark: $showCheckmark,
-                weightWheelConfig: weightWheelConfig,
-                repWheelConfig: repWheelConfig,
-                exertionWheelConfig: exertionWheelConfig
-            ),
-            ExerciseView(
-                exerciseName: "Deadlift",
-                weightValue: $weightValue,
-                repValue: $repValue,
-                exertionValue: $exertionValue,
-                setCount: $setCount,
-                showCheckmark: $showCheckmark,
-                weightWheelConfig: weightWheelConfig,
-                repWheelConfig: repWheelConfig,
-                exertionWheelConfig: exertionWheelConfig
-            ),
-            ExerciseView(
-                exerciseName: "Bicep Curl",
-                weightValue: $weightValue,
-                repValue: $repValue,
-                exertionValue: $exertionValue,
-                setCount: $setCount,
-                showCheckmark: $showCheckmark,
-                weightWheelConfig: weightWheelConfig,
-                repWheelConfig: repWheelConfig,
-                exertionWheelConfig: exertionWheelConfig
-            )
-        ]
-    }
-    
+
     var body: some View {
-        VerticalPager(pageCount: exercises.count, currentIndex: $currentIndex) {
-            ForEach(0..<exercises.count, id: \.self) { index in
-                exercises[index]
+        VerticalPager(pageCount: exerciseStates.count, currentIndex: $currentIndex) {
+            ForEach(exerciseStates.indices, id: \.self) { index in
+                ExerciseView(
+                    exerciseName: ["Bench Press", "Squat", "Deadlift", "Bicep Curl"][index],
+                    state: $exerciseStates[index],
+                    weightWheelConfig: weightWheelConfig,
+                    repWheelConfig: repWheelConfig,
+                    exertionWheelConfig: exertionWheelConfig
+                )
             }
         }
     }

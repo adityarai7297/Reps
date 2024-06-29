@@ -2,11 +2,7 @@ import SwiftUI
 
 struct ExerciseView: View {
     let exerciseName: String
-    @Binding var weightValue: CGFloat
-    @Binding var repValue: CGFloat
-    @Binding var exertionValue: CGFloat
-    @Binding var setCount: Int
-    @Binding var showCheckmark: Bool
+    @Binding var state: ExerciseState
     let weightWheelConfig: WheelPicker.Config
     let repWheelConfig: WheelPicker.Config
     let exertionWheelConfig: WheelPicker.Config
@@ -25,10 +21,10 @@ struct ExerciseView: View {
                 
                 VStack{
                     HStack(alignment: .lastTextBaseline, spacing: 5, content: {
-                        Text(verbatim: "\(weightValue)")
+                        Text(verbatim: "\(state.weightValue)")
                             .font(.largeTitle.bold())
-                            .contentTransition(.numericText(value: weightValue))
-                            .animation(.snappy, value: weightValue)
+                            .contentTransition(.numericText(value: state.weightValue))
+                            .animation(.snappy, value: state.weightValue)
                         
                         Text("lbs")
                             .font(.title2)
@@ -37,20 +33,19 @@ struct ExerciseView: View {
                             .foregroundStyle(.gray)
                     })
                     
-                    WheelPicker(config: weightWheelConfig, value: $weightValue)
+                    WheelPicker(config: weightWheelConfig, value: $state.weightValue)
                         .frame(height: 60)
                     
                 }
-                
                 
                 Spacer().frame(height: 40)
                 
                 VStack{
                     HStack(alignment: .lastTextBaseline, spacing: 5, content: {
-                        Text(verbatim: "\(Int(repValue))")
+                        Text(verbatim: "\(Int(state.repValue))")
                             .font(.largeTitle.bold())
-                            .contentTransition(.numericText(value: repValue))
-                            .animation(.snappy, value: repValue)
+                            .contentTransition(.numericText(value: state.repValue))
+                            .animation(.snappy, value: state.repValue)
                         
                         Text("reps")
                             .font(.title2)
@@ -59,20 +54,19 @@ struct ExerciseView: View {
                             .foregroundStyle(.gray)
                     })
                     
-                    WheelPicker(config: repWheelConfig, value: $repValue)
+                    WheelPicker(config: repWheelConfig, value: $state.repValue)
                         .frame(height: 60)
                     
                 }
-                
                 
                 Spacer().frame(height: 40)
                 
                 VStack{
                     HStack(alignment: .lastTextBaseline, spacing: 5, content: {
-                        Text(verbatim: "\(Int(exertionValue))")
+                        Text(verbatim: "\(Int(state.exertionValue))")
                             .font(.largeTitle.bold())
-                            .contentTransition(.numericText(value: exertionValue))
-                            .animation(.snappy, value: exertionValue)
+                            .contentTransition(.numericText(value: state.exertionValue))
+                            .animation(.snappy, value: state.exertionValue)
                         
                         Text("%  RPE")
                             .font(.title2)
@@ -81,28 +75,28 @@ struct ExerciseView: View {
                             .foregroundStyle(.gray)
                     })
                     
-                    WheelPicker(config: exertionWheelConfig, value: $exertionValue)
+                    WheelPicker(config: exertionWheelConfig, value: $state.exertionValue)
                         .frame(height: 60)
                     
                 }
                 
             }
-            .offset(y: showCheckmark ? -60 : 0) // Adjust offset value to move elements up
+            .offset(y: state.showCheckmark ? -60 : 0) // Adjust offset value to move elements up
             
             Spacer().frame(height: 40)
             
             HStack {
                 Spacer().frame(width: 12)
-                SetButton(showCheckmark: $showCheckmark, setCount: $setCount, action: {
-                    setCount += 1
-                    print("Weight: \(weightValue) lbs")
-                    print("Reps: \(repValue)")
-                    print("Exertion: \(exertionValue) % RPE")
+                SetButton(showCheckmark: $state.showCheckmark, setCount: $state.setCount, action: {
+                    state.setCount += 1
+                    print("Weight: \(state.weightValue) lbs")
+                    print("Reps: \(state.repValue)")
+                    print("Exertion: \(state.exertionValue) % RPE")
                 })
                 Spacer().frame(width: 12)
-                Text("\(setCount)")
+                Text("\(state.setCount)")
                     .font(.title)
-                    .opacity(setCount > 0 ? 1 : 0)
+                    .opacity(state.setCount > 0 ? 1 : 0)
             }
             
             Spacer().frame(height: 40)
