@@ -6,6 +6,7 @@ struct ExerciseView: View {
     let weightWheelConfig: WheelPicker.Config
     let repWheelConfig: WheelPicker.Config
     let exertionWheelConfig: WheelPicker.Config
+    let color: Color
 
     var body: some View {
         VStack {
@@ -15,7 +16,7 @@ struct ExerciseView: View {
                 
                 Rectangle()
                     .frame(height: 0.3)
-                    .foregroundColor(.gray)
+                    //.foregroundColor(.gray)
                 
                 Spacer().frame(height: 60)
                 
@@ -28,9 +29,9 @@ struct ExerciseView: View {
                         
                         Text("lbs")
                             .font(.title2)
-                            .fontWeight(.semibold)
+                            .fontWeight(.light)
                             .textScale(.secondary)
-                            .foregroundStyle(.gray)
+                            //.foregroundStyle(.gray)
                     })
                     
                     WheelPicker(config: weightWheelConfig, value: $state.weightValue)
@@ -49,9 +50,9 @@ struct ExerciseView: View {
                         
                         Text("reps")
                             .font(.title2)
-                            .fontWeight(.semibold)
+                            .fontWeight(.light)
                             .textScale(.secondary)
-                            .foregroundStyle(.gray)
+                            //.foregroundStyle(.gray)
                     })
                     
                     WheelPicker(config: repWheelConfig, value: $state.repValue)
@@ -70,9 +71,9 @@ struct ExerciseView: View {
                         
                         Text("%  RPE")
                             .font(.title2)
-                            .fontWeight(.semibold)
+                            .fontWeight(.light)
                             .textScale(.secondary)
-                            .foregroundStyle(.gray)
+                            //.foregroundStyle(.gray)
                     })
                     
                     WheelPicker(config: exertionWheelConfig, value: $state.exertionValue)
@@ -102,6 +103,7 @@ struct ExerciseView: View {
             Spacer().frame(height: 40)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(color)
         .edgesIgnoringSafeArea(.all)
     }
 }
