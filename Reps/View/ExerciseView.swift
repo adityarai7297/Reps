@@ -11,8 +11,10 @@ struct ExerciseView: View {
     var body: some View {
         VStack {
             VStack {
+                Spacer().frame(height: 40)
                 Text(exerciseName)
                     .font(.largeTitle.bold())
+                Spacer().frame(height: 40)
                 
                 Rectangle()
                     .frame(height: 0.3)
@@ -84,7 +86,7 @@ struct ExerciseView: View {
             }
             .offset(y: state.showCheckmark ? -60 : 0) // Adjust offset value to move elements up
             
-            Spacer().frame(height: 40)
+            Spacer().frame(height: 60)
             
             HStack {
                 Spacer().frame(width: 12)
@@ -100,7 +102,7 @@ struct ExerciseView: View {
                     .opacity(state.setCount > 0 ? 1 : 0)
             }
             
-            Spacer().frame(height: 40)
+            //Spacer().frame(height: 40)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(color)
