@@ -16,7 +16,8 @@ struct VerticalPager<Content: View>: View {
     var body: some View {
         GeometryReader { geometry in
             LazyVStack(spacing: 0) {
-                self.content().frame(width: geometry.size.width, height: geometry.size.height)
+                self.content()
+                    .frame(width: geometry.size.width, height: geometry.size.height)
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .background(Color.primary.opacity(0.000000001))
@@ -25,22 +26,25 @@ struct VerticalPager<Content: View>: View {
             .animation(.interactiveSpring(response: 0.3), value: currentIndex)
             .animation(.interactiveSpring(), value: translation)
             .gesture(
-                DragGesture(minimumDistance: 1).updating(self.$translation) { value, state, _ in
-                    state = value.translation.height
-                }.onEnded { value in
-                    let offset = -Int(value.translation.height)
-                    if abs(offset) > Int(geometry.size.height / 2) || abs(value.velocity.height) > 200 {
-                        let newIndex = currentIndex + min(max(offset, -1), 1)
-                        if newIndex >= 0 && newIndex < pageCount {
-                            self.currentIndex = newIndex
+                DragGesture(minimumDistance: 20)
+                    .updating(self.$translation) { value, state, _ in
+                        state = value.translation.height
+                    }
+                    .onEnded { value in
+                        let offset = -Int(value.translation.height)
+                        if abs(offset) > Int(geometry.size.height / 2) || abs(value.velocity.height) > 200 {
+                            let newIndex = currentIndex + (value.translation.height > 0 ? -1 : 1)
+                            if newIndex >= 0 && newIndex < pageCount {
+                                self.currentIndex = newIndex
+                            }
                         }
                     }
-                }
             )
         }
-        .edgesIgnoringSafeArea(.all) // Ensure the pager view occupies the entire screen area
+        .edgesIgnoringSafeArea(.all)
     }
 }
+
 
 #Preview {
     ContentView()

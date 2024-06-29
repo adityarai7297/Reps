@@ -21,8 +21,12 @@ struct ContentView: View {
         multiplier: 10
     )
     
-    @State private var weightValue: CGFloat = 100 // starting positions of wheel
-    @State private var repValue: CGFloat = 4 // starting positions of wheel
+    // TODO: Initialization configs will be loaded from firebase eventually
+    // load username
+    // load exercise card data
+    // last stored value variable
+    @State private var weightValue: CGFloat = 100
+    @State private var repValue: CGFloat = 4
     @State private var exertionValue: CGFloat = 50
     @State private var showCheckmark: Bool = false
     @State private var setCount: Int = 0
