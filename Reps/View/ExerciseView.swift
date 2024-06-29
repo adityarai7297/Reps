@@ -1,4 +1,5 @@
 import SwiftUI
+import FirebaseFirestore
 
 struct ExerciseView: View {
     @Binding var state: ExerciseState
@@ -96,6 +97,8 @@ struct ExerciseView: View {
                     print("Weight: \(state.lastWeightValue) lbs")
                     print("Reps: \(state.lastRepValue)")
                     print("RPE: \(state.lastRPEValue) % RPE")
+                    
+                    saveExerciseData(exerciseName: state.exerciseName, weight: state.lastWeightValue, reps: state.lastRepValue, RPE: state.lastRPEValue)
                 })
                 Spacer().frame(width: 30)
                 HStack{
@@ -116,6 +119,23 @@ struct ExerciseView: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(color)
         .edgesIgnoringSafeArea(.all)
+    }
+}
+
+func saveExerciseData(exerciseName: String, weight: Double, reps: Double, RPE: Double) {
+    let db = Firestore.firestore()
+    db.collection("sets").addDocument(data: [
+        "exerciseName": exerciseName,
+        "weight": weight,
+        "reps": reps,
+        "RPE": RPE,
+        "timestamp": Timestamp()
+    ]) { error in
+        if let error = error {
+            print("Error adding document: \(error)")
+        } else {
+            print("Document added successfully")
+        }
     }
 }
 
