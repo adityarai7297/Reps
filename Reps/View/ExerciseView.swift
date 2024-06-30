@@ -8,6 +8,7 @@ struct ExerciseView: View {
     let repWheelConfig: WheelPicker.Config
     let RPEWheelConfig: WheelPicker.Config
     let color: Color
+    let userId: String
 
     var body: some View {
         VStack {
@@ -98,7 +99,7 @@ struct ExerciseView: View {
                     print("Reps: \(state.lastRepValue)")
                     print("RPE: \(state.lastRPEValue) % RPE")
                     
-                    saveExerciseData(exerciseName: state.exerciseName, weight: state.lastWeightValue, reps: state.lastRepValue, RPE: state.lastRPEValue)
+                    saveExerciseData(userId: userId, exerciseName: state.exerciseName, weight: state.lastWeightValue, reps: state.lastRepValue, RPE: state.lastRPEValue)
                 })
                 Spacer().frame(width: 30)
                 HStack{
@@ -122,9 +123,12 @@ struct ExerciseView: View {
     }
 }
 
-func saveExerciseData(exerciseName: String, weight: Double, reps: Double, RPE: Double) {
+func saveExerciseData(userId: String, exerciseName: String, weight: Double, reps: Double, RPE: Double) {
     let db = Firestore.firestore()
-    db.collection("sets").addDocument(data: [
+    let userRef = db.collection("users").document(userId)
+    
+    // Save set data under 'history'
+    userRef.collection("history").addDocument(data: [
         "exerciseName": exerciseName,
         "weight": weight,
         "reps": reps,

@@ -22,15 +22,12 @@ struct ContentView: View {
         multiplier: 10
     )
     
-    @State private var exerciseStates: [ExerciseState] = [
-        ExerciseState(exerciseName: "Bench Press", lastWeightValue: 100, lastRepValue: 4, lastRPEValue: 50, setCount: 0, showCheckmark: false),
-        ExerciseState(exerciseName: "Squat", lastWeightValue: 100, lastRepValue: 4, lastRPEValue: 50, setCount: 0, showCheckmark: false),
-        ExerciseState(exerciseName: "Deadlift", lastWeightValue: 100, lastRepValue: 4, lastRPEValue: 50, setCount: 0, showCheckmark: false),
-        ExerciseState(exerciseName: "Bicep Curl", lastWeightValue: 100, lastRepValue: 4, lastRPEValue: 50, setCount: 0, showCheckmark: false)
-    ]
-    
+    @State private var exerciseStates: [ExerciseState] = []
     @State private var currentIndex: Int = 0
     @State private var showExerciseListView: Bool = false
+    @State private var isLoading: Bool = true
+    @State private var arrowOffset: CGFloat = -60
+    let userId: String = "your_user_id" // Replace this with your actual user ID logic
 
     var body: some View {
         let colors: [Color] = [Color(hex: "d4e09b"),
@@ -39,16 +36,30 @@ struct ContentView: View {
                                Color(hex: "f19c79")]
 
         ZStack {
-            VerticalPager(pageCount: exerciseStates.count, currentIndex: $currentIndex) {
-                ForEach(exerciseStates.indices, id: \.self) { index in
-                    ExerciseView(
-                        state: $exerciseStates[index],
-                        exerciseName: $exerciseStates[index].exerciseName,
-                        weightWheelConfig: weightWheelConfig,
-                        repWheelConfig: repWheelConfig,
-                        RPEWheelConfig: exertionWheelConfig,
-                        color: colors[index % colors.count]
-                    )
+            if isLoading {
+                Text("Loading...")
+                    .onAppear {
+                        loadExercisesFromFirebase()
+                    }
+            } else if exerciseStates.isEmpty {
+                VStack {
+                    // add a cute image here
+                    Text("Start adding exercises!")
+                    
+                }
+            } else {
+                VerticalPager(pageCount: exerciseStates.count, currentIndex: $currentIndex) {
+                    ForEach(exerciseStates.indices, id: \.self) { index in
+                        ExerciseView(
+                            state: $exerciseStates[index],
+                            exerciseName: $exerciseStates[index].exerciseName,
+                            weightWheelConfig: weightWheelConfig,
+                            repWheelConfig: repWheelConfig,
+                            RPEWheelConfig: exertionWheelConfig,
+                            color: colors[index % colors.count],
+                            userId: userId
+                        )
+                    }
                 }
             }
             
@@ -64,12 +75,61 @@ struct ContentView: View {
                             .foregroundColor(Color.black)
                     }
                     .padding()
+                    .overlay(
+                        VStack {
+                            if exerciseStates.isEmpty {
+                                HStack {
+                                    Image(systemName: "arrow.right")
+                                        .resizable()
+                                        .frame(width: 40, height: 25)
+                                        .foregroundColor(.gray)
+                                        .offset(x: arrowOffset)
+                                        .onAppear {
+                                            startBouncingArrow()
+                                        }
+                                }
+                            }
+                        }
+                    )
                 }
                 Spacer()
             }
         }
         .sheet(isPresented: $showExerciseListView) {
-            ExerciseListView(exerciseStates: $exerciseStates)
+            ExerciseListView(exerciseStates: $exerciseStates, userId: userId, startBouncingArrow: startBouncingArrow)
+        }
+    }
+
+    func loadExercisesFromFirebase() {
+        let db = Firestore.firestore()
+        let userRef = db.collection("users").document(userId)
+        userRef.collection("exercises").getDocuments { snapshot, error in
+            if let error = error {
+                print("Error loading exercises: \(error)")
+            } else {
+                guard let documents = snapshot?.documents else {
+                    self.isLoading = false
+                    return
+                }
+                self.exerciseStates = documents.map { doc in
+                    ExerciseState(
+                        exerciseName: doc["exerciseName"] as? String ?? "",
+                        lastWeightValue: 0,
+                        lastRepValue: 0,
+                        lastRPEValue: 0,
+                        setCount: 0,
+                        showCheckmark: false
+                    )
+                }
+                self.isLoading = false
+            }
+        }
+    }
+
+    func startBouncingArrow() {
+        arrowOffset = -60
+        withAnimation(Animation.interpolatingSpring(stiffness: 20, damping: 0).repeatForever(autoreverses: true)) {
+            arrowOffset = -50
         }
     }
 }
@@ -78,7 +138,9 @@ struct ExerciseListView: View {
     @Binding var exerciseStates: [ExerciseState]
     @State private var newExerciseName: String = ""
     @Environment(\.presentationMode) var presentationMode
-    
+    let userId: String
+    let startBouncingArrow: () -> Void
+
     var body: some View {
         NavigationView {
             VStack {
@@ -96,6 +158,7 @@ struct ExerciseListView: View {
                                     showCheckmark: false
                                 )
                                 exerciseStates.append(newExercise)
+                                addExerciseToFirebase(userId: userId, exerciseName: newExerciseName)
                                 newExerciseName = ""
                             }
                         }
@@ -107,7 +170,9 @@ struct ExerciseListView: View {
                                 Text(exerciseStates[index].exerciseName)
                                 Spacer()
                                 Button(action: {
+                                    removeExerciseFromFirebase(userId: userId, exerciseName: exerciseStates[index].exerciseName)
                                     exerciseStates.remove(at: index)
+                                    startBouncingArrow() // Restart animation after deletion
                                 }) {
                                     Image(systemName: "trash")
                                         .foregroundColor(.red)
@@ -134,6 +199,32 @@ struct ExerciseListView: View {
     func move(from source: IndexSet, to destination: Int) {
         exerciseStates.move(fromOffsets: source, toOffset: destination)
     }
+
+    func addExerciseToFirebase(userId: String, exerciseName: String) {
+        let db = Firestore.firestore()
+        let userRef = db.collection("users").document(userId)
+        userRef.collection("exercises").document(exerciseName).setData([
+            "exerciseName": exerciseName
+        ]) { error in
+            if let error = error {
+                print("Error adding document: \(error)")
+            } else {
+                print("Document added successfully")
+            }
+        }
+    }
+
+    func removeExerciseFromFirebase(userId: String, exerciseName: String) {
+        let db = Firestore.firestore()
+        let userRef = db.collection("users").document(userId)
+        userRef.collection("exercises").document(exerciseName).delete { error in
+            if let error = error {
+                print("Error removing document: \(error)")
+            } else {
+                print("Document removed successfully")
+            }
+        }
+    }
 }
 
 extension Color {
@@ -155,5 +246,3 @@ extension Color {
 #Preview {
     ContentView()
 }
-
-// Your existing ExerciseView and other related code here...
