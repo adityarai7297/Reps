@@ -20,7 +20,6 @@ struct ExerciseView: View {
                 
                 Rectangle()
                     .frame(height: 0.3)
-                    //.foregroundColor(.gray)
                 
                 Spacer().frame(height: 60)
                 
@@ -35,12 +34,13 @@ struct ExerciseView: View {
                             .font(.title2)
                             .fontWeight(.light)
                             .textScale(.secondary)
-                            //.foregroundStyle(.gray)
                     })
                     
                     WheelPicker(config: weightWheelConfig, value: $state.lastWeightValue)
                         .frame(height: 60)
-                    
+                        .onChange(of: state.lastWeightValue) { newValue in
+                            saveCurrentState()
+                        }
                 }
                 
                 Spacer().frame(height: 40)
@@ -56,12 +56,13 @@ struct ExerciseView: View {
                             .font(.title2)
                             .fontWeight(.light)
                             .textScale(.secondary)
-                            //.foregroundStyle(.gray)
                     })
                     
                     WheelPicker(config: repWheelConfig, value: $state.lastRepValue)
                         .frame(height: 60)
-                    
+                        .onChange(of: state.lastRepValue) { newValue in
+                            saveCurrentState()
+                        }
                 }
                 
                 Spacer().frame(height: 40)
@@ -77,16 +78,17 @@ struct ExerciseView: View {
                             .font(.title2)
                             .fontWeight(.light)
                             .textScale(.secondary)
-                            //.foregroundStyle(.gray)
                     })
                     
                     WheelPicker(config: RPEWheelConfig, value: $state.lastRPEValue)
                         .frame(height: 60)
-                    
+                        .onChange(of: state.lastRPEValue) { newValue in
+                                                    saveCurrentState()
+                                                }
                 }
                 
             }
-            .offset(y: state.showCheckmark ? -60 : 0) // Adjust offset value to move elements up
+            .offset(y: state.showCheckmark ? -60 : 0)
             
             Spacer().frame(height: 60)
             
@@ -94,11 +96,6 @@ struct ExerciseView: View {
                 Spacer().frame(width: 100)
                 SetButton(showCheckmark: $state.showCheckmark, setCount: $state.setCount, action: {
                     state.setCount += 1
-                    print("Exercise: \(state.exerciseName)")
-                    print("Weight: \(state.lastWeightValue) lbs")
-                    print("Reps: \(state.lastRepValue)")
-                    print("RPE: \(state.lastRPEValue) % RPE")
-                    
                     saveExerciseData(userId: userId, exerciseName: state.exerciseName, weight: state.lastWeightValue, reps: state.lastRepValue, RPE: state.lastRPEValue)
                 })
                 Spacer().frame(width: 30)
@@ -114,12 +111,30 @@ struct ExerciseView: View {
                 }
                 .opacity(state.setCount > 0 ? 1 : 0)
             }
-            
-            //Spacer().frame(height: 40)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(color)
         .edgesIgnoringSafeArea(.all)
+    }
+    
+    func saveCurrentState() {
+        let db = Firestore.firestore()
+        let userRef = db.collection("users").document(userId)
+        
+        // Save current state under 'currentState'
+        userRef.collection("currentState").document(exerciseName).setData([
+            "exerciseName": state.exerciseName,
+            "lastWeightValue": state.lastWeightValue,
+            "lastRepValue": state.lastRepValue,
+            "lastRPEValue": state.lastRPEValue,
+            "setCount": state.setCount
+        ]) { error in
+            if let error = error {
+                print("Error saving current state: \(error)")
+            } else {
+                print("Current state saved successfully")
+            }
+        }
     }
 }
 
@@ -141,8 +156,4 @@ func saveExerciseData(userId: String, exerciseName: String, weight: Double, reps
             print("Document added successfully")
         }
     }
-}
-
-#Preview {
-    ContentView()
 }
