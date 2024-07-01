@@ -58,7 +58,9 @@ struct ContentView: View {
                             RPEWheelConfig: exertionWheelConfig,
                             color: colors[index % colors.count],
                             userId: userId
-                        )
+                        ).onAppear {
+                            loadCurrentState(for: exerciseStates[index].exerciseName, at: index)
+                        }
                     }
                 }
             }
@@ -125,6 +127,25 @@ struct ContentView: View {
             }
         }
     }
+    
+    func loadCurrentState(for exerciseName: String, at index: Int) {
+            let db = Firestore.firestore()
+            let userRef = db.collection("users").document(userId)
+            
+            userRef.collection("currentState").document(exerciseName).getDocument { document, error in
+                if let error = error {
+                    print("Error loading current state: \(error)")
+                } else if let document = document, document.exists {
+                    let data = document.data()
+                    DispatchQueue.main.async {
+                        exerciseStates[index].lastWeightValue = data?["lastWeightValue"] as? Double ?? 0
+                        exerciseStates[index].lastRepValue = data?["lastRepValue"] as? Double ?? 0
+                        exerciseStates[index].lastRPEValue = data?["lastRPEValue"] as? Double ?? 0
+                        exerciseStates[index].setCount = data?["setCount"] as? Int ?? 0
+                    }
+                }
+            }
+        }
 
     func startBouncingArrow() {
         arrowOffset = -60
