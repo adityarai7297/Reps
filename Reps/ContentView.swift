@@ -129,23 +129,26 @@ struct ContentView: View {
     }
     
     func loadCurrentState(for exerciseName: String, at index: Int) {
-            let db = Firestore.firestore()
-            let userRef = db.collection("users").document(userId)
-            
-            userRef.collection("currentState").document(exerciseName).getDocument { document, error in
-                if let error = error {
-                    print("Error loading current state: \(error)")
-                } else if let document = document, document.exists {
-                    let data = document.data()
+        let db = Firestore.firestore()
+        let userRef = db.collection("users").document(userId)
+        
+        userRef.collection("exercises").document(exerciseName).getDocument { document, error in
+            if let error = error {
+                print("Error loading current state: \(error)")
+            } else if let document = document, document.exists {
+                if let data = document.data(), let lastState = data["lastState"] as? [String: Any] {
                     DispatchQueue.main.async {
-                        exerciseStates[index].lastWeightValue = data?["lastWeightValue"] as? Double ?? 0
-                        exerciseStates[index].lastRepValue = data?["lastRepValue"] as? Double ?? 0
-                        exerciseStates[index].lastRPEValue = data?["lastRPEValue"] as? Double ?? 0
-                        exerciseStates[index].setCount = data?["setCount"] as? Int ?? 0
+                        exerciseStates[index].lastWeightValue = lastState["weight"] as? Double ?? 0
+                        exerciseStates[index].lastRepValue = lastState["reps"] as? Double ?? 0
+                        exerciseStates[index].lastRPEValue = lastState["RPE"] as? Double ?? 0
+    //                    exerciseStates[index].setCount = lastState["setCount"] as? Int ?? 0
                     }
+                } else {
+                    print("No lastState data found")
                 }
             }
         }
+    }
 
     func startBouncingArrow() {
         arrowOffset = -60
