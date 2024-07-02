@@ -125,7 +125,7 @@ struct ExerciseView: View {
         .background(color)
         .edgesIgnoringSafeArea(.all)
         .sheet(isPresented: $showHistoryPopup) {
-            HistoryPopupView(historyEntries: historyEntries)
+            HistoryPopupView(historyEntries: historyEntries, exerciseName: state.exerciseName, userId: userId)
         }
     }
     
@@ -143,6 +143,7 @@ struct ExerciseView: View {
                     self.historyEntries = documents.map { doc in
                         let data = doc.data()
                         return HistoryEntry(
+                            id: userId,
                             weight: data["weight"] as? Double ?? 0,
                             reps: data["reps"] as? Double ?? 0,
                             RPE: data["RPE"] as? Double ?? 0,
