@@ -123,6 +123,7 @@ struct ContentView: View {
                         showCheckmark: false
                     )
                 }
+                print("Loaded exercises: \(self.exerciseStates)")
                 self.isLoading = false
             }
         }
