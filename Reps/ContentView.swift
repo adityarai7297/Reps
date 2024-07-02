@@ -141,7 +141,7 @@ struct ContentView: View {
                         exerciseStates[index].lastWeightValue = lastState["weight"] as? Double ?? 0
                         exerciseStates[index].lastRepValue = lastState["reps"] as? Double ?? 0
                         exerciseStates[index].lastRPEValue = lastState["RPE"] as? Double ?? 0
-    //                    exerciseStates[index].setCount = lastState["setCount"] as? Int ?? 0
+                        exerciseStates[index].setCount = lastState["dailySetCount"] as? Int ?? 0
                     }
                 } else {
                     print("No lastState data found")
