@@ -96,7 +96,7 @@ struct ExerciseView: View {
                 Spacer().frame(width: 100)
                 SetButton(showCheckmark: $state.showCheckmark, setCount: $state.setCount, action: {
                     state.setCount += 1
-                    saveExerciseData(userId: userId, exerciseName: state.exerciseName, weight: state.lastWeightValue, reps: state.lastRepValue, RPE: state.lastRPEValue)
+                    saveExerciseData(userId: userId, exerciseName: state.exerciseName, weight: state.lastWeightValue, reps: state.lastRepValue, RPE: state.lastRPEValue, setCount: state.setCount)
                 })
                 Spacer().frame(width: 30)
                 HStack{
@@ -138,7 +138,7 @@ struct ExerciseView: View {
 //    }
 }
 
-func saveExerciseData(userId: String, exerciseName: String, weight: Double, reps: Double, RPE: Double) {
+func saveExerciseData(userId: String, exerciseName: String, weight: Double, reps: Double, RPE: Double, setCount: Int) {
     let db = Firestore.firestore()
     let userRef = db.collection("users").document(userId)
     
@@ -164,7 +164,8 @@ func saveExerciseData(userId: String, exerciseName: String, weight: Double, reps
             "weight": weight,
             "reps": reps,
             "RPE": RPE,
-            "timestamp": Timestamp()
+            "timestamp": Timestamp(),
+            "dailySetCount": setCount
         ]
     ]
     
