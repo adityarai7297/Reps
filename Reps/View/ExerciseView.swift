@@ -38,9 +38,9 @@ struct ExerciseView: View {
                     
                     WheelPicker(config: weightWheelConfig, value: $state.lastWeightValue)
                         .frame(height: 60)
-                        .onChange(of: state.lastWeightValue) { newValue in
-                            saveCurrentState()
-                        }
+//                        .onChange(of: state.lastWeightValue) { newValue in
+//                            saveCurrentState()
+//                        }
                 }
                 
                 Spacer().frame(height: 40)
@@ -60,9 +60,9 @@ struct ExerciseView: View {
                     
                     WheelPicker(config: repWheelConfig, value: $state.lastRepValue)
                         .frame(height: 60)
-                        .onChange(of: state.lastRepValue) { newValue in
-                            saveCurrentState()
-                        }
+//                        .onChange(of: state.lastRepValue) { newValue in
+//                            saveCurrentState()
+//                        }
                 }
                 
                 Spacer().frame(height: 40)
@@ -82,9 +82,9 @@ struct ExerciseView: View {
                     
                     WheelPicker(config: RPEWheelConfig, value: $state.lastRPEValue)
                         .frame(height: 60)
-                        .onChange(of: state.lastRPEValue) { newValue in
-                                                    saveCurrentState()
-                                                }
+//                        .onChange(of: state.lastRPEValue) { newValue in
+//                                                    saveCurrentState()
+//                                                }
                 }
                 
             }
@@ -117,25 +117,25 @@ struct ExerciseView: View {
         .edgesIgnoringSafeArea(.all)
     }
     
-    func saveCurrentState() {
-        let db = Firestore.firestore()
-        let userRef = db.collection("users").document(userId)
-        
-        // Save current state under 'currentState'
-        userRef.collection("currentState").document(exerciseName).setData([
-            "exerciseName": state.exerciseName,
-            "lastWeightValue": state.lastWeightValue,
-            "lastRepValue": state.lastRepValue,
-            "lastRPEValue": state.lastRPEValue,
-            "setCount": state.setCount
-        ]) { error in
-            if let error = error {
-                print("Error saving current state: \(error)")
-            } else {
-                print("Current state saved successfully")
-            }
-        }
-    }
+//    func saveCurrentState() {
+//        let db = Firestore.firestore()
+//        let userRef = db.collection("users").document(userId)
+//        
+//        // Save current state under 'currentState'
+//        userRef.collection("currentState").document(exerciseName).setData([
+//            "exerciseName": state.exerciseName,
+//            "lastWeightValue": state.lastWeightValue,
+//            "lastRepValue": state.lastRepValue,
+//            "lastRPEValue": state.lastRPEValue,
+//            "setCount": state.setCount
+//        ]) { error in
+//            if let error = error {
+//                print("Error saving current state: \(error)")
+//            } else {
+//                print("Current state saved successfully")
+//            }
+//        }
+//    }
 }
 
 func saveExerciseData(userId: String, exerciseName: String, weight: Double, reps: Double, RPE: Double) {
@@ -153,7 +153,26 @@ func saveExerciseData(userId: String, exerciseName: String, weight: Double, reps
         if let error = error {
             print("Error adding document: \(error)")
         } else {
-            print("Document added successfully")
+            print("Document added successfully to history")
+        }
+    }
+    
+    // Update 'lastState' in the 'exercises' collection
+    let exerciseData: [String: Any] = [
+        "exerciseName": exerciseName,
+        "lastState": [
+            "weight": weight,
+            "reps": reps,
+            "RPE": RPE,
+            "timestamp": Timestamp()
+        ]
+    ]
+    
+    userRef.collection("exercises").document(exerciseName).setData(exerciseData, merge: true) { error in
+        if let error = error {
+            print("Error updating lastState: \(error)")
+        } else {
+            print("lastState updated successfully in exercises")
         }
     }
 }
