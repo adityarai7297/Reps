@@ -244,6 +244,9 @@ struct ExerciseListView: View {
                 print("Error removing document: \(error)")
             } else {
                 print("Document removed successfully")
+                if let index = exerciseStates.firstIndex(where: { $0.exerciseName == exerciseName }) {
+                                exerciseStates.remove(at: index)
+                            }
             }
         }
     }
