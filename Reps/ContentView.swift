@@ -30,11 +30,6 @@ struct ContentView: View {
     let userId: String = "your_user_id" // Replace this with your actual user ID logic
 
     var body: some View {
-        let colors: [Color] = [Color(hex: "d4e09b"),
-                               Color(hex: "f6f4d2"),
-                               Color(hex: "cbdfbd"),
-                               Color(hex: "f19c79")]
-
         ZStack {
             if isLoading {
                 Text("Loading...")
@@ -56,9 +51,11 @@ struct ContentView: View {
                             weightWheelConfig: weightWheelConfig,
                             repWheelConfig: repWheelConfig,
                             RPEWheelConfig: exertionWheelConfig,
-                            color: colors[index % colors.count],
+                            color: .clear, // Set to clear since gradient will be applied
                             userId: userId
-                        ).onAppear {
+                        )
+                        .gradientBackground(index: index)
+                        .onAppear {
                             loadCurrentState(for: exerciseStates[index].exerciseName, at: index)
                         }
                     }
@@ -165,7 +162,7 @@ struct ExerciseListView: View {
     @Environment(\.presentationMode) var presentationMode
     let userId: String
     let startBouncingArrow: () -> Void
-
+    
     var body: some View {
         NavigationView {
             VStack {
@@ -224,21 +221,21 @@ struct ExerciseListView: View {
     func move(from source: IndexSet, to destination: Int) {
         exerciseStates.move(fromOffsets: source, toOffset: destination)
     }
-
+    
     func addExerciseToFirebase(userId: String, exerciseName: String) {
         let db = Firestore.firestore()
         let userRef = db.collection("users").document(userId)
         userRef.collection("exercises").document(exerciseName).setData([
             "exerciseName": exerciseName
-        ]) { error in
+        ]) {
+            error in
             if let error = error {
-                print("Error adding document: \(error)")
+                print("Error adding document: (error)")
             } else {
                 print("Document added successfully")
             }
         }
     }
-
     func removeExerciseFromFirebase(userId: String, exerciseName: String) {
         let db = Firestore.firestore()
         let userRef = db.collection("users").document(userId)
@@ -250,6 +247,7 @@ struct ExerciseListView: View {
             }
         }
     }
+    
 }
 
 extension Color {
@@ -267,7 +265,8 @@ extension Color {
         self.init(red: red, green: green, blue: blue)
     }
 }
+    
+    #Preview {
+        ContentView()
+    }
 
-#Preview {
-    ContentView()
-}
