@@ -45,7 +45,14 @@ struct VerticalPager<Content: View>: View {
     }
 }
 
-
-#Preview {
-    ContentView()
+struct VerticalPager_Previews: PreviewProvider {
+    static var previews: some View {
+        VerticalPager(pageCount: 5, currentIndex: .constant(0)) {
+            ForEach(0..<5) { index in
+                Text("Page \(index)")
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .background(Color.red)
+            }
+        }
+    }
 }

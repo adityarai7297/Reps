@@ -12,22 +12,13 @@ struct GradientBackground: ViewModifier {
             .background(
                 LinearGradient(
                     gradient: Gradient(colors: [
-                        Color(hue: Double(index) * 0.1, saturation: 0.3, brightness: 0.9),
-                        Color(hue: Double(index) * 0.1 + 0.1, saturation: 0.3, brightness: 0.9)
+                        Color(hue: Double(index) * 0.1, saturation: 0.8, brightness: 1),
+                        Color(hue: Double(index) * 0.1 + 0.1, saturation: 0.8, brightness: 1)
                     ]),
                     startPoint: startPoint,
                     endPoint: endPoint
                 )
-                //.animation(
-                   // Animation.linear(duration: 5)
-                    //    .repeatForever(autoreverses: true)
-                     //   .delay(Double(index) * 0.1)
-               // )
             )
-            //.onAppear {
-               // startPoint = UnitPoint(x: Double.random(in: 0...1), y: Double.random(in: 0...1))
-                //endPoint = UnitPoint(x: Double.random(in: 0...1), y: Double.random(in: 0...1))
-           // }
     }
 }
 
