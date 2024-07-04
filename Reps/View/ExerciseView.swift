@@ -11,7 +11,7 @@ struct ExerciseView: View {
     let userId: String
     @State private var showHistoryPopup = false
     @State private var historyEntries: [HistoryEntry] = []
-    
+
     var body: some View {
         VStack {
             VStack {
@@ -19,81 +19,71 @@ struct ExerciseView: View {
                 Text(exerciseName)
                     .font(.largeTitle.bold())
                 Spacer().frame(height: 40)
-                
+
                 Rectangle()
                     .frame(height: 0.3)
-                
+
                 Spacer().frame(height: 60)
-                
+
                 VStack{
                     HStack(alignment: .lastTextBaseline, spacing: 5, content: {
                         Text(verbatim: "\(state.lastWeightValue)")
                             .font(.largeTitle.bold())
                             .contentTransition(.numericText(value: state.lastWeightValue))
                             .animation(.snappy, value: state.lastWeightValue)
-                        
+
                         Text("lbs")
                             .font(.title2)
                             .fontWeight(.light)
                             .textScale(.secondary)
                     })
-                    
+
                     WheelPicker(config: weightWheelConfig, value: $state.lastWeightValue)
                         .frame(height: 60)
-                    //                        .onChange(of: state.lastWeightValue) { newValue in
-                    //                            saveCurrentState()
-                    //                        }
                 }
-                
+
                 Spacer().frame(height: 40)
-                
+
                 VStack{
                     HStack(alignment: .lastTextBaseline, spacing: 5, content: {
                         Text(verbatim: "\(Int(state.lastRepValue))")
                             .font(.largeTitle.bold())
                             .contentTransition(.numericText(value: state.lastRepValue))
                             .animation(.snappy, value: state.lastRepValue)
-                        
+
                         Text("reps")
                             .font(.title2)
                             .fontWeight(.light)
                             .textScale(.secondary)
                     })
-                    
+
                     WheelPicker(config: repWheelConfig, value: $state.lastRepValue)
                         .frame(height: 60)
-                    //                        .onChange(of: state.lastRepValue) { newValue in
-                    //                            saveCurrentState()
-                    //                        }
                 }
-                
+
                 Spacer().frame(height: 40)
-                
+
                 VStack{
                     HStack(alignment: .lastTextBaseline, spacing: 5, content: {
                         Text(verbatim: "\(Int(state.lastRPEValue))")
                             .font(.largeTitle.bold())
                             .contentTransition(.numericText(value: state.lastRPEValue))
                             .animation(.snappy, value: state.lastRPEValue)
-                        
+
                         Text("%  RPE")
                             .font(.title2)
                             .fontWeight(.light)
                             .textScale(.secondary)
                     })
-                    
+
                     WheelPicker(config: RPEWheelConfig, value: $state.lastRPEValue)
                         .frame(height: 60)
-                    //                        .onChange(of: state.lastRPEValue) { newValue in
-                    //                                                    saveCurrentState()
-                    //                                                }
                 }
-                
             }
             .offset(y: state.showCheckmark ? -60 : 0)
-            
+
             Spacer().frame(height: 60)
-            
+
             HStack {
                 Spacer().frame(width: 100)
                 SetButton(showCheckmark: $state.showCheckmark, setCount: $state.setCount, action: {
@@ -104,12 +94,12 @@ struct ExerciseView: View {
                 HStack{
                     Text("\(state.setCount)")
                         .font(.title)
-                    
+
                     Image(systemName: "checkmark.circle.fill")
                         .resizable()
                         .frame(width: 24, height: 24)
                         .foregroundColor(.black)
-                    
+
                 }
                 .opacity(state.setCount > 0 ? 1 : 0)
                 .onTapGesture {
@@ -121,14 +111,11 @@ struct ExerciseView: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(color)
         .edgesIgnoringSafeArea(.all)
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(color)
-        .edgesIgnoringSafeArea(.all)
         .sheet(isPresented: $showHistoryPopup) {
-            HistoryPopupView(historyEntries: historyEntries, exerciseName: state.exerciseName, userId: userId)
+            HistoryPopupView(state: $state, historyEntries: $historyEntries, exerciseName: state.exerciseName, userId: userId)
         }
     }
-    
+
     func fetchHistory(for exerciseName: String) {
         let db = Firestore.firestore()
         let userRef = db.collection("users").document(userId)
@@ -143,7 +130,7 @@ struct ExerciseView: View {
                     self.historyEntries = documents.map { doc in
                         let data = doc.data()
                         return HistoryEntry(
-                            id: userId,
+                            id: doc.documentID, // Use the document ID as the ID
                             weight: data["weight"] as? Double ?? 0,
                             reps: data["reps"] as? Double ?? 0,
                             RPE: data["RPE"] as? Double ?? 0,
@@ -152,32 +139,12 @@ struct ExerciseView: View {
                     }
                 }
             }
-        
-        //    func saveCurrentState() {
-        //        let db = Firestore.firestore()
-        //        let userRef = db.collection("users").document(userId)
-        //
-        //        // Save current state under 'currentState'
-        //        userRef.collection("currentState").document(exerciseName).setData([
-        //            "exerciseName": state.exerciseName,
-        //            "lastWeightValue": state.lastWeightValue,
-        //            "lastRepValue": state.lastRepValue,
-        //            "lastRPEValue": state.lastRPEValue,
-        //            "setCount": state.setCount
-        //        ]) { error in
-        //            if let error = error {
-        //                print("Error saving current state: \(error)")
-        //            } else {
-        //                print("Current state saved successfully")
-        //            }
-        //        }
-        //    }
     }
-    
+
     func saveExerciseData(userId: String, exerciseName: String, weight: Double, reps: Double, RPE: Double, setCount: Int) {
         let db = Firestore.firestore()
         let userRef = db.collection("users").document(userId)
-        
+
         // Save set data under 'history'
         userRef.collection("history").addDocument(data: [
             "exerciseName": exerciseName,
@@ -192,7 +159,7 @@ struct ExerciseView: View {
                 print("Document added successfully to history")
             }
         }
-        
+
         // Update 'lastState' in the 'exercises' collection
         let exerciseData: [String: Any] = [
             "exerciseName": exerciseName,
@@ -204,7 +171,7 @@ struct ExerciseView: View {
                 "dailySetCount": setCount
             ]
         ]
-        
+
         userRef.collection("exercises").document(exerciseName).setData(exerciseData, merge: true) { error in
             if let error = error {
                 print("Error updating lastState: \(error)")

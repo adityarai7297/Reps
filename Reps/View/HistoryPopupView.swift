@@ -2,7 +2,8 @@ import SwiftUI
 import FirebaseFirestore
 
 struct HistoryPopupView: View {
-    let historyEntries: [HistoryEntry]
+    @Binding var state: ExerciseState
+    @Binding var historyEntries: [HistoryEntry] // Make it a binding
     let exerciseName: String
     let userId: String
     @Environment(\.presentationMode) var presentationMode // Add this to handle sheet closing
@@ -43,11 +44,8 @@ struct HistoryPopupView: View {
             .padding()
         }
         .preferredColorScheme(.dark)
-        //.frame(maxWidth: .infinity, maxHeight: .infinity)
-        //.background(Color.white)
         .cornerRadius(20)
         .shadow(radius: 20)
-        //.padding()
     }
 
     func deleteEntry(entry: HistoryEntry) {
@@ -55,10 +53,14 @@ struct HistoryPopupView: View {
         let userRef = db.collection("users").document(userId)
         userRef.collection("history").document(entry.id).delete { error in
             if let error = error {
-                print("Error deleting document: \(error)")
+                print("Error deleting Set: \(error)")
             } else {
-                print("Document successfully deleted")
-                // Optionally, you can refresh the historyEntries state here or inform the parent view to refresh
+                print("Set successfully deleted")
+                // Remove the deleted entry from the historyEntries list
+                if let index = historyEntries.firstIndex(where: { $0.id == entry.id }) {
+                    historyEntries.remove(at: index)
+                }
+                state.setCount = max(state.setCount - 1, 0)
             }
         }
     }
