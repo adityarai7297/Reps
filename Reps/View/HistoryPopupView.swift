@@ -10,10 +10,6 @@ struct HistoryPopupView: View {
 
     var body: some View {
         VStack {
-            Text("History for \(exerciseName)")
-                .font(.headline)
-                .padding()
-
             List {
                 ForEach(historyEntries) { entry in
                     HStack {
