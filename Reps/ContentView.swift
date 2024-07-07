@@ -50,7 +50,7 @@ struct ContentView: View {
                     }) {
                         Image(systemName: "rectangle.stack")
                             .resizable()
-                            .frame(width: 30, height: 50)
+                            .frame(width: 25, height: 35)
                             .foregroundColor(Color.black)
                     }
                     .padding()

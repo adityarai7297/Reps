@@ -17,11 +17,13 @@ struct ExerciseView: View {
             VStack {
                 Spacer().frame(height: 40)
                 Text(exerciseName)
-                    .font(.largeTitle.bold())
+                    .font(.largeTitle)
+                    .fontWeight(.medium)
                 Spacer().frame(height: 40)
 
                 Rectangle()
-                    .frame(height: 0.3)
+                                .fill(Color.black)
+                                .frame(width: UIScreen.main.bounds.width, height: 0.2)
 
                 Spacer().frame(height: 60)
 
