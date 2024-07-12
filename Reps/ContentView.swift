@@ -11,7 +11,7 @@ struct ContentView: View {
     @State private var showExerciseListView: Bool = false
     @State private var isLoading: Bool = true
     @State private var arrowOffset: CGFloat = -60
-    let userId: String = "your_user_id" // Replace this with your actual user ID logic
+    let userId: String = "your_user_id"
 
     var body: some View {
         ZStack {
