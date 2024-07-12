@@ -10,8 +10,8 @@ struct ContentView: View {
     @State private var currentIndex: Int = 0
     @State private var showExerciseListView: Bool = false
     @State private var isLoading: Bool = true
-    @State private var arrowOffset: CGFloat = -60
-    let userId: String = "your_user_id"
+    @State private var showMenu: Bool = false
+    @State private var userId: String = "your_user_id"
 
     var body: some View {
         ZStack {
@@ -46,36 +46,32 @@ struct ContentView: View {
                 HStack {
                     Spacer()
                     Button(action: {
-                        showExerciseListView = true
+                        withAnimation {
+                            showMenu.toggle()
+                        }
                     }) {
-                        Image(systemName: "rectangle.stack")
+                        Image(systemName: "line.horizontal.3")
                             .resizable()
-                            .frame(width: 25, height: 35)
+                            .frame(width: 25, height: 25)
                             .foregroundColor(Color.black)
                     }
                     .padding()
-                    .overlay(
-                        VStack {
-                            if exerciseStates.isEmpty {
-                                HStack {
-                                    Image(systemName: "arrow.right")
-                                        .resizable()
-                                        .frame(width: 40, height: 25)
-                                        .foregroundColor(.gray)
-                                        .offset(x: arrowOffset)
-                                        .onAppear {
-                                            startBouncingArrow()
-                                        }
-                                }
-                            }
-                        }
-                    )
                 }
                 Spacer()
             }
-        }
-        .sheet(isPresented: $showExerciseListView) {
-            ExerciseListView(exerciseStates: $exerciseStates, currentIndex: $currentIndex, userId: userId)
+            
+            if showMenu {
+                Color.black.opacity(0.5)
+                    .edgesIgnoringSafeArea(.all)
+                    .onTapGesture {
+                        withAnimation {
+                            showMenu.toggle()
+                        }
+                    }
+                
+                MenuView(showExerciseListView: $showExerciseListView, userId: $userId, exerciseStates: $exerciseStates, currentIndex: $currentIndex )
+                    .transition(.move(edge: .trailing))
+            }
         }
     }
 
@@ -132,13 +128,9 @@ struct ContentView: View {
         }
     }
 
-    func startBouncingArrow() {
-        arrowOffset = -60
-        withAnimation(Animation.interpolatingSpring(stiffness: 20, damping: 0).repeatForever(autoreverses: true)) {
-            arrowOffset = -50
-        }
-    }
+   
 }
+
 
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
