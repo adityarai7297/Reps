@@ -46,7 +46,7 @@ struct ContentView: View {
                 HStack {
                     Spacer()
                     Button(action: {
-                        withAnimation {
+                        withAnimation(.easeIn(duration: 0.2)) { // Faster animation
                             showMenu.toggle()
                         }
                     }) {
@@ -61,16 +61,18 @@ struct ContentView: View {
             }
             
             if showMenu {
-                Color.black.opacity(0.5)
+                BlurView(style: .systemUltraThinMaterial) // Glassy, transparent blur
                     .edgesIgnoringSafeArea(.all)
                     .onTapGesture {
-                        withAnimation {
+                        withAnimation(.easeIn(duration: 0.2)) { // Faster animation
                             showMenu.toggle()
                         }
                     }
                 
-                MenuView(showExerciseListView: $showExerciseListView, userId: $userId, exerciseStates: $exerciseStates, currentIndex: $currentIndex )
+                MenuView(showExerciseListView: $showExerciseListView, userId: $userId, exerciseStates: $exerciseStates, currentIndex: $currentIndex)
+                    .foregroundColor(Color.black) // Ensure text is black
                     .transition(.move(edge: .trailing))
+                    .background(Color.clear) // Transparent background
             }
         }
     }
@@ -127,13 +129,23 @@ struct ContentView: View {
             }
         }
     }
-
-   
 }
 
+struct BlurView: UIViewRepresentable {
+    var style: UIBlurEffect.Style
+
+    func makeUIView(context: Context) -> UIVisualEffectView {
+        return UIVisualEffectView(effect: UIBlurEffect(style: style))
+    }
+
+    func updateUIView(_ uiView: UIVisualEffectView, context: Context) {
+        uiView.effect = UIBlurEffect(style: style)
+    }
+}
 
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
         ContentView()
     }
 }
+
