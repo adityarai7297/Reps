@@ -9,9 +9,9 @@ struct MenuView: View {
     var body: some View {
         VStack {
             Button(action: {
-                // Action for the button
+                showExerciseListView.toggle()
             }) {
-                Text("Menu Item 1")
+                Text("Manage Exercises")
             }
             .padding()
             .background(Color.clear)
@@ -20,7 +20,7 @@ struct MenuView: View {
             Button(action: {
                 // Action for the button
             }) {
-                Text("Menu Item 2")
+                Text("Logout")
             }
             .padding()
             .background(Color.clear)
@@ -31,5 +31,12 @@ struct MenuView: View {
             Spacer()
         }
         .padding()
+        .sheet(isPresented: $showExerciseListView) {
+            ExerciseListView(
+                exerciseStates: $exerciseStates,
+                currentIndex: $currentIndex,
+                userId: userId
+            )
+        }
     }
 }

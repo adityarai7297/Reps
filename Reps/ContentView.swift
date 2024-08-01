@@ -70,7 +70,7 @@ struct ContentView: View {
                     }
                 
                 MenuView(showExerciseListView: $showExerciseListView, userId: $userId, exerciseStates: $exerciseStates, currentIndex: $currentIndex)
-                    .foregroundColor(Color.black) // Ensure text is black
+                    .foregroundColor(Color.white) // Ensure text is black
                     .transition(.move(edge: .trailing))
                     .background(Color.clear) // Transparent background
             }
