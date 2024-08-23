@@ -9,8 +9,7 @@ struct ExerciseView: View {
     let RPEWheelConfig: WheelPicker.Config
     let color: Color
     let userId: String
-    @State private var showHistoryPopup = false
-    @State private var historyEntries: [HistoryEntry] = []
+    
 
     var body: some View {
         VStack {
@@ -90,7 +89,7 @@ struct ExerciseView: View {
                 Spacer().frame(width: 100)
                 SetButton(showCheckmark: $state.showCheckmark, setCount: $state.setCount, action: {
                     state.setCount += 1
-                    saveExerciseData(userId: userId, exerciseName: state.exerciseName, weight: state.lastWeightValue, reps: state.lastRepValue, RPE: state.lastRPEValue, setCount: state.setCount)
+                    //saveExerciseData
                 })
                 Spacer().frame(width: 30)
                 HStack{
@@ -104,82 +103,10 @@ struct ExerciseView: View {
 
                 }
                 .opacity(state.setCount > 0 ? 1 : 0)
-                .onTapGesture {
-                    fetchHistory(for: state.exerciseName)
-                    showHistoryPopup = true
-                }
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(color)
         .edgesIgnoringSafeArea(.all)
-        .sheet(isPresented: $showHistoryPopup) {
-            HistoryPopupView(state: $state, historyEntries: $historyEntries, exerciseName: state.exerciseName, userId: userId)
-        }
-    }
-
-    func fetchHistory(for exerciseName: String) {
-        let db = Firestore.firestore()
-        let userRef = db.collection("users").document(userId)
-        userRef.collection("history")
-            .whereField("exerciseName", isEqualTo: exerciseName)
-            .order(by: "timestamp", descending: true)
-            .getDocuments { snapshot, error in
-                if let error = error {
-                    print("Error fetching history: \(error)")
-                } else {
-                    guard let documents = snapshot?.documents else { return }
-                    self.historyEntries = documents.map { doc in
-                        let data = doc.data()
-                        return HistoryEntry(
-                            id: doc.documentID, // Use the document ID as the ID
-                            weight: data["weight"] as? Double ?? 0,
-                            reps: data["reps"] as? Double ?? 0,
-                            RPE: data["RPE"] as? Double ?? 0,
-                            timestamp: (data["timestamp"] as? Timestamp)?.dateValue() ?? Date()
-                        )
-                    }
-                }
-            }
-    }
-
-    func saveExerciseData(userId: String, exerciseName: String, weight: Double, reps: Double, RPE: Double, setCount: Int) {
-        let db = Firestore.firestore()
-        let userRef = db.collection("users").document(userId)
-
-        // Save set data under 'history'
-        userRef.collection("history").addDocument(data: [
-            "exerciseName": exerciseName,
-            "weight": weight,
-            "reps": reps,
-            "RPE": RPE,
-            "timestamp": Timestamp()
-        ]) { error in
-            if let error = error {
-                print("Error adding document: \(error)")
-            } else {
-                print("Document added successfully to history")
-            }
-        }
-
-        // Update 'lastState' in the 'exercises' collection
-        let exerciseData: [String: Any] = [
-            "exerciseName": exerciseName,
-            "lastState": [
-                "weight": weight,
-                "reps": reps,
-                "RPE": RPE,
-                "timestamp": Timestamp(),
-                "dailySetCount": setCount
-            ]
-        ]
-
-        userRef.collection("exercises").document(exerciseName).setData(exerciseData, merge: true) { error in
-            if let error = error {
-                print("Error updating lastState: \(error)")
-            } else {
-                print("lastState updated successfully in exercises")
-            }
-        }
     }
 }
