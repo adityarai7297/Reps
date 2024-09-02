@@ -8,14 +8,14 @@ final class ExerciseState {
     var lastRepValue: CGFloat
     var lastRPEValue: CGFloat
     var setCount: Int
-    var showCheckmark: Bool
+    var timestamp: Date? // New property to store the timestamp
     
-    init(exerciseName: String, lastWeightValue: CGFloat, lastRepValue: CGFloat, lastRPEValue: CGFloat, setCount: Int, showCheckmark: Bool) {
+    init(exerciseName: String, lastWeightValue: CGFloat, lastRepValue: CGFloat, lastRPEValue: CGFloat, setCount: Int, timestamp: Date = Date()) {
         self.exerciseName = exerciseName
         self.lastWeightValue = lastWeightValue
         self.lastRepValue = lastRepValue
         self.lastRPEValue = lastRPEValue
         self.setCount = setCount
-        self.showCheckmark = showCheckmark
+        self.timestamp = timestamp
     }
 }

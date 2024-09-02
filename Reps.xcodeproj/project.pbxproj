@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		132EF34E2C367BE000E75796 /* GradientBackground.swift in Sources */ = {isa = PBXBuildFile; fileRef = 132EF34D2C367BE000E75796 /* GradientBackground.swift */; };
+		1339416D2C86732800B1EF2B /* ExerciseHistory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1339416C2C86732800B1EF2B /* ExerciseHistory.swift */; };
 		1341AC3F2C418CA300838E87 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 1341AC3E2C418CA300838E87 /* FirebaseAuth */; };
 		1371B14F2C2ED42500A4254A /* VerticalPager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1371B14E2C2ED42500A4254A /* VerticalPager.swift */; };
 		1371B1522C2F9C9A00A4254A /* ExerciseState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1371B1512C2F9C9A00A4254A /* ExerciseState.swift */; };
@@ -45,6 +46,7 @@
 
 /* Begin PBXFileReference section */
 		132EF34D2C367BE000E75796 /* GradientBackground.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GradientBackground.swift; sourceTree = "<group>"; };
+		1339416C2C86732800B1EF2B /* ExerciseHistory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExerciseHistory.swift; sourceTree = "<group>"; };
 		1371B14E2C2ED42500A4254A /* VerticalPager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VerticalPager.swift; sourceTree = "<group>"; };
 		1371B1512C2F9C9A00A4254A /* ExerciseState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExerciseState.swift; sourceTree = "<group>"; };
 		1371B1532C2FCFEB00A4254A /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = "GoogleService-Info.plist"; path = "../../Downloads/GoogleService-Info.plist"; sourceTree = "<group>"; };
@@ -149,6 +151,7 @@
 				13FEA2722C2D483400D04BF2 /* ExerciseView.swift */,
 				13FEA2702C2C400600D04BF2 /* SetButton.swift */,
 				1371B14E2C2ED42500A4254A /* VerticalPager.swift */,
+				1339416C2C86732800B1EF2B /* ExerciseHistory.swift */,
 			);
 			path = View;
 			sourceTree = "<group>";
@@ -296,6 +299,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				1371B1522C2F9C9A00A4254A /* ExerciseState.swift in Sources */,
+				1339416D2C86732800B1EF2B /* ExerciseHistory.swift in Sources */,
 				13FEA2432C27C9D200D04BF2 /* ContentView.swift in Sources */,
 				13FEA26F2C2943A000D04BF2 /* WheelPicker.swift in Sources */,
 				13FEA2712C2C400600D04BF2 /* SetButton.swift in Sources */,
