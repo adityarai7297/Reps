@@ -1,9 +1,12 @@
 import SwiftUI
-import FirebaseFirestore
+import SwiftData
 
 struct ExerciseView: View {
     @Binding var state: ExerciseState
+    @State private var showCheckmark: Bool = false
+    @State private var showingHistory = false
     @Binding var exerciseName: String
+    @Environment(\.modelContext) private var modelContext
     let weightWheelConfig: WheelPicker.Config
     let repWheelConfig: WheelPicker.Config
     let RPEWheelConfig: WheelPicker.Config
@@ -81,15 +84,15 @@ struct ExerciseView: View {
                         .frame(height: 60)
                 }
             }
-            .offset(y: state.showCheckmark ? -60 : 0)
+            .offset(y: showCheckmark ? -60 : 0)
 
             Spacer().frame(height: 60)
 
             HStack {
                 Spacer().frame(width: 100)
-                SetButton(showCheckmark: $state.showCheckmark, setCount: $state.setCount, action: {
+                SetButton(showCheckmark: $showCheckmark, setCount: $state.setCount, action: {
                     state.setCount += 1
-                    //saveExerciseData
+                    saveExerciseData(state: state)
                 })
                 Spacer().frame(width: 30)
                 HStack{
@@ -103,10 +106,28 @@ struct ExerciseView: View {
 
                 }
                 .opacity(state.setCount > 0 ? 1 : 0)
+                .onTapGesture {
+                                    showingHistory.toggle()
+                                }
+                                .sheet(isPresented: $showingHistory) {
+                                    ExerciseHistoryView(exerciseName: exerciseName, date: Date())
+                                }
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(color)
         .edgesIgnoringSafeArea(.all)
     }
+    
+    func saveExerciseData(state: ExerciseState) {
+        let context = modelContext  // Obtain the current model context
+        do {
+            state.timestamp = Date() // Update the timestamp to the current date and time
+            try context.save() // Save the updated state to the persistent store
+        } catch {
+            print("Failed to save exercise state: \(error)")
+        }
+    }
 }
+
+

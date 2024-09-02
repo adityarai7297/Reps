@@ -24,6 +24,6 @@ struct RepsApp: App {
     var body: some Scene {
         WindowGroup {
             ContentView()
-        }
+        }.modelContainer(for: [ExerciseState.self])
     }
 }
