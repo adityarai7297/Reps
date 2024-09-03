@@ -11,23 +11,27 @@ struct ContentView: View {
     @State private var currentIndex: Int = 0
     @State private var exercises: [Exercise] = []
     @State private var showingManageExercises = false
+    @State private var refreshTrigger = false
 
     var body: some View {
         NavigationView {
             ZStack {
-                VerticalPager(pageCount: exercises.count, currentIndex: $currentIndex) {
-                    ForEach(exercises.indices, id: \.self) { index in
-                        ExerciseView(
-                            exercise: $exercises[index],
-                            weightWheelConfig: weightWheelConfig,
-                            repWheelConfig: repWheelConfig,
-                            RPEWheelConfig: exertionWheelConfig,
-                            color: .clear, // Set to clear since gradient will be applied
-                            userId: userId
-                        )
-                        .gradientBackground(index: index)
-                        .onAppear {
-                            loadExercises()
+                if exercises.isEmpty {
+                    Text("No exercises available. Please add new exercises.")
+                        .foregroundColor(.gray)
+                        .padding()
+                } else {
+                    VerticalPager(pageCount: exercises.count, currentIndex: $currentIndex) {
+                        ForEach(exercises.indices, id: \.self) { index in
+                            ExerciseView(
+                                exercise: $exercises[index],
+                                weightWheelConfig: weightWheelConfig,
+                                repWheelConfig: repWheelConfig,
+                                RPEWheelConfig: exertionWheelConfig,
+                                color: .clear, // Set to clear since gradient will be applied
+                                userId: userId
+                            )
+                            .gradientBackground(index: index)
                         }
                     }
                 }
@@ -36,9 +40,11 @@ struct ContentView: View {
                 showingManageExercises.toggle()
             }) {
                 Image(systemName: "plus")
+                    .foregroundColor(.black)
             })
             .sheet(isPresented: $showingManageExercises) {
-                ManageExercisesView(exercises: $exercises)
+                ManageExercisesView(refreshTrigger: $refreshTrigger, exercises: $exercises)
+                    .id(refreshTrigger)
                     .environment(\.modelContext, modelContext) // Pass model context to the modal
             }
             .onAppear {

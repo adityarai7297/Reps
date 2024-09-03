@@ -9,30 +9,62 @@ struct ExerciseHistoryView: View {
     @State private var exerciseHistory: [ExerciseHistory] = []
 
     var body: some View {
-        VStack {
-            Text(formattedDay(date)) // Display the day on top
-                .font(.headline)
-                .padding(.top, 8)
+        VStack(alignment: .leading) {
+            HStack {
+                Text(exerciseName)
+                    .font(.system(size: 34, weight: .bold))
+                    .foregroundColor(.white)
+                    .padding(.leading, 16)
+                    .padding(.top, 32)
 
-            Text(exerciseName)
-                .font(.largeTitle)
-                .fontWeight(.medium)
-                .padding(.bottom, 8)
-
-            List(exerciseHistory) { history in
-                VStack(alignment: .leading) {
-                    Text("Weight: \(history.weight, specifier: "%.1f") lbs")
-                    Text("Reps: \(Int(history.reps))")
-                    Text("RPE: \(Int(history.rpe))")
-                    Text("Time: \(formattedTime(history.timestamp))")
-                }
-                .padding()
+                Spacer()
+                
+                Text(formattedDay(date))
+                    .font(.system(size: 18, weight: .medium))
+                    .foregroundColor(.gray)
+                    .padding(.trailing, 16)
+                    .padding(.top, 32)
             }
+            .padding(.bottom, 16)
+
+            List {
+                ForEach(exerciseHistory) { history in
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Weight: \(history.weight, specifier: "%.1f") lbs")
+                            .font(.headline)
+                            .foregroundColor(.white)
+                        
+                        Text("Reps: \(Int(history.reps))")
+                            .font(.subheadline)
+                            .foregroundColor(.white)
+                        
+                        HStack {
+                            Text("RPE: \(Int(history.rpe))%")
+                                .font(.subheadline)
+                                .foregroundColor(.white)
+                            
+                            Spacer()
+                            
+                            Text("Time: \(formattedTime(history.timestamp))")
+                                .font(.subheadline)
+                                .foregroundColor(.white)
+                        }
+                    }
+                    .padding()
+                    .background(Color(.darkGray))
+                    .cornerRadius(10)
+                }
+                .listRowBackground(Color.black)  // Ensures each row has a dark background
+            }
+            .listStyle(PlainListStyle()) // Avoids any automatic background styling applied by default
+            .background(Color.black) // Sets the entire list's background to black
             .onAppear {
                 loadExerciseHistory()
             }
             .navigationTitle(exerciseName)
         }
+        .background(Color.black.edgesIgnoringSafeArea(.all))
+        .navigationBarTitleDisplayMode(.inline)
     }
     
     private func loadExerciseHistory() {

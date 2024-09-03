@@ -3,47 +3,73 @@ import SwiftData
 
 struct ManageExercisesView: View {
     @Environment(\.modelContext) private var modelContext
+    @Binding var refreshTrigger: Bool // Binding to trigger a re-render in the parent view
     @Binding var exercises: [Exercise]
     @State private var newExerciseName: String = ""
-    @Environment(\.presentationMode) var presentationMode
+    @State private var editingExercise: Exercise?
 
     var body: some View {
         NavigationView {
-            List {
-                ForEach(exercises.indices, id: \.self) { index in
-                    HStack {
-                        Image(systemName: "line.horizontal.3")
-                            .foregroundColor(.gray)
-                        TextField("Exercise Name", text: Binding(
-                            get: { exercises[index].name },
-                            set: { exercises[index].name = $0 }
-                        ))
-                        Spacer()
-                        Button(action: {
-                            deleteExercise(at: index)
-                        }) {
-                            Image(systemName: "minus.circle.fill")
-                                .foregroundColor(.red)
-                        }
-                    }
-                }
-                .onMove(perform: moveExercise) // Make the list draggable without EditButton
-                
+            VStack {
+                // Text Field to add new exercise
                 HStack {
-                    TextField("New Exercise Name", text: $newExerciseName)
-                    Spacer()
-                    Button(action: addExercise) {
+                    TextField("New Exercise", text: $newExerciseName)
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                        .padding(.horizontal)
+
+                    Button(action: {
+                        addExercise()
+                        newExerciseName = ""
+                    }) {
                         Image(systemName: "plus.circle.fill")
                             .foregroundColor(.green)
+                            .font(.system(size: 24))
+                    }
+                    .padding(.trailing)
+                }
+                .padding(.top)
+
+                // List of exercises
+                List {
+                    ForEach(exercises) { exercise in
+                        HStack {
+                            if editingExercise == exercise {
+                                TextField("Exercise Name", text: Binding(
+                                    get: { exercise.name },
+                                    set: { newName in
+                                        exercise.name = newName
+                                    }
+                                ))
+                                .textFieldStyle(RoundedBorderTextFieldStyle())
+                                .onSubmit {
+                                    saveChanges(for: exercise)
+                                }
+                                .onDisappear {
+                                    if editingExercise == exercise {
+                                        saveChanges(for: exercise)
+                                    }
+                                }
+                            } else {
+                                Text(exercise.name)
+                                    .onTapGesture {
+                                        editingExercise = exercise
+                                    }
+                                    .contextMenu {
+                                        Button("Edit") {
+                                            editingExercise = exercise
+                                        }
+                                        Button("Delete", role: .destructive) {
+                                            deleteExercise(exercise)
+                                        }
+                                    }
+                            }
+                        }
+                        .padding(.vertical, 8)
                     }
                 }
+                .listStyle(PlainListStyle())
             }
-            .navigationBarTitle("Manage Exercises", displayMode: .inline)
-            .navigationBarItems(trailing: Button("Done") {
-                saveExercisesOrder()
-                presentationMode.wrappedValue.dismiss()
-            })
-            .environment(\.editMode, .constant(.active)) // Activate drag-and-drop by default
+            .navigationTitle("Manage Exercises")
         }
     }
 
@@ -54,22 +80,25 @@ struct ManageExercisesView: View {
         exercises.append(newExercise)
         modelContext.insert(newExercise)
         saveContext()
-        newExerciseName = ""
     }
 
-    private func deleteExercise(at index: Int) {
-        let exercise = exercises.remove(at: index)
+    private func saveChanges(for exercise: Exercise) {
+        if let index = exercises.firstIndex(of: exercise) {
+            exercises[index].name = exercise.name
+            editingExercise = nil
+            saveContext()
+        }
+    }
+
+    private func deleteExercise(_ exercise: Exercise) {
+        guard let index = exercises.firstIndex(of: exercise) else { return }
+
         modelContext.delete(exercise)
+        exercises.remove(at: index)
         saveContext()
-    }
 
-    private func moveExercise(from source: IndexSet, to destination: Int) {
-        exercises.move(fromOffsets: source, toOffset: destination)
-        saveContext()
-    }
-
-    private func saveExercisesOrder() {
-        saveContext()
+        // Trigger the refresh of the ContentView
+        refreshTrigger.toggle()
     }
 
     private func saveContext() {
