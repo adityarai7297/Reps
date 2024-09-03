@@ -37,6 +37,8 @@ struct ContentView: View {
                 }
             }
             .navigationBarItems(trailing: Button(action: {
+                // Reset to the first exercise
+                currentIndex = 0
                 showingManageExercises.toggle()
             }) {
                 Image(systemName: "plus")
@@ -44,7 +46,7 @@ struct ContentView: View {
             })
             .sheet(isPresented: $showingManageExercises) {
                 ManageExercisesView(refreshTrigger: $refreshTrigger, exercises: $exercises)
-                    .id(refreshTrigger)
+                    .id(refreshTrigger) // This ensures the sheet content is reloaded when refreshTrigger changes
                     .environment(\.modelContext, modelContext) // Pass model context to the modal
             }
             .onAppear {

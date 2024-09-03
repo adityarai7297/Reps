@@ -97,7 +97,9 @@ struct ManageExercisesView: View {
         exercises.remove(at: index)
         saveContext()
 
-        // Trigger the refresh of the ContentView
+        // Trigger a view update to ensure the list refreshes properly
+        self.exercises = Array(exercises) // Reassign to ensure state update
+
         refreshTrigger.toggle()
     }
 
