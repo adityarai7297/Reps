@@ -35,7 +35,7 @@ struct ExerciseView: View {
                         Text("\(currentWeight, specifier: "%.1f")")
                             .font(.largeTitle.bold())
                             .contentTransition(.numericText(value: currentWeight))
-                            .animation(.snappy, value: currentWeight) // Ensure this is properly applied
+                            .animation(.easeInOut(duration: 0.2), value: currentWeight) // Smooth animation
 
                         Text("lbs")
                             .font(.title2)
@@ -54,7 +54,7 @@ struct ExerciseView: View {
                         Text("\(Int(currentReps))")
                             .font(.largeTitle.bold())
                             .contentTransition(.numericText(value: currentReps))
-                            .animation(.snappy, value: currentReps) // Ensure this is properly applied
+                            .animation(.easeInOut(duration: 0.2), value: currentReps) // Smooth animation
 
                         Text("reps")
                             .font(.title2)
@@ -73,7 +73,7 @@ struct ExerciseView: View {
                         Text("\(Int(currentRPE))")
                             .font(.largeTitle.bold())
                             .contentTransition(.numericText(value: currentRPE))
-                            .animation(.snappy, value: currentRPE) // Ensure this is properly applied
+                            .animation(.easeInOut(duration: 0.2), value: currentRPE) // Smooth animation
 
                         Text("%  RPE")
                             .font(.title2)
@@ -123,11 +123,9 @@ struct ExerciseView: View {
     
     private func loadCurrentValues() {
         if let lastHistory = exercise.history.last {
-            withAnimation(.snappy) {
-                currentWeight = lastHistory.weight
-                currentReps = lastHistory.reps
-                currentRPE = lastHistory.rpe
-            }
+            currentWeight = lastHistory.weight
+            currentReps = lastHistory.reps
+            currentRPE = lastHistory.rpe
         } else {
             currentWeight = 0
             currentReps = 0

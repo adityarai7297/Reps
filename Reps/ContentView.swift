@@ -10,65 +10,52 @@ struct ContentView: View {
     @State private var userId = "XXXXX"
     @State private var currentIndex: Int = 0
     @State private var exercises: [Exercise] = []
+    @State private var showingManageExercises = false
 
     var body: some View {
-        ZStack {
-            VerticalPager(pageCount: exercises.count, currentIndex: $currentIndex) {
-                ForEach(exercises.indices, id: \.self) { index in
-                    ExerciseView(
-                        exercise: $exercises[index],
-                        weightWheelConfig: weightWheelConfig,
-                        repWheelConfig: repWheelConfig,
-                        RPEWheelConfig: exertionWheelConfig,
-                        color: .clear, // Set to clear since gradient will be applied
-                        userId: userId
-                    )
-                    .gradientBackground(index: index)
-                    .onAppear {
-                        loadExercises()
+        NavigationView {
+            ZStack {
+                VerticalPager(pageCount: exercises.count, currentIndex: $currentIndex) {
+                    ForEach(exercises.indices, id: \.self) { index in
+                        ExerciseView(
+                            exercise: $exercises[index],
+                            weightWheelConfig: weightWheelConfig,
+                            repWheelConfig: repWheelConfig,
+                            RPEWheelConfig: exertionWheelConfig,
+                            color: .clear, // Set to clear since gradient will be applied
+                            userId: userId
+                        )
+                        .gradientBackground(index: index)
+                        .onAppear {
+                            loadExercises()
+                        }
                     }
                 }
             }
-        }
-        .onAppear {
-            loadExercises()
+            .navigationBarItems(trailing: Button(action: {
+                showingManageExercises.toggle()
+            }) {
+                Image(systemName: "plus")
+            })
+            .sheet(isPresented: $showingManageExercises) {
+                ManageExercisesView(exercises: $exercises)
+                    .environment(\.modelContext, modelContext) // Pass model context to the modal
+            }
+            .onAppear {
+                loadExercises()
+            }
         }
     }
 
     private func loadExercises() {
-        let fetchRequest = FetchDescriptor<Exercise>() // Correct fetch descriptor for SwiftData
+        let fetchRequest = FetchDescriptor<Exercise>(
+            sortBy: [SortDescriptor(\.name)] // Fetch exercises in their saved order
+        )
 
         do {
-            let savedExercises = try modelContext.fetch(fetchRequest)
-            if !savedExercises.isEmpty {
-                exercises = savedExercises
-            } else {
-                // If there are no saved exercises, populate with default exercises
-                loadDefaultExercises()
-            }
+            exercises = try modelContext.fetch(fetchRequest)
         } catch {
             print("Failed to load exercises: \(error)")
-        }
-    }
-
-    private func loadDefaultExercises() {
-        let defaultExercises = [
-            Exercise(name: "Bench Press"),
-            Exercise(name: "Squat"),
-            Exercise(name: "Deadlift")
-        ]
-        
-        exercises = defaultExercises
-
-        // Save these default exercises to the model context
-        for exercise in defaultExercises {
-            modelContext.insert(exercise)
-        }
-
-        do {
-            try modelContext.save()
-        } catch {
-            print("Failed to save default exercises: \(error)")
         }
     }
 }
