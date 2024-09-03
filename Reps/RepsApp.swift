@@ -1,10 +1,3 @@
-//
-//  RepsApp.swift
-//  Reps
-//
-//  Created by Rai, Adi on 6/22/24.
-//
-
 import SwiftUI
 import FirebaseCore
 import SwiftData
@@ -24,6 +17,6 @@ struct RepsApp: App {
     var body: some Scene {
         WindowGroup {
             ContentView()
-        }.modelContainer(for: [ExerciseState.self])
+        }.modelContainer(for: [Exercise.self, ExerciseHistory.self]) // Use the new models
     }
 }

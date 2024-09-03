@@ -8,10 +8,11 @@
 
 /* Begin PBXBuildFile section */
 		132EF34E2C367BE000E75796 /* GradientBackground.swift in Sources */ = {isa = PBXBuildFile; fileRef = 132EF34D2C367BE000E75796 /* GradientBackground.swift */; };
-		1339416D2C86732800B1EF2B /* ExerciseHistory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1339416C2C86732800B1EF2B /* ExerciseHistory.swift */; };
+		1339416F2C86B37800B1EF2B /* Exercise.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1339416E2C86B37800B1EF2B /* Exercise.swift */; };
+		133941712C86B39F00B1EF2B /* ExerciseHistory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 133941702C86B39F00B1EF2B /* ExerciseHistory.swift */; };
+		133941732C86B6AF00B1EF2B /* ExerciseHistoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 133941722C86B6AF00B1EF2B /* ExerciseHistoryView.swift */; };
 		1341AC3F2C418CA300838E87 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 1341AC3E2C418CA300838E87 /* FirebaseAuth */; };
 		1371B14F2C2ED42500A4254A /* VerticalPager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1371B14E2C2ED42500A4254A /* VerticalPager.swift */; };
-		1371B1522C2F9C9A00A4254A /* ExerciseState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1371B1512C2F9C9A00A4254A /* ExerciseState.swift */; };
 		1371B1542C2FCFEB00A4254A /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 1371B1532C2FCFEB00A4254A /* GoogleService-Info.plist */; };
 		1371B1572C2FD26400A4254A /* FirebaseDatabase in Frameworks */ = {isa = PBXBuildFile; productRef = 1371B1562C2FD26400A4254A /* FirebaseDatabase */; };
 		1371B1592C2FD26400A4254A /* FirebaseDatabaseSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 1371B1582C2FD26400A4254A /* FirebaseDatabaseSwift */; };
@@ -46,9 +47,10 @@
 
 /* Begin PBXFileReference section */
 		132EF34D2C367BE000E75796 /* GradientBackground.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GradientBackground.swift; sourceTree = "<group>"; };
-		1339416C2C86732800B1EF2B /* ExerciseHistory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExerciseHistory.swift; sourceTree = "<group>"; };
+		1339416E2C86B37800B1EF2B /* Exercise.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Exercise.swift; sourceTree = "<group>"; };
+		133941702C86B39F00B1EF2B /* ExerciseHistory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExerciseHistory.swift; sourceTree = "<group>"; };
+		133941722C86B6AF00B1EF2B /* ExerciseHistoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExerciseHistoryView.swift; sourceTree = "<group>"; };
 		1371B14E2C2ED42500A4254A /* VerticalPager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VerticalPager.swift; sourceTree = "<group>"; };
-		1371B1512C2F9C9A00A4254A /* ExerciseState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExerciseState.swift; sourceTree = "<group>"; };
 		1371B1532C2FCFEB00A4254A /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = "GoogleService-Info.plist"; path = "../../Downloads/GoogleService-Info.plist"; sourceTree = "<group>"; };
 		13FEA23D2C27C9D200D04BF2 /* Reps.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Reps.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		13FEA2402C27C9D200D04BF2 /* RepsApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RepsApp.swift; sourceTree = "<group>"; };
@@ -97,8 +99,9 @@
 		1371B1502C2F9C8100A4254A /* Model */ = {
 			isa = PBXGroup;
 			children = (
-				1371B1512C2F9C9A00A4254A /* ExerciseState.swift */,
 				132EF34D2C367BE000E75796 /* GradientBackground.swift */,
+				1339416E2C86B37800B1EF2B /* Exercise.swift */,
+				133941702C86B39F00B1EF2B /* ExerciseHistory.swift */,
 			);
 			path = Model;
 			sourceTree = "<group>";
@@ -151,7 +154,7 @@
 				13FEA2722C2D483400D04BF2 /* ExerciseView.swift */,
 				13FEA2702C2C400600D04BF2 /* SetButton.swift */,
 				1371B14E2C2ED42500A4254A /* VerticalPager.swift */,
-				1339416C2C86732800B1EF2B /* ExerciseHistory.swift */,
+				133941722C86B6AF00B1EF2B /* ExerciseHistoryView.swift */,
 			);
 			path = View;
 			sourceTree = "<group>";
@@ -298,11 +301,12 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				1371B1522C2F9C9A00A4254A /* ExerciseState.swift in Sources */,
-				1339416D2C86732800B1EF2B /* ExerciseHistory.swift in Sources */,
 				13FEA2432C27C9D200D04BF2 /* ContentView.swift in Sources */,
 				13FEA26F2C2943A000D04BF2 /* WheelPicker.swift in Sources */,
 				13FEA2712C2C400600D04BF2 /* SetButton.swift in Sources */,
+				133941732C86B6AF00B1EF2B /* ExerciseHistoryView.swift in Sources */,
+				133941712C86B39F00B1EF2B /* ExerciseHistory.swift in Sources */,
+				1339416F2C86B37800B1EF2B /* Exercise.swift in Sources */,
 				1371B14F2C2ED42500A4254A /* VerticalPager.swift in Sources */,
 				13FEA2412C27C9D200D04BF2 /* RepsApp.swift in Sources */,
 				13FEA2732C2D483400D04BF2 /* ExerciseView.swift in Sources */,
