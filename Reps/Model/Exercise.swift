@@ -3,12 +3,12 @@ import SwiftUI
 
 @Model
 final class Exercise {
-    var id = UUID()
+    @Attribute(.unique) var id: UUID
     var name: String
-    var history: [ExerciseHistory] // Relationship to track the history of this exercise
+    var history: [ExerciseHistory] = []
 
     init(name: String) {
+        self.id = UUID()
         self.name = name
-        self.history = []
     }
 }

@@ -5,6 +5,7 @@ struct ExerciseHistoryView: View {
     @Environment(\.modelContext) private var modelContext
     var exerciseName: String
     var date: Date
+    var onDelete: () -> Void // Callback to notify parent view of deletion
 
     @State private var exerciseHistory: [ExerciseHistory] = []
 
@@ -34,12 +35,12 @@ struct ExerciseHistoryView: View {
                             .font(.headline)
                             .foregroundColor(.white)
                         
-                        Text("Reps: \(Int(history.reps))")
+                        Text("Reps: \(history.reps, specifier: "%.0f")")
                             .font(.subheadline)
                             .foregroundColor(.white)
                         
                         HStack {
-                            Text("RPE: \(Int(history.rpe))%")
+                            Text("RPE: \(history.rpe, specifier: "%.0f")%")
                                 .font(.subheadline)
                                 .foregroundColor(.white)
                             
@@ -49,6 +50,19 @@ struct ExerciseHistoryView: View {
                                 .font(.subheadline)
                                 .foregroundColor(.white)
                         }
+                        
+                        // Delete button
+                        Button(action: {
+                            deleteHistory(history)
+                        }) {
+                            HStack {
+                                Image(systemName: "trash")
+                                    .foregroundColor(.red)
+                                Text("Delete")
+                                    .foregroundColor(.red)
+                            }
+                        }
+                        .padding(.top, 8)
                     }
                     .padding()
                     .background(Color(.darkGray))
@@ -86,6 +100,19 @@ struct ExerciseHistoryView: View {
             exerciseHistory = try modelContext.fetch(fetchRequest)
         } catch {
             print("Failed to load exercise history: \(error)")
+        }
+    }
+
+    private func deleteHistory(_ history: ExerciseHistory) {
+        modelContext.delete(history)
+        do {
+            try modelContext.save()
+            // Notify parent view to recalculate set count
+            onDelete()
+            // Reload the history after deletion
+            loadExerciseHistory()
+        } catch {
+            print("Failed to delete exercise history: \(error)")
         }
     }
 
