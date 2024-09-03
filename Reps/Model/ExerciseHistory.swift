@@ -3,6 +3,7 @@ import SwiftUI
 
 @Model
 final class ExerciseHistory {
+    var id = UUID()
     var exercise: Exercise // Relationship to the Exercise entity
     var weight: CGFloat
     var reps: CGFloat
