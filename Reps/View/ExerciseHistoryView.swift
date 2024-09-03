@@ -20,55 +20,63 @@ struct ExerciseHistoryView: View {
 
                 Spacer()
                 
-                Text(formattedDay(date))
-                    .font(.system(size: 18, weight: .medium))
-                    .foregroundColor(.gray)
-                    .padding(.trailing, 16)
-                    .padding(.top, 32)
+                VStack { // Stack day and date vertically
+                                    Text(formattedDay(date))
+                                        .font(.system(size: 18, weight: .medium))
+                                        .foregroundColor(.gray)
+                                    
+                                    Text(formattedDate(date))
+                                        .font(.system(size: 14, weight: .medium))
+                                        .foregroundColor(.gray)
+                                }
+                                .padding(.trailing, 16)
+                                .padding(.top, 32)
             }
             .padding(.bottom, 16)
 
             List {
                 ForEach(exerciseHistory) { history in
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("Weight: \(history.weight, specifier: "%.1f") lbs")
-                            .font(.headline)
-                            .foregroundColor(.white)
-                        
-                        Text("Reps: \(history.reps, specifier: "%.0f")")
-                            .font(.subheadline)
-                            .foregroundColor(.white)
-                        
-                        HStack {
-                            Text("RPE: \(history.rpe, specifier: "%.0f")%")
-                                .font(.subheadline)
+                    HStack {
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text("Weight: \(history.weight, specifier: "%.1f") lbs")
+                                .font(.headline)
                                 .foregroundColor(.white)
                             
-                            Spacer()
-                            
-                            Text("Time: \(formattedTime(history.timestamp))")
-                                .font(.subheadline)
+                            Text("Reps: \(history.reps, specifier: "%.0f")")
+                                .font(.headline)
                                 .foregroundColor(.white)
+                            
+                           
+                                Text("RPE: \(history.rpe, specifier: "%.0f")%")
+                                    .font(.headline)
+                                    .foregroundColor(.white)
+                                
+                                
+                                Text("Time: \(formattedTime(history.timestamp))")
+                                    .font(.headline)
+                                    .foregroundColor(.white)
+                            
                         }
-                        
-                        // Delete button
+
+                        Spacer() // Push the delete button to the right
+
+                        // Delete button on the right side
                         Button(action: {
-                            deleteHistory(history)
-                        }) {
-                            HStack {
-                                Image(systemName: "trash")
-                                    .foregroundColor(.red)
-                                Text("Delete")
-                                    .foregroundColor(.red)
+                            withAnimation {
+                                deleteHistory(history)
                             }
+                        }) {
+                            Image(systemName: "trash")
+                                .foregroundColor(.red)
+                                .padding()
                         }
-                        .padding(.top, 8)
                     }
                     .padding()
                     .background(Color(.darkGray))
                     .cornerRadius(10)
                 }
                 .listRowBackground(Color.black)  // Ensures each row has a dark background
+                .animation(.default, value: exerciseHistory) // Animation for row changes
             }
             .listStyle(PlainListStyle()) // Avoids any automatic background styling applied by default
             .background(Color.black) // Sets the entire list's background to black
@@ -89,15 +97,14 @@ struct ExerciseHistoryView: View {
         // Fetch all ExerciseHistory objects for the given exercise and date range, sorted by timestamp in descending order
         let fetchRequest = FetchDescriptor<ExerciseHistory>(
             predicate: #Predicate { history in
-                history.exercise.name == exerciseName &&
-                history.timestamp >= startOfDay &&
-                history.timestamp < endOfDay
+                history.timestamp >= startOfDay && history.timestamp < endOfDay
             },
             sortBy: [SortDescriptor(\.timestamp, order: .reverse)] // Sort by timestamp in descending order
         )
         
         do {
             exerciseHistory = try modelContext.fetch(fetchRequest)
+            exerciseHistory = exerciseHistory.filter { $0.exercise.name == exerciseName }
         } catch {
             print("Failed to load exercise history: \(error)")
         }
@@ -107,10 +114,8 @@ struct ExerciseHistoryView: View {
         modelContext.delete(history)
         do {
             try modelContext.save()
-            // Notify parent view to recalculate set count
-            onDelete()
-            // Reload the history after deletion
-            loadExerciseHistory()
+            onDelete() // Trigger the set count recalculation
+            loadExerciseHistory() // Reload the history after deletion
         } catch {
             print("Failed to delete exercise history: \(error)")
         }
@@ -123,8 +128,14 @@ struct ExerciseHistoryView: View {
     }
 
     private func formattedDay(_ date: Date) -> String {
-        let formatter = DateFormatter()
-        formatter.dateStyle = .full
-        return formatter.string(from: date)
-    }
+            let formatter = DateFormatter()
+            formatter.dateFormat = "EEEE" // Display the day name, e.g., "Monday"
+            return formatter.string(from: date)
+        }
+        
+        private func formattedDate(_ date: Date) -> String {
+            let formatter = DateFormatter()
+            formatter.dateStyle = .medium // Display the date, e.g., "Sep 3, 2023"
+            return formatter.string(from: date)
+        }
 }

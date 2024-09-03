@@ -88,7 +88,7 @@ struct ExerciseView: View {
             }
             .offset(y: showCheckmark ? -60 : 0)
             .onAppear {
-                loadCurrentValues()
+                loadCurrentValues()  // Load the most recent values for this exercise
                 calculateSetCountForToday() // Calculate the set count based on today's history
             }
 
@@ -126,11 +126,38 @@ struct ExerciseView: View {
     }
     
     private func loadCurrentValues() {
-        if let lastHistory = exercise.history.last {
-            currentWeight = lastHistory.weight
-            currentReps = lastHistory.reps
-            currentRPE = lastHistory.rpe
-        } else {
+        let calendar = Calendar.current
+        let startOfDay = calendar.startOfDay(for: Date())
+        let endOfDay = calendar.date(byAdding: .day, value: 1, to: startOfDay)!
+
+        // Fetch all ExerciseHistory records for the current day
+        let fetchRequest = FetchDescriptor<ExerciseHistory>(
+            predicate: #Predicate { history in
+                history.timestamp >= startOfDay && history.timestamp < endOfDay
+            },
+            sortBy: [SortDescriptor(\.timestamp, order: .reverse)] // Sort by timestamp in descending order
+        )
+        
+        do {
+            // Fetch the history for the entire day
+            let todayHistory = try modelContext.fetch(fetchRequest)
+            
+            // Filter history by the specific exercise name
+            let filteredHistory = todayHistory.filter { $0.exercise.name == exercise.name }
+            
+            // Set the current values to the most recent history entry
+            if let lastHistory = filteredHistory.first {
+                currentWeight = lastHistory.weight
+                currentReps = lastHistory.reps
+                currentRPE = lastHistory.rpe
+            } else {
+                // If no history exists, default to zero
+                currentWeight = 0
+                currentReps = 0
+                currentRPE = 0
+            }
+        } catch {
+            print("Failed to load current values: \(error)")
             currentWeight = 0
             currentReps = 0
             currentRPE = 0
@@ -139,7 +166,6 @@ struct ExerciseView: View {
 
     private func saveExerciseHistory() {
         let newHistory = ExerciseHistory(exercise: exercise, weight: currentWeight, reps: currentReps, rpe: currentRPE)
-        
         modelContext.insert(newHistory)
 
         do {
@@ -155,7 +181,7 @@ struct ExerciseView: View {
         let startOfDay = calendar.startOfDay(for: Date())
         let endOfDay = calendar.date(byAdding: .day, value: 1, to: startOfDay)!
 
-        // Fetch all ExerciseHistory records for the current day
+        // Fetch today's exercise history
         let fetchRequest = FetchDescriptor<ExerciseHistory>(
             predicate: #Predicate { history in
                 history.timestamp >= startOfDay && history.timestamp < endOfDay
@@ -163,13 +189,8 @@ struct ExerciseView: View {
         )
         
         do {
-            // Fetch the history for the entire day
             let todayHistory = try modelContext.fetch(fetchRequest)
-            
-            // Filter history by the specific exercise name
             let filteredHistory = todayHistory.filter { $0.exercise.name == exercise.name }
-            
-            // Set the count based on the filtered history
             setCount = filteredHistory.count
         } catch {
             print("Failed to calculate set count: \(error)")
