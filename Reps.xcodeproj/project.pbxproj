@@ -11,6 +11,7 @@
 		1339416F2C86B37800B1EF2B /* Exercise.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1339416E2C86B37800B1EF2B /* Exercise.swift */; };
 		133941712C86B39F00B1EF2B /* ExerciseHistory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 133941702C86B39F00B1EF2B /* ExerciseHistory.swift */; };
 		133941732C86B6AF00B1EF2B /* ExerciseHistoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 133941722C86B6AF00B1EF2B /* ExerciseHistoryView.swift */; };
+		133941752C86BB0C00B1EF2B /* ManageExercisesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 133941742C86BB0C00B1EF2B /* ManageExercisesView.swift */; };
 		1341AC3F2C418CA300838E87 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 1341AC3E2C418CA300838E87 /* FirebaseAuth */; };
 		1371B14F2C2ED42500A4254A /* VerticalPager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1371B14E2C2ED42500A4254A /* VerticalPager.swift */; };
 		1371B1542C2FCFEB00A4254A /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 1371B1532C2FCFEB00A4254A /* GoogleService-Info.plist */; };
@@ -50,6 +51,7 @@
 		1339416E2C86B37800B1EF2B /* Exercise.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Exercise.swift; sourceTree = "<group>"; };
 		133941702C86B39F00B1EF2B /* ExerciseHistory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExerciseHistory.swift; sourceTree = "<group>"; };
 		133941722C86B6AF00B1EF2B /* ExerciseHistoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExerciseHistoryView.swift; sourceTree = "<group>"; };
+		133941742C86BB0C00B1EF2B /* ManageExercisesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ManageExercisesView.swift; sourceTree = "<group>"; };
 		1371B14E2C2ED42500A4254A /* VerticalPager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VerticalPager.swift; sourceTree = "<group>"; };
 		1371B1532C2FCFEB00A4254A /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = "GoogleService-Info.plist"; path = "../../Downloads/GoogleService-Info.plist"; sourceTree = "<group>"; };
 		13FEA23D2C27C9D200D04BF2 /* Reps.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Reps.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -155,6 +157,7 @@
 				13FEA2702C2C400600D04BF2 /* SetButton.swift */,
 				1371B14E2C2ED42500A4254A /* VerticalPager.swift */,
 				133941722C86B6AF00B1EF2B /* ExerciseHistoryView.swift */,
+				133941742C86BB0C00B1EF2B /* ManageExercisesView.swift */,
 			);
 			path = View;
 			sourceTree = "<group>";
@@ -304,6 +307,7 @@
 				13FEA2432C27C9D200D04BF2 /* ContentView.swift in Sources */,
 				13FEA26F2C2943A000D04BF2 /* WheelPicker.swift in Sources */,
 				13FEA2712C2C400600D04BF2 /* SetButton.swift in Sources */,
+				133941752C86BB0C00B1EF2B /* ManageExercisesView.swift in Sources */,
 				133941732C86B6AF00B1EF2B /* ExerciseHistoryView.swift in Sources */,
 				133941712C86B39F00B1EF2B /* ExerciseHistory.swift in Sources */,
 				1339416F2C86B37800B1EF2B /* Exercise.swift in Sources */,
