@@ -28,7 +28,7 @@ struct ContentView: View {
 
                                 Image("CatWorkingOut")
                                     .resizable()
-                                    .frame(width: 300, height: 250) // Adjust size as needed
+                                    .frame(width: 300, height: 220) // Adjust size as needed
 
                                 
                             }
