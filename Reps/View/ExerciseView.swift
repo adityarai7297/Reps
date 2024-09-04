@@ -125,40 +125,53 @@ struct ExerciseView: View {
         .edgesIgnoringSafeArea(.all)
     }
     
-    // Updated to use exerciseName directly
     private func loadCurrentValues() {
         let calendar = Calendar.current
         let startOfDay = calendar.startOfDay(for: Date())
         let endOfDay = calendar.date(byAdding: .day, value: 1, to: startOfDay)!
 
-        // Fetch all ExerciseHistory records for the current day
+        // Step 1: Fetch all ExerciseHistory records for this exercise
         let fetchRequest = FetchDescriptor<ExerciseHistory>(
-            predicate: #Predicate { history in
-                history.timestamp >= startOfDay && history.timestamp < endOfDay
-            },
             sortBy: [SortDescriptor(\.timestamp, order: .reverse)] // Sort by timestamp in descending order
         )
         
         do {
-            // Fetch the history for the entire day
-            let todayHistory = try modelContext.fetch(fetchRequest)
+            // Fetch all the exercise history records
+            let allHistory = try modelContext.fetch(fetchRequest)
             
-            // Filter history by the specific exercise name
-            let filteredHistory = todayHistory.filter { $0.exerciseName == exercise.name }
+            // Step 2: Filter for the current exercise and today's date
+            let todayHistory = allHistory.filter { history in
+                history.exerciseName == exercise.name && history.timestamp >= startOfDay && history.timestamp < endOfDay
+            }
             
-            // Set the current values to the most recent history entry
-            if let lastHistory = filteredHistory.first {
-                currentWeight = lastHistory.weight
-                currentReps = lastHistory.reps
-                currentRPE = lastHistory.rpe
+            // Step 3: If no history exists for today, look for the most recent history from any previous day
+            if todayHistory.isEmpty {
+                let recentHistory = allHistory.filter { history in
+                    history.exerciseName == exercise.name
+                }
+                
+                // Step 4: Load the most recent history values if found, or set to zero if none exists
+                if let lastHistory = recentHistory.first {
+                    currentWeight = lastHistory.weight
+                    currentReps = lastHistory.reps
+                    currentRPE = lastHistory.rpe
+                } else {
+                    // No history at all, set to zero
+                    currentWeight = 0
+                    currentReps = 0
+                    currentRPE = 0
+                }
             } else {
-                // If no history exists, default to zero
-                currentWeight = 0
-                currentReps = 0
-                currentRPE = 0
+                // If history exists for today, use the most recent entry from today
+                if let lastHistory = todayHistory.first {
+                    currentWeight = lastHistory.weight
+                    currentReps = lastHistory.reps
+                    currentRPE = lastHistory.rpe
+                }
             }
         } catch {
             print("Failed to load current values: \(error)")
+            // In case of error, set everything to zero
             currentWeight = 0
             currentReps = 0
             currentRPE = 0
