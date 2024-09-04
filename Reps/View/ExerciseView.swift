@@ -114,7 +114,7 @@ struct ExerciseView: View {
                     showingHistory.toggle()
                 }
                 .sheet(isPresented: $showingHistory) {
-                    ExerciseHistoryView(exerciseName: exercise.name, date: Date(), onDelete: {
+                    ExerciseHistoryView(exerciseName: exercise.name, onDelete: {
                         calculateSetCountForToday()
                     })
                 }
@@ -125,6 +125,7 @@ struct ExerciseView: View {
         .edgesIgnoringSafeArea(.all)
     }
     
+    // Updated to use exerciseName directly
     private func loadCurrentValues() {
         let calendar = Calendar.current
         let startOfDay = calendar.startOfDay(for: Date())
@@ -143,7 +144,7 @@ struct ExerciseView: View {
             let todayHistory = try modelContext.fetch(fetchRequest)
             
             // Filter history by the specific exercise name
-            let filteredHistory = todayHistory.filter { $0.exercise.name == exercise.name }
+            let filteredHistory = todayHistory.filter { $0.exerciseName == exercise.name }
             
             // Set the current values to the most recent history entry
             if let lastHistory = filteredHistory.first {
@@ -165,7 +166,8 @@ struct ExerciseView: View {
     }
 
     private func saveExerciseHistory() {
-        let newHistory = ExerciseHistory(exercise: exercise, weight: currentWeight, reps: currentReps, rpe: currentRPE)
+        // Create new ExerciseHistory using exerciseName (String) instead of Exercise (object)
+        let newHistory = ExerciseHistory(exerciseName: exercise.name, weight: currentWeight, reps: currentReps, rpe: currentRPE)
         modelContext.insert(newHistory)
 
         do {
@@ -176,6 +178,7 @@ struct ExerciseView: View {
         }
     }
 
+    // Updated to use exerciseName directly
     private func calculateSetCountForToday() {
         let calendar = Calendar.current
         let startOfDay = calendar.startOfDay(for: Date())
@@ -190,7 +193,7 @@ struct ExerciseView: View {
         
         do {
             let todayHistory = try modelContext.fetch(fetchRequest)
-            let filteredHistory = todayHistory.filter { $0.exercise.name == exercise.name }
+            let filteredHistory = todayHistory.filter { $0.exerciseName == exercise.name }
             setCount = filteredHistory.count
         } catch {
             print("Failed to calculate set count: \(error)")

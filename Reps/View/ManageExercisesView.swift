@@ -93,15 +93,38 @@ struct ManageExercisesView: View {
     private func deleteExercise(_ exercise: Exercise) {
         guard let index = exercises.firstIndex(of: exercise) else { return }
 
-        modelContext.delete(exercise)
-        exercises.remove(at: index)
-        saveContext()
+        // Fetch all ExerciseHistory entries first, and filter them in-memory
+        let historyFetchRequest = FetchDescriptor<ExerciseHistory>(
+            sortBy: [SortDescriptor(\.timestamp, order: .reverse)] // Fetch all and sort by timestamp
+        )
+        
+        do {
+            let allHistories = try modelContext.fetch(historyFetchRequest)
+            
+            // Filter histories by exercise name in-memory
+            let historiesToDelete = allHistories.filter { $0.exerciseName == exercise.name }
+            
+            // Delete each filtered ExerciseHistory entry
+            for history in historiesToDelete {
+                modelContext.delete(history)
+            }
+            
+            // Now delete the exercise itself
+            modelContext.delete(exercise)
+            exercises.remove(at: index)
+            
+            // Save the context to persist the deletions
+            saveContext()
 
-        // Trigger a view update to ensure the list refreshes properly
-        self.exercises = Array(exercises) // Reassign to ensure state update
+            // Trigger a view update to ensure the list refreshes properly
+            self.exercises = Array(exercises) // Force reassign to trigger state update
+            refreshTrigger.toggle()
 
-        refreshTrigger.toggle()
+        } catch {
+            print("Failed to delete exercise or exercise history: \(error)")
+        }
     }
+
 
     private func saveContext() {
         do {
