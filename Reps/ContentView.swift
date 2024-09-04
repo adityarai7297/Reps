@@ -12,14 +12,29 @@ struct ContentView: View {
     @State private var exercises: [Exercise] = []
     @State private var showingManageExercises = false
     @State private var refreshTrigger = false
+    @State private var catOffset: CGFloat = UIScreen.main.bounds.height // Start off-screen
 
     var body: some View {
         NavigationView {
             ZStack {
                 if exercises.isEmpty {
-                    Text("No exercises available. Please add new exercises.")
-                        .foregroundColor(.gray)
-                        .padding()
+                    
+                    VStack {
+                            Text("Start adding exercises!")
+                            .font(.headline)
+                                    .padding()
+
+                                
+
+                                Image("CatWorkingOut")
+                                    .resizable()
+                                    .frame(width: 300, height: 250) // Adjust size as needed
+
+                                
+                            }
+                    
+                    
+                    
                 } else {
                     VerticalPager(pageCount: exercises.count, currentIndex: $currentIndex) {
                         ForEach(exercises.indices, id: \.self) { index in
