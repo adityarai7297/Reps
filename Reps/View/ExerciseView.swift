@@ -107,7 +107,6 @@ struct ExerciseView: View {
                     Image(systemName: "checkmark.circle.fill")
                         .resizable()
                         .frame(width: 24, height: 24)
-                        .foregroundColor(.black)
                 }
                 .opacity(setCount > 0 ? 1 : 0)
                 .onTapGesture {
@@ -121,6 +120,7 @@ struct ExerciseView: View {
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .foregroundColor(.black)
         .background(color)
         .edgesIgnoringSafeArea(.all)
     }

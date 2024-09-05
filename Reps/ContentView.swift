@@ -57,7 +57,7 @@ struct ContentView: View {
                 showingManageExercises.toggle()
             }) {
                 Image(systemName: "plus")
-                    .foregroundColor(.black)
+                    .foregroundColor(exercises.isEmpty ? .white : .black)
             })
             .sheet(isPresented: $showingManageExercises) {
                 ManageExercisesView(refreshTrigger: $refreshTrigger, exercises: $exercises)
@@ -68,7 +68,10 @@ struct ContentView: View {
                 loadExercises()
             }
         }
+        .preferredColorScheme(.dark)
+        
     }
+        
 
     private func loadExercises() {
         let fetchRequest = FetchDescriptor<Exercise>(
