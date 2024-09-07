@@ -47,7 +47,7 @@ struct ContentView: View {
                 leading: Button(action: {
                     showingLogbook.toggle()
                 }) {
-                    Image(systemName: "book.fill")
+                    Image(systemName: "list.bullet.rectangle")
                         .foregroundColor(exercises.isEmpty ? .white : .black)
                 },
                 trailing: Button(action: {
