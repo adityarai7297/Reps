@@ -48,6 +48,7 @@ struct ContentView: View {
                     showingLogbook.toggle()
                 }) {
                     Image(systemName: "list.bullet.rectangle")
+
                         .foregroundColor(exercises.isEmpty ? .white : .black)
                 },
                 trailing: Button(action: {
@@ -64,7 +65,7 @@ struct ContentView: View {
                     .environment(\.modelContext, modelContext)
             }
             .sheet(isPresented: $showingManageExercises) {
-                ManageExercisesView(refreshTrigger: $refreshTrigger, exercises: $exercises)
+                ManageExercisesView(refreshTrigger: $refreshTrigger, exercises: $exercises, currentIndex: $currentIndex)
                     .id(refreshTrigger) // This ensures the sheet content is reloaded when refreshTrigger changes
                     .environment(\.modelContext, modelContext) // Pass model context to the modal
             }
