@@ -20,6 +20,7 @@
 		1371B15B2C2FD26400A4254A /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = 1371B15A2C2FD26400A4254A /* FirebaseFirestore */; };
 		1371B15D2C2FD26400A4254A /* FirebaseFirestoreSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 1371B15C2C2FD26400A4254A /* FirebaseFirestoreSwift */; };
 		1371B15F2C2FD26400A4254A /* FirebaseFunctions in Frameworks */ = {isa = PBXBuildFile; productRef = 1371B15E2C2FD26400A4254A /* FirebaseFunctions */; };
+		13BE7B272C8BD849001BED75 /* LogbookView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 13BE7B262C8BD849001BED75 /* LogbookView.swift */; };
 		13FEA2412C27C9D200D04BF2 /* RepsApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 13FEA2402C27C9D200D04BF2 /* RepsApp.swift */; };
 		13FEA2432C27C9D200D04BF2 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 13FEA2422C27C9D200D04BF2 /* ContentView.swift */; };
 		13FEA2452C27C9D300D04BF2 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13FEA2442C27C9D300D04BF2 /* Assets.xcassets */; };
@@ -54,6 +55,7 @@
 		133941742C86BB0C00B1EF2B /* ManageExercisesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ManageExercisesView.swift; sourceTree = "<group>"; };
 		1371B14E2C2ED42500A4254A /* VerticalPager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VerticalPager.swift; sourceTree = "<group>"; };
 		1371B1532C2FCFEB00A4254A /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = "GoogleService-Info.plist"; path = "../../Downloads/GoogleService-Info.plist"; sourceTree = "<group>"; };
+		13BE7B262C8BD849001BED75 /* LogbookView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogbookView.swift; sourceTree = "<group>"; };
 		13FEA23D2C27C9D200D04BF2 /* Reps.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Reps.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		13FEA2402C27C9D200D04BF2 /* RepsApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RepsApp.swift; sourceTree = "<group>"; };
 		13FEA2422C27C9D200D04BF2 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -158,6 +160,7 @@
 				1371B14E2C2ED42500A4254A /* VerticalPager.swift */,
 				133941722C86B6AF00B1EF2B /* ExerciseHistoryView.swift */,
 				133941742C86BB0C00B1EF2B /* ManageExercisesView.swift */,
+				13BE7B262C8BD849001BED75 /* LogbookView.swift */,
 			);
 			path = View;
 			sourceTree = "<group>";
@@ -308,6 +311,7 @@
 				13FEA26F2C2943A000D04BF2 /* WheelPicker.swift in Sources */,
 				13FEA2712C2C400600D04BF2 /* SetButton.swift in Sources */,
 				133941752C86BB0C00B1EF2B /* ManageExercisesView.swift in Sources */,
+				13BE7B272C8BD849001BED75 /* LogbookView.swift in Sources */,
 				133941732C86B6AF00B1EF2B /* ExerciseHistoryView.swift in Sources */,
 				133941712C86B39F00B1EF2B /* ExerciseHistory.swift in Sources */,
 				1339416F2C86B37800B1EF2B /* Exercise.swift in Sources */,
@@ -475,16 +479,18 @@
 				DEVELOPMENT_TEAM = XK6AQX4LZN;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = Repsi;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphonesimulator*]" = YES;
 				"INFOPLIST_KEY_UILaunchScreen_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UILaunchScreen_Generation[sdk=iphonesimulator*]" = YES;
+				INFOPLIST_KEY_UIStatusBarStyle = "";
 				"INFOPLIST_KEY_UIStatusBarStyle[sdk=iphoneos*]" = UIStatusBarStyleDefault;
 				"INFOPLIST_KEY_UIStatusBarStyle[sdk=iphonesimulator*]" = UIStatusBarStyleDefault;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				IPHONEOS_DEPLOYMENT_TARGET = 17.5;
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
 				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
@@ -514,16 +520,18 @@
 				DEVELOPMENT_TEAM = XK6AQX4LZN;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = Repsi;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphonesimulator*]" = YES;
 				"INFOPLIST_KEY_UILaunchScreen_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UILaunchScreen_Generation[sdk=iphonesimulator*]" = YES;
+				INFOPLIST_KEY_UIStatusBarStyle = "";
 				"INFOPLIST_KEY_UIStatusBarStyle[sdk=iphoneos*]" = UIStatusBarStyleDefault;
 				"INFOPLIST_KEY_UIStatusBarStyle[sdk=iphonesimulator*]" = UIStatusBarStyleDefault;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				IPHONEOS_DEPLOYMENT_TARGET = 17.5;
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
 				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";

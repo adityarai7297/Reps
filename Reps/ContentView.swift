@@ -12,29 +12,21 @@ struct ContentView: View {
     @State private var exercises: [Exercise] = []
     @State private var showingManageExercises = false
     @State private var refreshTrigger = false
+    @State private var showingLogbook = false
     @State private var catOffset: CGFloat = UIScreen.main.bounds.height // Start off-screen
 
     var body: some View {
         NavigationView {
             ZStack {
                 if exercises.isEmpty {
-                    
                     VStack {
-                            Text("Start adding exercises!")
+                        Text("Start adding exercises!")
                             .font(.headline)
-                                    .padding()
-
-                                
-
-                                Image("CatWorkingOut")
-                                    .resizable()
-                                    .frame(width: 300, height: 220) // Adjust size as needed
-
-                                
-                            }
-                    
-                    
-                    
+                            .padding()
+                        Image("CatWorkingOut")
+                            .resizable()
+                            .frame(width: 300, height: 220) // Adjust size as needed
+                    }
                 } else {
                     VerticalPager(pageCount: exercises.count, currentIndex: $currentIndex) {
                         ForEach(exercises.indices, id: \.self) { index in
@@ -51,14 +43,26 @@ struct ContentView: View {
                     }
                 }
             }
-            .navigationBarItems(trailing: Button(action: {
-                // Reset to the first exercise
-                currentIndex = 0
-                showingManageExercises.toggle()
-            }) {
-                Image(systemName: "plus")
-                    .foregroundColor(exercises.isEmpty ? .white : .black)
-            })
+            .navigationBarItems(
+                leading: Button(action: {
+                    showingLogbook.toggle()
+                }) {
+                    Image(systemName: "book.fill")
+                        .foregroundColor(exercises.isEmpty ? .white : .black)
+                },
+                trailing: Button(action: {
+                    // Reset to the first exercise
+                    currentIndex = 0
+                    showingManageExercises.toggle()
+                }) {
+                    Image(systemName: "plus")
+                        .foregroundColor(exercises.isEmpty ? .white : .black)
+                }
+            )
+            .sheet(isPresented: $showingLogbook) {
+                LogbookView()
+                    .environment(\.modelContext, modelContext)
+            }
             .sheet(isPresented: $showingManageExercises) {
                 ManageExercisesView(refreshTrigger: $refreshTrigger, exercises: $exercises)
                     .id(refreshTrigger) // This ensures the sheet content is reloaded when refreshTrigger changes
@@ -69,10 +73,9 @@ struct ContentView: View {
             }
         }
         .preferredColorScheme(.dark)
-        
     }
-        
-
+    
+    // The loadExercises function that fetches exercises from the model context
     private func loadExercises() {
         let fetchRequest = FetchDescriptor<Exercise>(
             sortBy: [SortDescriptor(\.name)] // Fetch exercises in their saved order

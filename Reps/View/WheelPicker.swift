@@ -19,7 +19,7 @@ struct WheelPicker: View {
                         let remainder = index % config.steps
                         
                         Divider()
-                            .background(remainder == 0 ? Color.primary : .gray)
+                            .background(.black)
                             .frame(width: 0.1, height: remainder == 0 ? 20 : 10, alignment: .center)
                             .frame(maxHeight: 20, alignment: .bottom)
                             .overlay(alignment: .bottom) {
