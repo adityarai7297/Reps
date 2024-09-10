@@ -52,8 +52,8 @@ struct WheelPicker: View {
                 if let newValue {
                     value = (CGFloat(newValue) / CGFloat(config.steps)) * CGFloat(config.multiplier)
 
-                    // Trigger haptic feedback when scrolling past new steps
-                    if abs(value - lastHapticValue) >= CGFloat(config.multiplier) {
+                    // Trigger more frequent haptic feedback when scrolling past smaller dividers
+                    if abs(value - lastHapticValue) >= CGFloat(config.multiplier) / CGFloat(config.steps) {
                         feedbackGenerator.impactOccurred() // Trigger haptic feedback
                         lastHapticValue = value // Update last haptic value
                     }
