@@ -8,6 +8,7 @@ struct ContentView: View {
     @State private var exertionWheelConfig: WheelPicker.Config = .init(count: 10, steps: 1, spacing: 50, multiplier: 10)
     @State private var userId = "XXXXX"
     @State private var currentIndex: Int = 0
+    @State private var setCount: Int = 0
     @State private var exercises: [Exercise] = []
     @State private var showingManageExercises = false
     @State private var refreshTrigger = false
@@ -60,7 +61,7 @@ struct ContentView: View {
                 }
             )
             .sheet(isPresented: $showingLogbook) {
-                LogbookView()
+                LogbookView(setCount: $setCount)
                     .environment(\.modelContext, modelContext)
             }
             .sheet(isPresented: $showingManageExercises) {
@@ -77,14 +78,19 @@ struct ContentView: View {
     
     // The loadExercises function that fetches exercises from the model context
     private func loadExercises() {
-        let fetchRequest = FetchDescriptor<Exercise>(
-            sortBy: [SortDescriptor(\.name)] // Fetch exercises in their saved order
-        )
-
-        do {
-            exercises = try modelContext.fetch(fetchRequest)
-        } catch {
-            print("Failed to load exercises: \(error)")
+        DispatchQueue.global(qos: .userInitiated).async {
+            let fetchRequest = FetchDescriptor<Exercise>(
+                sortBy: [SortDescriptor(\.name)]
+            )
+            do {
+                let fetchedExercises = try modelContext.fetch(fetchRequest)
+                DispatchQueue.main.async {
+                    exercises = fetchedExercises
+                }
+            } catch {
+                print("Failed to load exercises: \(error)")
+            }
         }
     }
 }
+
