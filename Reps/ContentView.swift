@@ -1,6 +1,5 @@
 import SwiftUI
 import SwiftData
-import FirebaseFirestore
 
 struct ContentView: View {
     @Environment(\.modelContext) private var modelContext
