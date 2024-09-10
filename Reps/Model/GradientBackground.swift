@@ -1,5 +1,4 @@
 import SwiftUI
-import FirebaseFirestore
 
 struct GradientBackground: ViewModifier {
     @State private var startPoint = UnitPoint.topLeading
