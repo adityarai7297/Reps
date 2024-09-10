@@ -412,9 +412,30 @@ struct ManageExercisesView: View {
     }
 
     private func saveChanges(for exercise: Exercise) {
-        if let index = exercises.firstIndex(of: exercise) {
-            exercises[index].name = editedExerciseName
+        // Ensure the new name isn't empty and the exercise is valid
+        guard !editedExerciseName.isEmpty, let index = exercises.firstIndex(of: exercise) else { return }
+
+        let oldName = exercise.name // Store the old exercise name
+        exercises[index].name = editedExerciseName // Update the exercise name
+
+        // Update the exercise history records with the new exercise name
+        let historyFetchRequest = FetchDescriptor<ExerciseHistory>(
+            sortBy: [SortDescriptor(\.timestamp, order: .reverse)]
+        )
+
+        do {
+            let allHistories = try modelContext.fetch(historyFetchRequest)
+            let historiesToUpdate = allHistories.filter { $0.exerciseName == oldName }
+
+            // Update each history record with the new exercise name
+            for history in historiesToUpdate {
+                history.exerciseName = editedExerciseName
+            }
+
+            // Save the changes in the context
             saveContext()
+        } catch {
+            print("Failed to update exercise history: \(error)")
         }
     }
 
