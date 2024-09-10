@@ -125,92 +125,113 @@ struct ExerciseView: View {
         .edgesIgnoringSafeArea(.all)
     }
     
+    // Optimized loadCurrentValues with DispatchQueue
     private func loadCurrentValues() {
-        let calendar = Calendar.current
-        let startOfDay = calendar.startOfDay(for: Date())
-        let endOfDay = calendar.date(byAdding: .day, value: 1, to: startOfDay)!
+        DispatchQueue.global(qos: .userInitiated).async {
+            let calendar = Calendar.current
+            let startOfDay = calendar.startOfDay(for: Date())
+            let endOfDay = calendar.date(byAdding: .day, value: 1, to: startOfDay)!
 
-        // Step 1: Fetch all ExerciseHistory records for this exercise
-        let fetchRequest = FetchDescriptor<ExerciseHistory>(
-            sortBy: [SortDescriptor(\.timestamp, order: .reverse)] // Sort by timestamp in descending order
-        )
-        
-        do {
-            // Fetch all the exercise history records
-            let allHistory = try modelContext.fetch(fetchRequest)
-            
-            // Step 2: Filter for the current exercise and today's date
-            let todayHistory = allHistory.filter { history in
-                history.exerciseName == exercise.name && history.timestamp >= startOfDay && history.timestamp < endOfDay
-            }
-            
-            // Step 3: If no history exists for today, look for the most recent history from any previous day
-            if todayHistory.isEmpty {
-                let recentHistory = allHistory.filter { history in
-                    history.exerciseName == exercise.name
+            // Step 1: Fetch all ExerciseHistory records for this exercise
+            let fetchRequest = FetchDescriptor<ExerciseHistory>(
+                sortBy: [SortDescriptor(\.timestamp, order: .reverse)]
+            )
+
+            do {
+                // Fetch all the exercise history records on background thread
+                let allHistory = try modelContext.fetch(fetchRequest)
+
+                // Step 2: Filter for the current exercise and today's date
+                let todayHistory = allHistory.filter { history in
+                    history.exerciseName == exercise.name && history.timestamp >= startOfDay && history.timestamp < endOfDay
                 }
-                
-                // Step 4: Load the most recent history values if found, or set to zero if none exists
-                if let lastHistory = recentHistory.first {
-                    currentWeight = lastHistory.weight
-                    currentReps = lastHistory.reps
-                    currentRPE = lastHistory.rpe
-                } else {
-                    // No history at all, set to zero
+
+                DispatchQueue.main.async {
+                    // Step 3 & 4: Update UI based on history data
+                    if todayHistory.isEmpty {
+                        let recentHistory = allHistory.filter { history in
+                            history.exerciseName == exercise.name
+                        }
+                        if let lastHistory = recentHistory.first {
+                            currentWeight = lastHistory.weight
+                            currentReps = lastHistory.reps
+                            currentRPE = lastHistory.rpe
+                        } else {
+                            // No history, set to zero
+                            currentWeight = 0
+                            currentReps = 0
+                            currentRPE = 0
+                        }
+                    } else {
+                        if let lastHistory = todayHistory.first {
+                            currentWeight = lastHistory.weight
+                            currentReps = lastHistory.reps
+                            currentRPE = lastHistory.rpe
+                        }
+                    }
+                }
+            } catch {
+                DispatchQueue.main.async {
+                    print("Failed to load current values: \(error)")
+                    // In case of error, reset to zero on main thread
                     currentWeight = 0
                     currentReps = 0
                     currentRPE = 0
                 }
-            } else {
-                // If history exists for today, use the most recent entry from today
-                if let lastHistory = todayHistory.first {
-                    currentWeight = lastHistory.weight
-                    currentReps = lastHistory.reps
-                    currentRPE = lastHistory.rpe
+            }
+        }
+    }
+
+    // Optimized saveExerciseHistory with DispatchQueue
+    private func saveExerciseHistory() {
+        DispatchQueue.global(qos: .userInitiated).async {
+            // Create new ExerciseHistory using exerciseName (String)
+            let newHistory = ExerciseHistory(exerciseName: exercise.name, weight: currentWeight, reps: currentReps, rpe: currentRPE)
+            modelContext.insert(newHistory)
+
+            do {
+                try modelContext.save()
+
+                DispatchQueue.main.async {
+                    // Recalculate set count after saving on main thread
+                    calculateSetCountForToday()
+                }
+            } catch {
+                DispatchQueue.main.async {
+                    print("Failed to save exercise history: \(error)")
                 }
             }
-        } catch {
-            print("Failed to load current values: \(error)")
-            // In case of error, set everything to zero
-            currentWeight = 0
-            currentReps = 0
-            currentRPE = 0
         }
     }
 
-    private func saveExerciseHistory() {
-        // Create new ExerciseHistory using exerciseName (String) instead of Exercise (object)
-        let newHistory = ExerciseHistory(exerciseName: exercise.name, weight: currentWeight, reps: currentReps, rpe: currentRPE)
-        modelContext.insert(newHistory)
-
-        do {
-            try modelContext.save()
-            calculateSetCountForToday() // Recalculate set count after saving
-        } catch {
-            print("Failed to save exercise history: \(error)")
-        }
-    }
-
-    // Updated to use exerciseName directly
+    // Optimized calculateSetCountForToday with DispatchQueue
     private func calculateSetCountForToday() {
-        let calendar = Calendar.current
-        let startOfDay = calendar.startOfDay(for: Date())
-        let endOfDay = calendar.date(byAdding: .day, value: 1, to: startOfDay)!
+        DispatchQueue.global(qos: .userInitiated).async {
+            let calendar = Calendar.current
+            let startOfDay = calendar.startOfDay(for: Date())
+            let endOfDay = calendar.date(byAdding: .day, value: 1, to: startOfDay)!
 
-        // Fetch today's exercise history
-        let fetchRequest = FetchDescriptor<ExerciseHistory>(
-            predicate: #Predicate { history in
-                history.timestamp >= startOfDay && history.timestamp < endOfDay
+            // Fetch today's exercise history
+            let fetchRequest = FetchDescriptor<ExerciseHistory>(
+                predicate: #Predicate { history in
+                    history.timestamp >= startOfDay && history.timestamp < endOfDay
+                }
+            )
+
+            do {
+                let todayHistory = try modelContext.fetch(fetchRequest)
+                let filteredHistory = todayHistory.filter { $0.exerciseName == exercise.name }
+
+                DispatchQueue.main.async {
+                    // Update setCount on the main thread
+                    setCount = filteredHistory.count
+                }
+            } catch {
+                DispatchQueue.main.async {
+                    print("Failed to calculate set count: \(error)")
+                    setCount = 0
+                }
             }
-        )
-        
-        do {
-            let todayHistory = try modelContext.fetch(fetchRequest)
-            let filteredHistory = todayHistory.filter { $0.exerciseName == exercise.name }
-            setCount = filteredHistory.count
-        } catch {
-            print("Failed to calculate set count: \(error)")
-            setCount = 0
         }
     }
 }

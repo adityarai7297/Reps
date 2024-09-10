@@ -395,72 +395,87 @@ struct ManageExercisesView: View {
     }
 
     private func addExercise() {
-        // Ensure no empty or duplicate exercise names are added
         guard !newExerciseName.isEmpty else { return }
 
-        // Check for duplicates
-        if exercises.contains(where: { $0.name.lowercased() == newExerciseName.lowercased() }) {
+        // Check for duplicates more efficiently
+        if exercises.contains(where: { $0.name.caseInsensitiveCompare(newExerciseName) == .orderedSame }) {
             showDuplicateAlert = true
         } else {
             let newExercise = Exercise(name: newExerciseName)
             exercises.append(newExercise)
-            modelContext.insert(newExercise)
-            saveContext()
-            newExerciseName = ""  // Clear the text field after adding
-            showSuggestions = false
+
+            DispatchQueue.global(qos: .userInitiated).async {
+                modelContext.insert(newExercise)
+                saveContext()
+
+                DispatchQueue.main.async {
+                    newExerciseName = ""  // Clear the text field on the main thread
+                    showSuggestions = false
+                }
+            }
         }
     }
 
     private func saveChanges(for exercise: Exercise) {
-        // Ensure the new name isn't empty and the exercise is valid
         guard !editedExerciseName.isEmpty, let index = exercises.firstIndex(of: exercise) else { return }
 
-        let oldName = exercise.name // Store the old exercise name
-        exercises[index].name = editedExerciseName // Update the exercise name
+        let oldName = exercise.name
+        exercises[index].name = editedExerciseName
 
-        // Update the exercise history records with the new exercise name
-        let historyFetchRequest = FetchDescriptor<ExerciseHistory>(
-            sortBy: [SortDescriptor(\.timestamp, order: .reverse)]
-        )
+        DispatchQueue.global(qos: .userInitiated).async {
+            let historyFetchRequest = FetchDescriptor<ExerciseHistory>(
+                sortBy: [SortDescriptor(\.timestamp, order: .reverse)]
+            )
 
-        do {
-            let allHistories = try modelContext.fetch(historyFetchRequest)
-            let historiesToUpdate = allHistories.filter { $0.exerciseName == oldName }
+            do {
+                let allHistories = try modelContext.fetch(historyFetchRequest)
+                let historiesToUpdate = allHistories.filter { $0.exerciseName == oldName }
 
-            // Update each history record with the new exercise name
-            for history in historiesToUpdate {
-                history.exerciseName = editedExerciseName
+                // Update each history record with the new exercise name
+                for history in historiesToUpdate {
+                    history.exerciseName = editedExerciseName
+                }
+
+                saveContext()
+
+                DispatchQueue.main.async {
+                    // Handle any UI updates or success feedback
+                }
+            } catch {
+                DispatchQueue.main.async {
+                    print("Failed to update exercise history: \(error)")
+                }
             }
-
-            // Save the changes in the context
-            saveContext()
-        } catch {
-            print("Failed to update exercise history: \(error)")
         }
     }
 
     private func deleteExercise(_ exercise: Exercise) {
         guard let index = exercises.firstIndex(of: exercise) else { return }
 
-        let historyFetchRequest = FetchDescriptor<ExerciseHistory>(
-            sortBy: [SortDescriptor(\.timestamp, order: .reverse)]
-        )
+        // Immediately update the UI by removing the exercise
+        exercises.remove(at: index)
+        refreshTrigger.toggle()
 
-        do {
-            let allHistories = try modelContext.fetch(historyFetchRequest)
-            let historiesToDelete = allHistories.filter { $0.exerciseName == exercise.name }
+        DispatchQueue.global(qos: .userInitiated).async {
+            let historyFetchRequest = FetchDescriptor<ExerciseHistory>(
+                sortBy: [SortDescriptor(\.timestamp, order: .reverse)]
+            )
 
-            for history in historiesToDelete {
-                modelContext.delete(history)
+            do {
+                let allHistories = try modelContext.fetch(historyFetchRequest)
+                let historiesToDelete = allHistories.filter { $0.exerciseName == exercise.name }
+
+                for history in historiesToDelete {
+                    modelContext.delete(history)
+                }
+
+                modelContext.delete(exercise)
+                saveContext()
+            } catch {
+                DispatchQueue.main.async {
+                    print("Failed to delete exercise or exercise history: \(error)")
+                }
             }
-
-            modelContext.delete(exercise)
-            exercises.remove(at: index)
-            saveContext()
-            refreshTrigger.toggle()
-
-        } catch {
-            print("Failed to delete exercise or exercise history: \(error)")
         }
     }
 
@@ -468,19 +483,29 @@ struct ManageExercisesView: View {
         do {
             try modelContext.save()
         } catch {
-            print("Failed to save context: \(error)")
+            DispatchQueue.main.async {
+                print("Failed to save context: \(error)")
+            }
         }
     }
 
     private func updateSuggestions() {
-        if newExerciseName.count < 2 {
-            suggestedExercises = []  // Clear suggestions if fewer than 3 characters
+        guard newExerciseName.count >= 2 else {
+            suggestedExercises = []
             showSuggestions = false
-        } else {
-            suggestedExercises = allPossibleExercises.filter {
+            return
+        }
+
+        // Filter suggestions in the background
+        DispatchQueue.global(qos: .userInitiated).async {
+            let suggestions = allPossibleExercises.filter {
                 $0.lowercased().contains(newExerciseName.lowercased())
             }
-            showSuggestions = true
+
+            DispatchQueue.main.async {
+                suggestedExercises = suggestions
+                showSuggestions = !suggestions.isEmpty
+            }
         }
     }
 }
