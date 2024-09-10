@@ -46,8 +46,8 @@ struct ContentView: View {
                 leading: Button(action: {
                     showingLogbook.toggle()
                 }) {
-                    Image(systemName: "list.bullet.rectangle")
-
+                    Image(systemName: "book.pages")
+                        .font(.title2)
                         .foregroundColor(exercises.isEmpty ? .white : .black)
                 },
                 trailing: Button(action: {
@@ -55,7 +55,7 @@ struct ContentView: View {
                     currentIndex = 0
                     showingManageExercises.toggle()
                 }) {
-                    Image(systemName: "plus")
+                    Image(systemName: "list.bullet")
                         .foregroundColor(exercises.isEmpty ? .white : .black)
                 }
             )

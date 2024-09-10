@@ -473,7 +473,7 @@ struct ManageExercisesView: View {
     }
 
     private func updateSuggestions() {
-        if newExerciseName.count < 3 {
+        if newExerciseName.count < 2 {
             suggestedExercises = []  // Clear suggestions if fewer than 3 characters
             showSuggestions = false
         } else {

@@ -2,7 +2,7 @@ import SwiftUI
 import SwiftData
 
 struct LogbookView: View {
-    @Environment(\.modelContext) private var modelContext
+    @Environment(\.modelContext) private var modelContext // Correct environment usage
     @State private var groupedExerciseHistory: [String: [Date: [ExerciseHistory]]] = [:]
     @State private var groupedByDate: [Date: [ExerciseHistory]] = [:] // New state for grouping by date
     @State private var selectedTab: Int = 0 // Track which tab is selected
@@ -43,9 +43,15 @@ struct LogbookView: View {
                         } else {
                             TabView(selection: $selectedExerciseIndex) {
                                 ForEach(0..<exercises.count, id: \.self) { index in
-                                    ExerciseCarouselCard(exerciseName: exercises[index], exerciseHistory: groupedExerciseHistory[exercises[index]] ?? [:])
-                                        .padding(.horizontal, 2)
-                                        .tag(index)
+                                    ExerciseCarouselCard(
+                                        exerciseName: exercises[index],
+                                        exerciseHistory: groupedExerciseHistory[exercises[index]] ?? [:],
+                                        onDelete: { deletedExerciseName in
+                                            handleExerciseHistoryDeletion(for: deletedExerciseName)
+                                        }
+                                    )
+                                    .padding(.horizontal, 2)
+                                    .tag(index)
                                 }
                             }
                             .tabViewStyle(PageTabViewStyle(indexDisplayMode: .automatic))
@@ -89,6 +95,17 @@ struct LogbookView: View {
                                                     .foregroundColor(.primary)
                                             }
                                             Spacer()
+
+                                            // Delete button for exercise history
+                                            Button(action: {
+                                                withAnimation {
+                                                    deleteHistory(history)
+                                                }
+                                            }) {
+                                                Image(systemName: "trash")
+                                                    .foregroundColor(.red)
+                                                    .padding()
+                                            }
                                         }
                                         .padding()
                                         .background(Color(UIColor.secondarySystemBackground))
@@ -142,6 +159,25 @@ struct LogbookView: View {
         }
     }
 
+    private func handleExerciseHistoryDeletion(for exerciseName: String) {
+        // Remove the exercise entry if no history exists for it
+        if groupedExerciseHistory[exerciseName]?.isEmpty ?? true {
+            groupedExerciseHistory.removeValue(forKey: exerciseName)
+        }
+        // Recalculate the exercise array
+        selectedExerciseIndex = 0
+    }
+
+    private func deleteHistory(_ history: ExerciseHistory) {
+        modelContext.delete(history) // Correctly use the environment variable
+        do {
+            try modelContext.save()
+            loadAllExerciseHistory() // Reload the history after deletion
+        } catch {
+            print("Failed to delete exercise history: \(error)")
+        }
+    }
+
     private func formattedTime(_ date: Date) -> String {
         let formatter = DateFormatter()
         formatter.timeStyle = .short
@@ -157,8 +193,10 @@ struct LogbookView: View {
 
 // A single carousel card for each exercise
 struct ExerciseCarouselCard: View {
+    @Environment(\.modelContext) private var modelContext // Correct environment usage
     let exerciseName: String
     let exerciseHistory: [Date: [ExerciseHistory]] // Grouped exercise history by date
+    let onDelete: (String) -> Void // Callback to notify parent view of deletion
 
     var body: some View {
         VStack {
@@ -194,6 +232,17 @@ struct ExerciseCarouselCard: View {
                                 }
 
                                 Spacer()
+
+                                // Delete button for exercise history
+                                Button(action: {
+                                    withAnimation {
+                                        deleteHistory(history)
+                                    }
+                                }) {
+                                    Image(systemName: "trash")
+                                        .foregroundColor(.red)
+                                        .padding()
+                                }
                             }
                             .padding()
                             .background(Color(UIColor.secondarySystemBackground)) // Dynamic background for list items
@@ -220,5 +269,15 @@ struct ExerciseCarouselCard: View {
         let formatter = DateFormatter()
         formatter.dateStyle = .medium
         return formatter.string(from: date)
+    }
+
+    private func deleteHistory(_ history: ExerciseHistory) {
+        modelContext.delete(history) // Correctly use the environment variable
+        do {
+            try modelContext.save()
+            onDelete(exerciseName) // Notify the parent view that an exercise's history has been deleted
+        } catch {
+            print("Failed to delete exercise history: \(error)")
+        }
     }
 }
