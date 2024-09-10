@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 
 struct WheelPicker: View {
     /// Config
@@ -6,6 +7,11 @@ struct WheelPicker: View {
     @Binding var value: CGFloat
     /// View Properties
     @State private var isLoaded: Bool = false
+    @State private var lastHapticValue: CGFloat = 0 // Store the last value to detect when to trigger haptics
+
+    // Haptic feedback generator
+    let feedbackGenerator = UIImpactFeedbackGenerator(style: .light)
+
     var body: some View {
         GeometryReader {
             let size = $0.size
@@ -45,6 +51,12 @@ struct WheelPicker: View {
             }, set: { newValue in
                 if let newValue {
                     value = (CGFloat(newValue) / CGFloat(config.steps)) * CGFloat(config.multiplier)
+
+                    // Trigger haptic feedback when scrolling past new steps
+                    if abs(value - lastHapticValue) >= CGFloat(config.multiplier) {
+                        feedbackGenerator.impactOccurred() // Trigger haptic feedback
+                        lastHapticValue = value // Update last haptic value
+                    }
                 }
             }))
             .overlay(alignment: .center) {
@@ -54,7 +66,10 @@ struct WheelPicker: View {
             }
             .safeAreaPadding(.horizontal, horizontalPadding)
             .onAppear {
-                if !isLoaded { isLoaded = true }
+                if !isLoaded {
+                    isLoaded = true
+                    feedbackGenerator.prepare() // Prepare the haptic feedback generator
+                }
             }
         }
         /// Optional
