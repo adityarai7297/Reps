@@ -33,9 +33,9 @@ struct ManageExercisesView: View {
         "Machine Chest Press",
         "Smith Machine Bench Press",
         "Landmine Press",
-        "Dumbbell Pullover",  // Added pullover
-        "Machine Pullover",   // Added pullover
-        "Cable Pullover",     // Added pullover
+        "Dumbbell Pullover",
+        "Machine Pullover",
+        "Cable Pullover",
 
         // Back exercises
         "Deadlift",
@@ -65,7 +65,7 @@ struct ManageExercisesView: View {
         "Stiff-Legged Deadlift",
         "Snatch-Grip Deadlift",
         "Good Mornings",
-        "Dumbbell Pullover (for back emphasis)",  // Added back emphasis pullover
+        "Dumbbell Pullover (for back emphasis)",
 
         // Shoulder exercises
         "Overhead Press (OHP)",
