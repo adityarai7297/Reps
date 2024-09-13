@@ -273,7 +273,7 @@ struct ManageExercisesView: View {
         "Eccentric Pull-Ups",
         "Paused Squats",
         "Tempo Bench Press"
-    ];
+    ]
 
     var body: some View {
         NavigationView {
@@ -284,7 +284,7 @@ struct ManageExercisesView: View {
                         TextField("New Exercise", text: $newExerciseName)
                             .textFieldStyle(RoundedBorderTextFieldStyle())
                             .padding(.horizontal)
-                            .onChange(of: newExerciseName) { newValue in
+                            .onChange(of: newExerciseName) { _ in
                                 updateSuggestions()
                             }
                             .onTapGesture {
@@ -315,7 +315,7 @@ struct ManageExercisesView: View {
                                         Spacer()
                                     }
                                     .padding(.vertical, 8)
-                                    .frame(maxWidth: .infinity, alignment: .leading) // Align text to the left
+                                    .frame(maxWidth: .infinity, alignment: .leading)
                                     .contentShape(Rectangle())
                                 }
                                 .buttonStyle(PlainButtonStyle())
@@ -331,7 +331,7 @@ struct ManageExercisesView: View {
                     ForEach(exercises.indices, id: \.self) { index in
                         HStack {
                             Text(exercises[index].name)
-                                .frame(maxWidth: .infinity, alignment: .leading) // Align text to the left
+                                .frame(maxWidth: .infinity, alignment: .leading)
                         }
                         .padding(.vertical, 8)
                         .contentShape(Rectangle()) // Make the entire row tappable
@@ -397,22 +397,19 @@ struct ManageExercisesView: View {
     private func addExercise() {
         guard !newExerciseName.isEmpty else { return }
 
-        // Check for duplicates more efficiently
+        // Check for duplicates
         if exercises.contains(where: { $0.name.caseInsensitiveCompare(newExerciseName) == .orderedSame }) {
             showDuplicateAlert = true
         } else {
             let newExercise = Exercise(name: newExerciseName)
             exercises.append(newExercise)
 
-            DispatchQueue.global(qos: .userInitiated).async {
-                modelContext.insert(newExercise)
-                saveContext()
+            // Perform modelContext operations on the main thread
+            modelContext.insert(newExercise)
+            saveContext()
 
-                DispatchQueue.main.async {
-                    newExerciseName = ""  // Clear the text field on the main thread
-                    showSuggestions = false
-                }
-            }
+            newExerciseName = ""  // Clear the text field
+            showSuggestions = false
         }
     }
 
@@ -422,30 +419,23 @@ struct ManageExercisesView: View {
         let oldName = exercise.name
         exercises[index].name = editedExerciseName
 
-        DispatchQueue.global(qos: .userInitiated).async {
-            let historyFetchRequest = FetchDescriptor<ExerciseHistory>(
-                sortBy: [SortDescriptor(\.timestamp, order: .reverse)]
-            )
+        // Perform modelContext operations on the main thread
+        let historyFetchRequest = FetchDescriptor<ExerciseHistory>(
+            sortBy: [SortDescriptor(\.timestamp, order: .reverse)]
+        )
 
-            do {
-                let allHistories = try modelContext.fetch(historyFetchRequest)
-                let historiesToUpdate = allHistories.filter { $0.exerciseName == oldName }
+        do {
+            let allHistories = try modelContext.fetch(historyFetchRequest)
+            let historiesToUpdate = allHistories.filter { $0.exerciseName == oldName }
 
-                // Update each history record with the new exercise name
-                for history in historiesToUpdate {
-                    history.exerciseName = editedExerciseName
-                }
-
-                saveContext()
-
-                DispatchQueue.main.async {
-                    // Handle any UI updates or success feedback
-                }
-            } catch {
-                DispatchQueue.main.async {
-                    print("Failed to update exercise history: \(error)")
-                }
+            // Update each history record with the new exercise name
+            for history in historiesToUpdate {
+                history.exerciseName = editedExerciseName
             }
+
+            saveContext()
+        } catch {
+            print("Failed to update exercise history: \(error)")
         }
     }
 
@@ -456,26 +446,23 @@ struct ManageExercisesView: View {
         exercises.remove(at: index)
         refreshTrigger.toggle()
 
-        DispatchQueue.global(qos: .userInitiated).async {
-            let historyFetchRequest = FetchDescriptor<ExerciseHistory>(
-                sortBy: [SortDescriptor(\.timestamp, order: .reverse)]
-            )
+        // Perform modelContext operations on the main thread
+        let historyFetchRequest = FetchDescriptor<ExerciseHistory>(
+            sortBy: [SortDescriptor(\.timestamp, order: .reverse)]
+        )
 
-            do {
-                let allHistories = try modelContext.fetch(historyFetchRequest)
-                let historiesToDelete = allHistories.filter { $0.exerciseName == exercise.name }
+        do {
+            let allHistories = try modelContext.fetch(historyFetchRequest)
+            let historiesToDelete = allHistories.filter { $0.exerciseName == exercise.name }
 
-                for history in historiesToDelete {
-                    modelContext.delete(history)
-                }
-
-                modelContext.delete(exercise)
-                saveContext()
-            } catch {
-                DispatchQueue.main.async {
-                    print("Failed to delete exercise or exercise history: \(error)")
-                }
+            for history in historiesToDelete {
+                modelContext.delete(history)
             }
+
+            modelContext.delete(exercise)
+            saveContext()
+        } catch {
+            print("Failed to delete exercise or exercise history: \(error)")
         }
     }
 
@@ -483,9 +470,7 @@ struct ManageExercisesView: View {
         do {
             try modelContext.save()
         } catch {
-            DispatchQueue.main.async {
-                print("Failed to save context: \(error)")
-            }
+            print("Failed to save context: \(error)")
         }
     }
 
