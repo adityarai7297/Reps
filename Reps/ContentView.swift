@@ -14,6 +14,7 @@ struct ContentView: View {
     @State private var refreshTrigger = false // Used to trigger refresh
     @State private var showingLogbook = false
     @State private var catOffset: CGFloat = UIScreen.main.bounds.height // Start off-screen
+    @State private var impactFeedback = UIImpactFeedbackGenerator(style: .heavy)
 
     var body: some View {
         NavigationView {
@@ -42,22 +43,24 @@ struct ContentView: View {
                 }
             }
             .navigationBarItems(
-                leading: Button(action: {
-                    showingLogbook.toggle()
-                }) {
-                    Image(systemName: "book.pages")
-                        .font(.title2)
-                        .foregroundColor(exercises.isEmpty ? .white : .black)
-                },
-                trailing: Button(action: {
-                    // Reset to the first exercise
-                    currentIndex = 0
-                    showingManageExercises.toggle()
-                }) {
-                    Image(systemName: "list.bullet")
-                        .foregroundColor(exercises.isEmpty ? .white : .black)
-                }
-            )
+                            leading: Button(action: {
+                                impactFeedback.impactOccurred() // Add this line
+                                showingLogbook.toggle()
+                            }) {
+                                Image(systemName: "book.pages")
+                                    .font(.title2)
+                                    .foregroundColor(exercises.isEmpty ? .white : .black)
+                            },
+                            trailing: Button(action: {
+                                impactFeedback.impactOccurred() // Add this line
+                                // Reset to the first exercise
+                                currentIndex = 0
+                                showingManageExercises.toggle()
+                            }) {
+                                Image(systemName: "list.bullet")
+                                    .foregroundColor(exercises.isEmpty ? .white : .black)
+                            }
+                        )
             .sheet(isPresented: $showingLogbook) {
                 LogbookView(setCount: $setCount, refreshTrigger: $refreshTrigger) // Pass refreshTrigger
                     .environment(\.modelContext, modelContext)

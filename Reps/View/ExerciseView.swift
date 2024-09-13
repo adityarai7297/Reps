@@ -11,6 +11,7 @@ struct ExerciseView: View {
     @State private var currentReps: CGFloat = 0
     @State private var currentRPE: CGFloat = 0
     @State private var setCount: Int = 0 // This tracks the number of sets for today
+    @State private var impactFeedback = UIImpactFeedbackGenerator(style: .heavy)
     let weightWheelConfig: WheelPicker.Config
     let repWheelConfig: WheelPicker.Config
     let RPEWheelConfig: WheelPicker.Config
@@ -99,7 +100,7 @@ struct ExerciseView: View {
                     saveExerciseHistory()
                 })
                 .frame(maxWidth: .infinity, alignment: .center)
-                .offset(x: UIScreen.main.bounds.width / 10)
+                .offset(x: UIScreen.main.bounds.width / 12)
 
                 HStack(spacing: 5) {
                     Text("\(setCount)")
@@ -111,9 +112,11 @@ struct ExerciseView: View {
                 }
                 .opacity(setCount > 0 ? 1 : 0)
                 .animation(.spring(response: 0.3), value: showCheckmark)
-                .offset(x: -UIScreen.main.bounds.width / 10)
+                .offset(x: -UIScreen.main.bounds.width / 8)
                 .onTapGesture {
+                    impactFeedback.impactOccurred()
                     showingHistory.toggle()
+                    
                 }
                 .sheet(isPresented: $showingHistory) {
                     ExerciseHistoryView(exerciseName: exercise.name, onDelete: {

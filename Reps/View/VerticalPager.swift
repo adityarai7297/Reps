@@ -7,6 +7,9 @@ struct VerticalPager<Content: View>: View {
 
     @GestureState private var dragOffset: CGFloat = 0
 
+    // Add a parameter for drag threshold
+    var dragThreshold: CGFloat = 50 // Default value, adjust as needed
+
     var body: some View {
         GeometryReader { geometry in
             let height = geometry.size.height
@@ -26,11 +29,19 @@ struct VerticalPager<Content: View>: View {
                         state = value.translation.height
                     }
                     .onEnded { value in
-                        let threshold = height / 2
-                        if value.predictedEndTranslation.height < -threshold, currentIndex < pageCount - 1 {
-                            currentIndex += 1
-                        } else if value.predictedEndTranslation.height > threshold, currentIndex > 0 {
-                            currentIndex -= 1
+                        let dragDistance = value.translation.height
+                        let predictedEndOffset = value.predictedEndTranslation.height
+                        let dragVelocity = value.velocity.height
+                        let threshold = dragThreshold
+
+                        if dragDistance < -threshold || dragVelocity < -500 {
+                            if currentIndex < pageCount - 1 {
+                                currentIndex += 1
+                            }
+                        } else if dragDistance > threshold || dragVelocity > 500 {
+                            if currentIndex > 0 {
+                                currentIndex -= 1
+                            }
                         }
                     }
             )
