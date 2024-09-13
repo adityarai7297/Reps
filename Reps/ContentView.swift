@@ -11,7 +11,7 @@ struct ContentView: View {
     @State private var setCount: Int = 0
     @State private var exercises: [Exercise] = []
     @State private var showingManageExercises = false
-    @State private var refreshTrigger = false
+    @State private var refreshTrigger = false // Used to trigger refresh
     @State private var showingLogbook = false
     @State private var catOffset: CGFloat = UIScreen.main.bounds.height // Start off-screen
 
@@ -31,11 +31,11 @@ struct ContentView: View {
                     VerticalPager(pageCount: exercises.count, currentIndex: $currentIndex) { index in
                         ExerciseView(
                             exercise: $exercises[index],
-                            weightWheelConfig: weightWheelConfig,
+                            refreshTrigger: $refreshTrigger, weightWheelConfig: weightWheelConfig,
                             repWheelConfig: repWheelConfig,
                             RPEWheelConfig: exertionWheelConfig,
                             color: .clear, // Since gradient is applied
-                            userId: userId
+                            userId: userId // Pass the binding here
                         )
                         .gradientBackground(index: index)
                     }
@@ -59,7 +59,7 @@ struct ContentView: View {
                 }
             )
             .sheet(isPresented: $showingLogbook) {
-                LogbookView(setCount: $setCount)
+                LogbookView(setCount: $setCount, refreshTrigger: $refreshTrigger) // Pass refreshTrigger
                     .environment(\.modelContext, modelContext)
             }
             .sheet(isPresented: $showingManageExercises) {
@@ -69,6 +69,12 @@ struct ContentView: View {
             }
             .onAppear {
                 loadExercises()
+            }
+            // Trigger refresh when LogbookView is dismissed
+            .onChange(of: showingLogbook) { newValue in
+                if !newValue {
+                    refreshTrigger.toggle()
+                }
             }
         }
         .preferredColorScheme(.dark)
@@ -91,4 +97,3 @@ struct ContentView: View {
         }
     }
 }
-

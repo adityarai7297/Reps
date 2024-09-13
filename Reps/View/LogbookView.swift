@@ -5,6 +5,7 @@ struct LogbookView: View {
     @Environment(\.modelContext) private var modelContext
     @State private var groupedByDate: [Date: [String: [ExerciseHistory]]] = [:] // Group by date, then by exercise name
     @Binding var setCount: Int // Bind the set count from the parent view (ContentView)
+    @Binding var refreshTrigger: Bool // Add this binding to notify changes
     
     var body: some View {
         VStack(alignment: .leading) {
@@ -127,6 +128,7 @@ struct LogbookView: View {
                     // Reload the history and recalculate set count on the main thread
                     loadAllExerciseHistory()
                     calculateSetCountForToday()
+                    refreshTrigger.toggle() // Notify parent views about the change
                 }
             } catch {
                 print("Failed to delete exercise history: \(error)")

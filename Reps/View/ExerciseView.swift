@@ -3,6 +3,7 @@ import SwiftData
 
 struct ExerciseView: View {
     @Binding var exercise: Exercise
+    @Binding var refreshTrigger: Bool // Add this binding
     @State private var showCheckmark: Bool = false
     @State private var showingHistory = false
     @Environment(\.modelContext) private var modelContext
@@ -130,6 +131,10 @@ struct ExerciseView: View {
         .background(color)
         .onAppear {
             loadCurrentValues()
+            calculateSetCountForToday()
+        }
+        // Recalculate set count when refreshTrigger changes
+        .onChange(of: refreshTrigger) { _ in
             calculateSetCountForToday()
         }
     }
