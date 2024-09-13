@@ -28,18 +28,16 @@ struct ContentView: View {
                             .frame(width: 300, height: 220) // Adjust size as needed
                     }
                 } else {
-                    VerticalPager(pageCount: exercises.count, currentIndex: $currentIndex) {
-                        ForEach(exercises.indices, id: \.self) { index in
-                            ExerciseView(
-                                exercise: $exercises[index],
-                                weightWheelConfig: weightWheelConfig,
-                                repWheelConfig: repWheelConfig,
-                                RPEWheelConfig: exertionWheelConfig,
-                                color: .clear, // Set to clear since gradient will be applied
-                                userId: userId
-                            )
-                            .gradientBackground(index: index)
-                        }
+                    VerticalPager(pageCount: exercises.count, currentIndex: $currentIndex) { index in
+                        ExerciseView(
+                            exercise: $exercises[index],
+                            weightWheelConfig: weightWheelConfig,
+                            repWheelConfig: repWheelConfig,
+                            RPEWheelConfig: exertionWheelConfig,
+                            color: .clear, // Since gradient is applied
+                            userId: userId
+                        )
+                        .gradientBackground(index: index)
                     }
                 }
             }
