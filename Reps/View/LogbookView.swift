@@ -3,7 +3,7 @@ import SwiftData
 
 struct LogbookView: View {
     @Environment(\.modelContext) private var modelContext
-    @State private var groupedByDate: [Date: [ExerciseHistory]] = [:] // State for grouping by date
+    @State private var groupedByDate: [Date: [String: [ExerciseHistory]]] = [:] // Group by date, then by exercise name
     @Binding var setCount: Int // Bind the set count from the parent view (ContentView)
     
     var body: some View {
@@ -27,46 +27,52 @@ struct LogbookView: View {
                                     .font(.headline)
                                     .foregroundColor(.secondary)
                                     .padding(.leading, 16)) {
-                            ForEach(groupedByDate[date] ?? [], id: \.self) { history in
-                                HStack {
-                                    VStack(alignment: .leading, spacing: 8) {
-                                        Text("Exercise: \(history.exerciseName)")
-                                            .font(.headline)
-                                            .foregroundColor(.primary)
+                            // Subgroup by exercise name
+                            ForEach(groupedByDate[date]?.keys.sorted() ?? [], id: \.self) { exerciseName in
+                                VStack(alignment: .leading) {
+                                    Text(exerciseName)
+                                        .font(.headline)
+                                        .padding(.leading, 16)
+                                        .foregroundColor(.primary)
 
-                                        Text("Weight: \(history.weight, specifier: "%.1f") lbs")
-                                            .font(.headline)
-                                            .foregroundColor(.primary)
+                                    ForEach(groupedByDate[date]?[exerciseName] ?? [], id: \.self) { history in
+                                        HStack {
+                                            VStack(alignment: .leading, spacing: 8) {
+                                                Text("Weight: \(history.weight, specifier: "%.1f") lbs")
+                                                    .font(.headline)
+                                                    .foregroundColor(.primary)
 
-                                        Text("Reps: \(history.reps, specifier: "%.0f")")
-                                            .font(.headline)
-                                            .foregroundColor(.primary)
+                                                Text("Reps: \(history.reps, specifier: "%.0f")")
+                                                    .font(.headline)
+                                                    .foregroundColor(.primary)
 
-                                        Text("RPE: \(history.rpe, specifier: "%.0f")%")
-                                            .font(.headline)
-                                            .foregroundColor(.primary)
+                                                Text("RPE: \(history.rpe, specifier: "%.0f")%")
+                                                    .font(.headline)
+                                                    .foregroundColor(.primary)
 
-                                        Text("Time: \(formattedTime(history.timestamp))")
-                                            .font(.headline)
-                                            .foregroundColor(.primary)
-                                    }
-                                    Spacer()
+                                                Text("Time: \(formattedTime(history.timestamp))")
+                                                    .font(.headline)
+                                                    .foregroundColor(.primary)
+                                            }
+                                            Spacer()
 
-                                    // Delete button for exercise history
-                                    Button(action: {
-                                        withAnimation {
-                                            deleteHistory(history)
+                                            // Delete button for exercise history
+                                            Button(action: {
+                                                withAnimation {
+                                                    deleteHistory(history)
+                                                }
+                                            }) {
+                                                Image(systemName: "trash")
+                                                    .foregroundColor(.red)
+                                                    .padding()
+                                            }
                                         }
-                                    }) {
-                                        Image(systemName: "trash")
-                                            .foregroundColor(.red)
-                                            .padding()
+                                        .padding()
+                                        .background(Color(UIColor.secondarySystemBackground))
+                                        .cornerRadius(10)
+                                        .padding(.horizontal, 16)
                                     }
                                 }
-                                .padding()
-                                .background(Color(UIColor.secondarySystemBackground))
-                                .cornerRadius(10)
-                                .padding(.horizontal, 16)
                             }
                         }
                     }
@@ -80,7 +86,7 @@ struct LogbookView: View {
         }
     }
 
-    // Loading all exercise history and grouping by date
+    // Loading all exercise history and grouping by date, then by exercise name
     private func loadAllExerciseHistory() {
         DispatchQueue.global(qos: .userInitiated).async {
             let fetchRequest = FetchDescriptor<ExerciseHistory>(
@@ -90,9 +96,11 @@ struct LogbookView: View {
             do {
                 let allHistory = try modelContext.fetch(fetchRequest)
 
-                // Group by date
+                // Group by date, then by exercise name
                 let grouped = Dictionary(grouping: allHistory) { history in
                     Calendar.current.startOfDay(for: history.timestamp)
+                }.mapValues { histories in
+                    Dictionary(grouping: histories) { $0.exerciseName }
                 }
 
                 DispatchQueue.main.async {

@@ -2,7 +2,7 @@ import SwiftData
 import SwiftUI
 
 @Model
-final class Exercise {
+final class Exercise  {
     @Attribute(.unique) var id: UUID
     var name: String
     var history: [ExerciseHistory] = []
