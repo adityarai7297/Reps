@@ -97,6 +97,8 @@ struct ExerciseView: View {
                 SetButton(showCheckmark: $showCheckmark, setCount: $setCount, action: {
                     saveExerciseHistory()
                 })
+                .frame(maxWidth: .infinity, alignment: .center)
+                .offset(x: UIScreen.main.bounds.width / 10)
 
                 HStack(spacing: 5) {
                     Text("\(setCount)")
@@ -108,6 +110,7 @@ struct ExerciseView: View {
                 }
                 .opacity(setCount > 0 ? 1 : 0)
                 .animation(.spring(response: 0.3), value: showCheckmark)
+                .offset(x: -UIScreen.main.bounds.width / 10)
                 .onTapGesture {
                     showingHistory.toggle()
                 }
@@ -119,7 +122,8 @@ struct ExerciseView: View {
                 }
             }
             .padding(.bottom, 40)
-            .frame(maxWidth: .infinity, alignment: .center) // Center the HStack
+            
+            
         }
         .padding(.horizontal)
         .foregroundColor(.black)
