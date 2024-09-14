@@ -89,7 +89,6 @@
 		1371B1502C2F9C8100A4254A /* Model */ = {
 			isa = PBXGroup;
 			children = (
-				132EF34D2C367BE000E75796 /* GradientBackground.swift */,
 				1339416E2C86B37800B1EF2B /* Exercise.swift */,
 				133941702C86B39F00B1EF2B /* ExerciseHistory.swift */,
 			);
@@ -117,6 +116,7 @@
 		13FEA23F2C27C9D200D04BF2 /* Reps */ = {
 			isa = PBXGroup;
 			children = (
+				4089FA152C95761B00F96526 /* ViewModifiers */,
 				1371B1502C2F9C8100A4254A /* Model */,
 				13FEA26D2C29436C00D04BF2 /* View */,
 				13FEA2402C27C9D200D04BF2 /* RepsApp.swift */,
@@ -148,6 +148,14 @@
 				13BE7B262C8BD849001BED75 /* LogbookView.swift */,
 			);
 			path = View;
+			sourceTree = "<group>";
+		};
+		4089FA152C95761B00F96526 /* ViewModifiers */ = {
+			isa = PBXGroup;
+			children = (
+				132EF34D2C367BE000E75796 /* GradientBackground.swift */,
+			);
+			path = ViewModifiers;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
