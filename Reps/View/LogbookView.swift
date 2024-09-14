@@ -6,6 +6,7 @@ struct LogbookView: View {
     @State private var groupedByDate: [Date: [String: [ExerciseHistory]]] = [:] // Group by date, then by exercise name
     @Binding var setCount: Int // Bind the set count from the parent view (ContentView)
     @Binding var refreshTrigger: Bool // Add this binding to notify changes
+    @State private var impactFeedback = UIImpactFeedbackGenerator(style: .heavy)
     
     var body: some View {
         VStack(alignment: .leading) {
@@ -59,6 +60,7 @@ struct LogbookView: View {
 
                                             // Delete button for exercise history
                                             Button(action: {
+                                                impactFeedback.impactOccurred()
                                                 withAnimation {
                                                     deleteHistory(history)
                                                 }

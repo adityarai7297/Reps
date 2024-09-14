@@ -9,7 +9,7 @@ struct SetButton: View {
     var action: () -> Void // Closure to perform the action
 
     // Haptic feedback generator
-    private let feedbackGenerator = UIImpactFeedbackGenerator(style: .medium)
+    private let feedbackGenerator = UIImpactFeedbackGenerator(style: .heavy)
 
     var body: some View {
         VStack(spacing: 10) {
@@ -51,6 +51,7 @@ struct SetButton: View {
                     .stroke(style: StrokeStyle(lineWidth: 4, lineCap: .round))
                     .rotation(.degrees(-90))
             )
+            .contentShape(Circle().inset(by: -15))
             .animation(.easeInOut.speed(0.8), value: topG)
             .scaleEffect(topG ? 1.1 : 1)
             .gesture(
