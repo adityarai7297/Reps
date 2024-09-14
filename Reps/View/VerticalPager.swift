@@ -6,6 +6,7 @@ struct VerticalPager<Content: View>: View {
     let contentAtIndex: (Int) -> Content
 
     @GestureState private var dragOffset: CGFloat = 0
+    @State private var impactFeedback = UIImpactFeedbackGenerator(style: .heavy)
 
     // Add a parameter for drag threshold
     var dragThreshold: CGFloat = 50 // Default value, adjust as needed
@@ -28,7 +29,8 @@ struct VerticalPager<Content: View>: View {
                     .updating($dragOffset) { value, state, _ in
                         state = value.translation.height
                     }
-                    .onEnded { value in
+                    .onEnded {
+                        value in
                         let dragDistance = value.translation.height
                         let predictedEndOffset = value.predictedEndTranslation.height
                         let dragVelocity = value.velocity.height
@@ -36,10 +38,12 @@ struct VerticalPager<Content: View>: View {
 
                         if dragDistance < -threshold || dragVelocity < -500 {
                             if currentIndex < pageCount - 1 {
+                                impactFeedback.impactOccurred()
                                 currentIndex += 1
                             }
                         } else if dragDistance > threshold || dragVelocity > 500 {
                             if currentIndex > 0 {
+                                impactFeedback.impactOccurred()
                                 currentIndex -= 1
                             }
                         }

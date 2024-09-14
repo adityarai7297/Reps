@@ -14,6 +14,7 @@ struct ManageExercisesView: View {
     @State private var showDuplicateAlert: Bool = false  // State for showing duplicate alert
     @State private var showingEditSheet = false          // State for showing the edit sheet
     @State private var editedExerciseName: String = ""   // State for holding the edited name
+    @State private var impactFeedback = UIImpactFeedbackGenerator(style: .heavy)
 
     let allPossibleExercises = [
         // Chest exercises
@@ -336,6 +337,7 @@ struct ManageExercisesView: View {
                         .padding(.vertical, 8)
                         .contentShape(Rectangle()) // Make the entire row tappable
                         .onTapGesture {
+                            impactFeedback.impactOccurred()
                             currentIndex = index  // Move the vertical pager to the tapped exercise
                             dismiss()             // Dismiss the modal view
                         }
