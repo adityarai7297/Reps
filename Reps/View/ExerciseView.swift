@@ -20,19 +20,23 @@ struct ExerciseView: View {
 
     var body: some View {
         VStack {
-            Spacer(minLength: 40)
+            Spacer()
 
             Text(exercise.name)
-                .font(.largeTitle)
+                .font(.title)
                 .fontWeight(.medium)
+                .padding(.horizontal)
+                .padding(.top, 40)
+                .frame(width: UIScreen.main.bounds.width/1.4)
+               
 
-            Spacer(minLength: 40)
+            Spacer()
 
             Rectangle()
                 .fill(Color.black)
                 .frame(height: 0.2)
 
-            Spacer(minLength: 40)
+            Spacer()
 
             // **Weight Picker Section**
             VStack(spacing: 10) {
