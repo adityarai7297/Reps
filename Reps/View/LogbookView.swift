@@ -10,7 +10,7 @@ struct LogbookView: View {
     
     var body: some View {
         VStack(alignment: .leading) {
-            Text("Exercise Logbook")
+            Text("Logbook")
                 .font(.system(size: 34, weight: .bold))
                 .foregroundColor(.primary)
                 .padding(.leading, 16)
