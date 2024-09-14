@@ -5,6 +5,7 @@ struct ExerciseHistoryView: View {
     @Environment(\.modelContext) private var modelContext
     var exerciseName: String
     var onDelete: () -> Void // Callback to notify parent view of deletion
+    @State private var impactFeedback = UIImpactFeedbackGenerator(style: .heavy)
 
     @State private var groupedExerciseHistory: [Date: [ExerciseHistory]] = [:]
 
@@ -51,6 +52,7 @@ struct ExerciseHistoryView: View {
 
                                 // Delete button
                                 Button(action: {
+                                    impactFeedback.impactOccurred()
                                     withAnimation {
                                         deleteHistory(history)
                                     }
@@ -61,7 +63,7 @@ struct ExerciseHistoryView: View {
                                 }
                             }
                             .padding()
-                            .background(Color(.darkGray))
+                            .background(Color(UIColor.secondarySystemBackground))
                             .cornerRadius(10)
                         }
                     }
