@@ -7,7 +7,7 @@ struct LogbookView: View {
     @Binding var setCount: Int // Bind the set count from the parent view (ContentView)
     @Binding var refreshTrigger: Bool // Add this binding to notify changes
     @State private var impactFeedback = UIImpactFeedbackGenerator(style: .heavy)
-    
+
     var body: some View {
         VStack(alignment: .leading) {
             Text("Logbook")
