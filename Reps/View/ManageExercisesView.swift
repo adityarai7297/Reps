@@ -15,296 +15,297 @@ struct ManageExercisesView: View {
     @State private var showingEditSheet = false          // State for showing the edit sheet
     @State private var editedExerciseName: String = ""   // State for holding the edited name
     @State private var impactFeedback = UIImpactFeedbackGenerator(style: .heavy)
+    @State private var textFieldFrame: CGRect = .zero    // State to hold the TextField frame
 
     let allPossibleExercises = [
         // Chest exercises
-        "Bench Press",
-        "Incline Bench Press",
-        "Decline Bench Press",
-        "Chest Flyes",
-        "Cable Crossovers",
-        "Push-Ups",
-        "Dumbbell Bench Press",
-        "Dumbbell Flyes",
-        "Pec Deck Machine",
-        "Guillotine Press",
-        "Hex Press",
-        "Svend Press",
-        "Cable Chest Press",
-        "Machine Chest Press",
-        "Smith Machine Bench Press",
-        "Landmine Press",
-        "Dumbbell Pullover",
-        "Machine Pullover",
-        "Cable Pullover",
+                "Bench Press",
+                "Incline Bench Press",
+                "Decline Bench Press",
+                "Chest Flyes",
+                "Cable Crossovers",
+                "Push-Ups",
+                "Dumbbell Bench Press",
+                "Dumbbell Flyes",
+                "Pec Deck Machine",
+                "Guillotine Press",
+                "Hex Press",
+                "Svend Press",
+                "Cable Chest Press",
+                "Machine Chest Press",
+                "Smith Machine Bench Press",
+                "Landmine Press",
+                "Dumbbell Pullover",
+                "Machine Pullover",
+                "Cable Pullover",
 
-        // Back exercises
-        "Deadlift",
-        "Pull-Ups",
-        "Chin-Ups",
-        "Lat Pulldown",
-        "Barbell Row",
-        "Dumbbell Row",
-        "T-Bar Row",
-        "Cable Row",
-        "Rack Pulls",
-        "Face Pulls",
-        "Hyperextensions",
-        "Single Arm Lat Pulldown",
-        "Inverted Row",
-        "Seal Row",
-        "Pendlay Row",
-        "Kroc Row",
-        "Machine Row",
-        "Single Arm Cable Row",
-        "Wide Grip Pull-Up",
-        "Meadows Row",
-        "Chest Supported Row",
-        "Neutral Grip Pull-Up",
-        "Trap Bar Deadlift",
-        "Deficit Deadlift",
-        "Stiff-Legged Deadlift",
-        "Snatch-Grip Deadlift",
-        "Good Mornings",
-        "Dumbbell Pullover (for back emphasis)",
+                // Back exercises
+                "Deadlift",
+                "Pull-Ups",
+                "Chin-Ups",
+                "Lat Pulldown",
+                "Barbell Row",
+                "Dumbbell Row",
+                "T-Bar Row",
+                "Cable Row",
+                "Rack Pulls",
+                "Face Pulls",
+                "Hyperextensions",
+                "Single Arm Lat Pulldown",
+                "Inverted Row",
+                "Seal Row",
+                "Pendlay Row",
+                "Kroc Row",
+                "Machine Row",
+                "Single Arm Cable Row",
+                "Wide Grip Pull-Up",
+                "Meadows Row",
+                "Chest Supported Row",
+                "Neutral Grip Pull-Up",
+                "Trap Bar Deadlift",
+                "Deficit Deadlift",
+                "Stiff-Legged Deadlift",
+                "Snatch-Grip Deadlift",
+                "Good Mornings",
+                "Dumbbell Pullover (for back emphasis)",
 
-        // Shoulder exercises
-        "Overhead Press (OHP)",
-        "Arnold Press",
-        "Lateral Raises",
-        "Front Raises",
-        "Rear Delt Flyes",
-        "Cable Lateral Raises",
-        "Dumbbell Shoulder Press",
-        "Barbell Shoulder Press",
-        "Cable Face Pulls",
-        "Landmine Shoulder Press",
-        "Smith Machine Overhead Press",
-        "Cuban Press",
-        "Snatch-Grip Overhead Press",
-        "Z-Press",
-        "Standing Dumbbell Press",
-        "Machine Shoulder Press",
-        "Cable Front Raise",
-        "Y Raises",
-        "Behind-the-Neck Press",
-        "Scaption",
+                // Shoulder exercises
+                "Overhead Press (OHP)",
+                "Arnold Press",
+                "Lateral Raises",
+                "Front Raises",
+                "Rear Delt Flyes",
+                "Cable Lateral Raises",
+                "Dumbbell Shoulder Press",
+                "Barbell Shoulder Press",
+                "Cable Face Pulls",
+                "Landmine Shoulder Press",
+                "Smith Machine Overhead Press",
+                "Cuban Press",
+                "Snatch-Grip Overhead Press",
+                "Z-Press",
+                "Standing Dumbbell Press",
+                "Machine Shoulder Press",
+                "Cable Front Raise",
+                "Y Raises",
+                "Behind-the-Neck Press",
+                "Scaption",
 
-        // Bicep exercises
-        "Barbell Bicep Curl",
-        "Dumbbell Bicep Curl",
-        "Preacher Curl",
-        "Hammer Curl",
-        "Concentration Curl",
-        "Cable Curl",
-        "Incline Dumbbell Curl",
-        "Spider Curl",
-        "Cable Preacher Curl",
-        "Drag Curl",
-        "Bayesian Curl",
-        "21s Bicep Curl",
-        "EZ Bar Curl",
-        "Cable Hammer Curl",
-        "Reverse Curl",
-        "Concentration Cable Curl",
-        "Incline Hammer Curl",
+                // Bicep exercises
+                "Barbell Bicep Curl",
+                "Dumbbell Bicep Curl",
+                "Preacher Curl",
+                "Hammer Curl",
+                "Concentration Curl",
+                "Cable Curl",
+                "Incline Dumbbell Curl",
+                "Spider Curl",
+                "Cable Preacher Curl",
+                "Drag Curl",
+                "Bayesian Curl",
+                "21s Bicep Curl",
+                "EZ Bar Curl",
+                "Cable Hammer Curl",
+                "Reverse Curl",
+                "Concentration Cable Curl",
+                "Incline Hammer Curl",
 
-        // Tricep exercises
-        "Tricep Dips",
-        "Skull Crushers",
-        "Close-Grip Bench Press",
-        "Tricep Pushdowns",
-        "Overhead Tricep Extension",
-        "Dumbbell Kickbacks",
-        "Cable Tricep Extension",
-        "Dumbbell Floor Press",
-        "Diamond Push-Ups",
-        "Rope Pushdowns",
-        "Single Arm Tricep Pushdown",
-        "Reverse Grip Tricep Pushdown",
-        "Smith Machine Close Grip Bench",
-        "Cable Kickback",
-        "Tricep Extensions on Bench",
-        "JM Press",
-        "Ring Dips",
+                // Tricep exercises
+                "Tricep Dips",
+                "Skull Crushers",
+                "Close-Grip Bench Press",
+                "Tricep Pushdowns",
+                "Overhead Tricep Extension",
+                "Dumbbell Kickbacks",
+                "Cable Tricep Extension",
+                "Dumbbell Floor Press",
+                "Diamond Push-Ups",
+                "Rope Pushdowns",
+                "Single Arm Tricep Pushdown",
+                "Reverse Grip Tricep Pushdown",
+                "Smith Machine Close Grip Bench",
+                "Cable Kickback",
+                "Tricep Extensions on Bench",
+                "JM Press",
+                "Ring Dips",
 
-        // Leg exercises
-        "Squats",
-        "Front Squats",
-        "Bulgarian Split Squats",
-        "Leg Press",
-        "Lunges",
-        "Step-Ups",
-        "Romanian Deadlift",
-        "Leg Curls",
-        "Leg Extensions",
-        "Calf Raises",
-        "Seated Calf Raises",
-        "Hack Squat",
-        "Sumo Deadlift",
-        "Hip Thrusts",
-        "Glute Bridge",
-        "Goblet Squat",
-        "Walking Lunges",
-        "Smith Machine Squat",
-        "Anderson Squats",
-        "Jefferson Squat",
-        "Sissy Squat",
-        "Belt Squat",
-        "Overhead Squat",
-        "Kang Squat",
-        "Box Squat",
-        "Pistol Squats",
-        "Sled Push",
-        "Sled Pull",
-        "Nordic Curls",
-        "Reverse Hack Squat",
-        "Barbell Hip Thrust",
-        "Cable Pull-Through",
-        "Landmine Squat",
-        "Smith Machine Lunges",
-        "Cossack Squat",
-        "Single-Leg Press",
-        "Lateral Lunges",
+                // Leg exercises
+                "Squats",
+                "Front Squats",
+                "Bulgarian Split Squats",
+                "Leg Press",
+                "Lunges",
+                "Step-Ups",
+                "Romanian Deadlift",
+                "Leg Curls",
+                "Leg Extensions",
+                "Calf Raises",
+                "Seated Calf Raises",
+                "Hack Squat",
+                "Sumo Deadlift",
+                "Hip Thrusts",
+                "Glute Bridge",
+                "Goblet Squat",
+                "Walking Lunges",
+                "Smith Machine Squat",
+                "Anderson Squats",
+                "Jefferson Squat",
+                "Sissy Squat",
+                "Belt Squat",
+                "Overhead Squat",
+                "Kang Squat",
+                "Box Squat",
+                "Pistol Squats",
+                "Sled Push",
+                "Sled Pull",
+                "Nordic Curls",
+                "Reverse Hack Squat",
+                "Barbell Hip Thrust",
+                "Cable Pull-Through",
+                "Landmine Squat",
+                "Smith Machine Lunges",
+                "Cossack Squat",
+                "Single-Leg Press",
+                "Lateral Lunges",
 
-        // Core exercises
-        "Planks",
-        "Hanging Leg Raise",
-        "Crunches",
-        "Russian Twists",
-        "Cable Woodchoppers",
-        "Ab Wheel Rollout",
-        "Bicycle Crunches",
-        "Sit-Ups",
-        "Cable Crunches",
-        "Mountain Climbers",
-        "Dead Bug",
-        "V-Sit Hold",
-        "Dragon Flag",
-        "Weighted Planks",
-        "Stir-the-Pot",
-        "L-Sit",
-        "Hollow Body Hold",
-        "Garhammer Raise",
-        "Cable Pallof Press",
-        "Flutter Kicks",
-        "Toe-to-Bar",
-        "Oblique Crunches",
-        "Cable Side Bends",
-        "Side Plank",
-        "Jackknives",
+                // Core exercises
+                "Planks",
+                "Hanging Leg Raise",
+                "Crunches",
+                "Russian Twists",
+                "Cable Woodchoppers",
+                "Ab Wheel Rollout",
+                "Bicycle Crunches",
+                "Sit-Ups",
+                "Cable Crunches",
+                "Mountain Climbers",
+                "Dead Bug",
+                "V-Sit Hold",
+                "Dragon Flag",
+                "Weighted Planks",
+                "Stir-the-Pot",
+                "L-Sit",
+                "Hollow Body Hold",
+                "Garhammer Raise",
+                "Cable Pallof Press",
+                "Flutter Kicks",
+                "Toe-to-Bar",
+                "Oblique Crunches",
+                "Cable Side Bends",
+                "Side Plank",
+                "Jackknives",
 
-        // Forearm exercises
-        "Wrist Curls",
-        "Reverse Wrist Curls",
-        "Farmer's Walk",
-        "Plate Pinches",
-        "Zottman Curl",
-        "Reverse Curl with EZ Bar",
-        "Behind-the-Back Wrist Curls",
-        "Towel Grip Pull-Ups",
-        "Fat Grip Bar Holds",
-        "Finger Curls",
-        "Wrist Roller",
-        "Thick Bar Deadlifts",
+                // Forearm exercises
+                "Wrist Curls",
+                "Reverse Wrist Curls",
+                "Farmer's Walk",
+                "Plate Pinches",
+                "Zottman Curl",
+                "Reverse Curl with EZ Bar",
+                "Behind-the-Back Wrist Curls",
+                "Towel Grip Pull-Ups",
+                "Fat Grip Bar Holds",
+                "Finger Curls",
+                "Wrist Roller",
+                "Thick Bar Deadlifts",
 
-        // Full body exercises
-        "Clean and Jerk",
-        "Snatch",
-        "Kettlebell Swings",
-        "Turkish Get-Up",
-        "Thrusters",
-        "Overhead Squat",
-        "Dumbbell Snatch",
-        "Kettlebell Clean",
-        "Squat Clean",
-        "Kettlebell High Pull",
-        "Man Makers",
-        "Barbell Complexes",
-        "Dumbbell Thruster",
-        "Devil Press",
-        "Kettlebell Turkish Get-Up",
-        "Clean Pull",
+                // Full body exercises
+                "Clean and Jerk",
+                "Snatch",
+                "Kettlebell Swings",
+                "Turkish Get-Up",
+                "Thrusters",
+                "Overhead Squat",
+                "Dumbbell Snatch",
+                "Kettlebell Clean",
+                "Squat Clean",
+                "Kettlebell High Pull",
+                "Man Makers",
+                "Barbell Complexes",
+                "Dumbbell Thruster",
+                "Devil Press",
+                "Kettlebell Turkish Get-Up",
+                "Clean Pull",
 
-        // Compound movements
-        "Barbell Squat",
-        "Deadlift",
-        "Bench Press",
-        "Pull-Ups",
-        "Overhead Press",
-        "Bent-Over Row",
-        "Log Press",
-        "Tire Flip",
-        "Stone to Shoulder",
-        "Farmers Walk with Trap Bar",
-        "Zercher Squat",
-        "Sots Press",
+                // Compound movements
+                "Barbell Squat",
+                "Deadlift",
+                "Bench Press",
+                "Pull-Ups",
+                "Overhead Press",
+                "Bent-Over Row",
+                "Log Press",
+                "Tire Flip",
+                "Stone to Shoulder",
+                "Farmers Walk with Trap Bar",
+                "Zercher Squat",
+                "Sots Press",
 
-        // Isolation and machine-based movements
-        "Leg Adduction",
-        "Leg Abduction",
-        "Machine Hamstring Curl",
-        "Cable Glute Kickbacks",
-        "Machine Hip Abduction",
-        "Smith Machine Calf Raise",
-        "Leg Extension Machine",
-        "Standing Hamstring Curl",
-        "Single Leg Curl Machine",
+                // Isolation and machine-based movements
+                "Leg Adduction",
+                "Leg Abduction",
+                "Machine Hamstring Curl",
+                "Cable Glute Kickbacks",
+                "Machine Hip Abduction",
+                "Smith Machine Calf Raise",
+                "Leg Extension Machine",
+                "Standing Hamstring Curl",
+                "Single Leg Curl Machine",
 
-        // Olympic Lifting Variations
-        "Power Clean",
-        "Power Snatch",
-        "Hang Clean",
-        "Hang Snatch",
-        "Split Jerk",
-        "Push Jerk",
-        "Push Press",
-        "Snatch Balance",
-        "Hang Power Clean",
+                // Olympic Lifting Variations
+                "Power Clean",
+                "Power Snatch",
+                "Hang Clean",
+                "Hang Snatch",
+                "Split Jerk",
+                "Push Jerk",
+                "Push Press",
+                "Snatch Balance",
+                "Hang Power Clean",
 
-        // Unique Variations
-        "Paused Deadlift",
-        "Banded Bench Press",
-        "Banded Squats",
-        "Deficit Bulgarian Split Squat",
-        "Single Leg Romanian Deadlift",
-        "Safety Bar Squat",
-        "Zercher Deadlift",
-        "Cluster Set Deadlifts",
-        "Eccentric Pull-Ups",
-        "Paused Squats",
-        "Tempo Bench Press"
+                // Unique Variations
+                "Paused Deadlift",
+                "Banded Bench Press",
+                "Banded Squats",
+                "Deficit Bulgarian Split Squat",
+                "Single Leg Romanian Deadlift",
+                "Safety Bar Squat",
+                "Zercher Deadlift",
+                "Cluster Set Deadlifts",
+                "Eccentric Pull-Ups",
+                "Paused Squats",
+                "Tempo Bench Press"
     ]
 
     var body: some View {
         NavigationView {
-            VStack {
-                // TextField to add new exercise with an autocomplete overlay
-                VStack {
-                    HStack {
-                        TextField("New Exercise", text: $newExerciseName)
-                            .textFieldStyle(RoundedBorderTextFieldStyle())
-                            .padding(.horizontal)
-                            .onChange(of: newExerciseName) { _ in
-                                updateSuggestions()
-                            }
-                            .onTapGesture {
-                                showSuggestions = true
-                            }
-
-                        Button(action: {
-                            addExercise()
-                        }) {
-                            Image(systemName: "plus.circle.fill")
-                                .foregroundColor(.green)
-                                .font(.system(size: 24))
+            VStack(spacing: 0) {
+                // TextField to add new exercise
+                HStack {
+                    TextField("New Exercise", text: $newExerciseName)
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                        .onChange(of: newExerciseName) { _ in
+                            updateSuggestions()
                         }
-                        .padding(.trailing)
-                    }
-                    .padding(.top)
+                        .onTapGesture {
+                            showSuggestions = true
+                        }
+                        .padding(.horizontal)
 
-                    // Autocomplete suggestion list that appears directly under the text field
-                    if showSuggestions && !suggestedExercises.isEmpty {
+                    Button(action: {
+                        addExercise()
+                    }) {
+                        Image(systemName: "plus.circle.fill")
+                            .foregroundColor(.green)
+                            .font(.system(size: 24))
+                    }
+                    .padding(.trailing)
+                }
+                .padding(.top)
+
+                // Suggestion List positioned under the TextField
+                if showSuggestions && !suggestedExercises.isEmpty {
+                    VStack {
                         List {
                             ForEach(suggestedExercises, id: \.self) { suggestion in
                                 Button(action: {
@@ -315,19 +316,24 @@ struct ManageExercisesView: View {
                                         Text(suggestion)
                                         Spacer()
                                     }
-                                    .padding(.vertical, 8)
                                     .frame(maxWidth: .infinity, alignment: .leading)
-                                    .contentShape(Rectangle())
                                 }
                                 .buttonStyle(PlainButtonStyle())
                             }
                         }
-                        .background(Color.white)
+                        .listStyle(PlainListStyle())
+                        .frame(height: min(200, CGFloat(suggestedExercises.count * 44))) // Adjust as needed
                         .cornerRadius(8)
+                        .shadow(radius: 5)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 8)
+                                .stroke(Color.gray.opacity(0.5), lineWidth: 1)
+                        )
+                        .padding(.horizontal)
                     }
                 }
 
-                // List of added exercises with swipe to delete and edit, and tap to move pager
+                // List of added exercises
                 List {
                     ForEach(exercises.indices, id: \.self) { index in
                         HStack {
@@ -335,11 +341,11 @@ struct ManageExercisesView: View {
                                 .frame(maxWidth: .infinity, alignment: .leading)
                         }
                         .padding(.vertical, 8)
-                        .contentShape(Rectangle()) // Make the entire row tappable
+                        .contentShape(Rectangle())
                         .onTapGesture {
                             impactFeedback.impactOccurred()
-                            currentIndex = index  // Move the vertical pager to the tapped exercise
-                            dismiss()             // Dismiss the modal view
+                            currentIndex = index
+                            dismiss()
                         }
                         .swipeActions(edge: .leading, allowsFullSwipe: false) {
                             Button("Edit") {
@@ -356,8 +362,11 @@ struct ManageExercisesView: View {
                     }
                 }
                 .listStyle(PlainListStyle())
+                // Apply blur when suggestions are shown
+                .blur(radius: showSuggestions ? 10 : 0)
             }
             .navigationTitle("Manage Exercises")
+            .ignoresSafeArea(.keyboard, edges: .bottom) // Prevent content from moving up
             .alert(isPresented: $showDuplicateAlert) {
                 Alert(
                     title: Text("Duplicate Exercise"),
@@ -384,7 +393,7 @@ struct ManageExercisesView: View {
                     }
                     .padding()
                 }
-                .presentationDetents([.fraction(0.3)]) // Set the sheet size
+                .presentationDetents([.fraction(0.3)])
             }
         }
     }
