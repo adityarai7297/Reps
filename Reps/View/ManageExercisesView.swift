@@ -450,12 +450,19 @@ struct ManageExercisesView: View {
         }
     }
 
-    private func deleteExercise(_ exercise: Exercise) {
-        guard let index = exercises.firstIndex(of: exercise) else { return }
+    private func deleteExercise(_ exercise: Exercise?) {
+        guard let exercise = exercise,
+              let index = exercises.firstIndex(of: exercise) else {
+            // Handle the nil case or return
+            return
+        }
 
         // Immediately update the UI by removing the exercise
         exercises.remove(at: index)
         refreshTrigger.toggle()
+
+        // Capture the exercise name before the closure
+        let exerciseNameToDelete = exercise.name
 
         // Perform modelContext operations on the main thread
         let historyFetchRequest = FetchDescriptor<ExerciseHistory>(
@@ -464,7 +471,9 @@ struct ManageExercisesView: View {
 
         do {
             let allHistories = try modelContext.fetch(historyFetchRequest)
-            let historiesToDelete = allHistories.filter { $0.exerciseName == exercise.name }
+            
+            // Use the captured exercise name in the closure
+            let historiesToDelete = allHistories.filter { $0.exerciseName == exerciseNameToDelete }
 
             for history in historiesToDelete {
                 modelContext.delete(history)

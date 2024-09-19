@@ -27,8 +27,7 @@ struct ExerciseView: View {
                 .fontWeight(.medium)
                 .padding(.horizontal)
                 .padding(.top, 40)
-                .frame(width: UIScreen.main.bounds.width/1.4)
-               
+                .frame(width: UIScreen.main.bounds.width / 1.4)
 
             Spacer()
 
@@ -120,29 +119,40 @@ struct ExerciseView: View {
                 .onTapGesture {
                     impactFeedback.impactOccurred()
                     showingHistory.toggle()
-                    
                 }
                 .sheet(isPresented: $showingHistory) {
                     ExerciseHistoryView(exerciseName: exercise.name, onDelete: {
-                        calculateSetCountForToday()
+                        // Recalculate set count only if exercises are present
+                        if areExercisesPresent() {
+                            calculateSetCountForToday()
+                        } else {
+                            setCount = 0
+                        }
                     })
                     .environment(\.modelContext, modelContext)
                 }
             }
             .padding(.bottom, 40)
-            
-            
         }
         .padding(.horizontal)
         .foregroundColor(.black)
         .background(color)
         .onAppear {
             loadCurrentValues()
-            calculateSetCountForToday()
+            // Only calculate set count if exercises are present
+            if areExercisesPresent() {
+                calculateSetCountForToday()
+            } else {
+                setCount = 0
+            }
         }
         // Recalculate set count when refreshTrigger changes
         .onChange(of: refreshTrigger) { _ in
-            calculateSetCountForToday()
+            if areExercisesPresent() {
+                calculateSetCountForToday()
+            } else {
+                setCount = 0
+            }
         }
     }
 
@@ -202,7 +212,12 @@ struct ExerciseView: View {
                 try modelContext.save()
 
                 DispatchQueue.main.async {
-                    calculateSetCountForToday()
+                    // Recalculate set count only if exercises are present
+                    if areExercisesPresent() {
+                        calculateSetCountForToday()
+                    } else {
+                        setCount = 0
+                    }
                     // Handle any additional logic if needed
                 }
             } catch {
@@ -215,6 +230,15 @@ struct ExerciseView: View {
 
     private func calculateSetCountForToday() {
         let exerciseName = exercise.name
+
+        // Return early if exercise name is empty
+        if exerciseName.isEmpty {
+            DispatchQueue.main.async {
+                setCount = 0
+            }
+            return
+        }
+
         let calendar = Calendar.current
         let startOfDay = calendar.startOfDay(for: Date())
         let endOfDay = calendar.date(byAdding: .day, value: 1, to: startOfDay)!
@@ -241,6 +265,20 @@ struct ExerciseView: View {
                     setCount = 0
                 }
             }
+        }
+    }
+
+    // **Helper Method to Check for Exercises**
+    private func areExercisesPresent() -> Bool {
+        let fetchRequest = FetchDescriptor<Exercise>(
+            predicate: nil
+        )
+        do {
+            let exercises = try modelContext.fetch(fetchRequest)
+            return !exercises.isEmpty
+        } catch {
+            print("Failed to fetch exercises: \(error)")
+            return false
         }
     }
 }
