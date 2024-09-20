@@ -2,7 +2,7 @@ import SwiftData
 import SwiftUI
 
 @Model
-final class ExerciseHistory {
+final class ExerciseHistory: ObservableObject, Identifiable {
     @Attribute(.unique) var id: UUID
     var exerciseName: String // Store exercise name directly
     var weight: CGFloat
