@@ -30,9 +30,9 @@ struct VerticalPager<Content: View>: View {
                     Color.black.opacity(0.5)
                         .edgesIgnoringSafeArea(.all)
                         .overlay(
-                            ProgressView("Loading...")
+                            ProgressView()
                                 .progressViewStyle(CircularProgressViewStyle())
-                                .foregroundColor(.white)
+                                .tint(.white)
                         )
                 }
             }
