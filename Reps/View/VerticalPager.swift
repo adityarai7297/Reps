@@ -6,6 +6,7 @@ struct VerticalPager<Content: View>: View {
     let contentAtIndex: (Int) -> Content
 
     @GestureState private var dragOffset: CGFloat = 0
+    @State private var isTransitioning: Bool = false
     @State private var impactFeedback = UIImpactFeedbackGenerator(style: .heavy)
 
     // Add a parameter for drag threshold
@@ -23,28 +24,39 @@ struct VerticalPager<Content: View>: View {
                             .offset(y: CGFloat(index - currentIndex) * height + dragOffset)
                     }
                 }
+
+                // Optional loading screen while transitioning
+                if isTransitioning {
+                    Color.black.opacity(0.5)
+                        .edgesIgnoringSafeArea(.all)
+                        .overlay(
+                            ProgressView("Loading...")
+                                .progressViewStyle(CircularProgressViewStyle())
+                                .foregroundColor(.white)
+                        )
+                }
             }
             .gesture(
                 DragGesture()
                     .updating($dragOffset) { value, state, _ in
-                        state = value.translation.height
+                        if !isTransitioning { // Disable dragging if transitioning
+                            state = value.translation.height
+                        }
                     }
-                    .onEnded {
-                        value in
+                    .onEnded { value in
+                        guard !isTransitioning else { return } // Ignore gesture if transitioning
+
                         let dragDistance = value.translation.height
-                        let predictedEndOffset = value.predictedEndTranslation.height
                         let dragVelocity = value.velocity.height
                         let threshold = dragThreshold
 
                         if dragDistance < -threshold || dragVelocity < -500 {
                             if currentIndex < pageCount - 1 {
-                                impactFeedback.impactOccurred()
-                                currentIndex += 1
+                                triggerTransition(to: currentIndex + 1)
                             }
                         } else if dragDistance > threshold || dragVelocity > 500 {
                             if currentIndex > 0 {
-                                impactFeedback.impactOccurred()
-                                currentIndex -= 1
+                                triggerTransition(to: currentIndex - 1)
                             }
                         }
                     }
@@ -53,5 +65,17 @@ struct VerticalPager<Content: View>: View {
             .animation(.interactiveSpring(), value: currentIndex)
         }
         .edgesIgnoringSafeArea(.all)
+    }
+
+    // Function to handle transitions
+    private func triggerTransition(to newIndex: Int) {
+        isTransitioning = true
+        impactFeedback.impactOccurred()
+
+        // Simulate loading time (adjust this duration as needed)
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+            currentIndex = newIndex
+            isTransitioning = false
+        }
     }
 }
