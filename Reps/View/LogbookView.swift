@@ -4,10 +4,11 @@ import SwiftData
 struct LogbookView: View {
     @Environment(\.modelContext) private var modelContext
     @State private var groupedByDate: [Date: [String: [ExerciseHistory]]] = [:] // Group by date, then by exercise name
+    @State private var selectedDate: Date? = nil // The date the user selects on the calendar
     @Binding var setCount: Int // Bind the set count from the parent view (ContentView)
     @Binding var refreshTrigger: Bool // Add this binding to notify changes
     @State private var impactFeedback = UIImpactFeedbackGenerator(style: .heavy)
-
+    
     var body: some View {
         VStack(alignment: .leading) {
             Text("Logbook")
@@ -16,72 +17,69 @@ struct LogbookView: View {
                 .padding(.leading, 16)
                 .padding(.top, 32)
 
-            if groupedByDate.isEmpty {
-                Text("No exercise history available")
-                    .foregroundColor(.gray)
-                    .font(.headline)
-                    .padding(.top, 20)
-                    .padding(.leading, 16)
-            } else {
+            // FSCalendar implementation
+            FSCalendarView(selectedDate: $selectedDate, workoutDays: Array(groupedByDate.keys))
+                .frame(height: 400)
+                .padding()
+
+            if let date = selectedDate, let workoutsForDate = groupedByDate[Calendar.current.startOfDay(for: date)] {
+                // Display the workout history for the selected date
                 ScrollView {
-                    ForEach(groupedByDate.keys.sorted(by: >), id: \.self) { date in
-                        Section(header: Text(formattedDate(date))
-                                    .font(.headline)
-                                    .foregroundColor(.secondary)
-                                    .padding(.leading, 16)) {
-                            // Subgroup by exercise name
-                            ForEach(groupedByDate[date]?.keys.sorted() ?? [], id: \.self) { exerciseName in
-                                VStack(alignment: .leading) {
-                                    Text(exerciseName)
-                                        .font(.headline)
-                                        .padding(.leading, 16)
-                                        .foregroundColor(.primary)
+                    ForEach(workoutsForDate.keys.sorted(), id: \.self) { exerciseName in
+                        VStack(alignment: .leading) {
+                            Text(exerciseName)
+                                .font(.headline)
+                                .padding(.leading, 16)
+                                .foregroundColor(.primary)
 
-                                    ForEach(groupedByDate[date]?[exerciseName] ?? [], id: \.self) { history in
-                                        HStack {
-                                            VStack(alignment: .leading, spacing: 8) {
-                                                Text("Weight: \(history.weight, specifier: "%.1f") lbs")
-                                                    .font(.headline)
-                                                    .foregroundColor(.primary)
+                            ForEach(workoutsForDate[exerciseName] ?? [], id: \.self) { history in
+                                HStack {
+                                    VStack(alignment: .leading, spacing: 8) {
+                                        Text("Weight: \(history.weight, specifier: "%.1f") lbs")
+                                            .font(.headline)
+                                            .foregroundColor(.primary)
 
-                                                Text("Reps: \(history.reps, specifier: "%.0f")")
-                                                    .font(.headline)
-                                                    .foregroundColor(.primary)
+                                        Text("Reps: \(history.reps, specifier: "%.0f")")
+                                            .font(.headline)
+                                            .foregroundColor(.primary)
 
-                                                Text("RPE: \(history.rpe, specifier: "%.0f")%")
-                                                    .font(.headline)
-                                                    .foregroundColor(.primary)
+                                        Text("RPE: \(history.rpe, specifier: "%.0f")%")
+                                            .font(.headline)
+                                            .foregroundColor(.primary)
 
-                                                Text("Time: \(formattedTime(history.timestamp))")
-                                                    .font(.headline)
-                                                    .foregroundColor(.primary)
-                                            }
-                                            Spacer()
+                                        Text("Time: \(formattedTime(history.timestamp))")
+                                            .font(.headline)
+                                            .foregroundColor(.primary)
+                                    }
+                                    Spacer()
 
-                                            // Delete button for exercise history
-                                            Button(action: {
-                                                impactFeedback.impactOccurred()
-                                                withAnimation {
-                                                    deleteHistory(history)
-                                                }
-                                            }) {
-                                                Image(systemName: "trash")
-                                                    .foregroundColor(.red)
-                                                    .padding()
-                                            }
+                                    // Delete button for exercise history
+                                    Button(action: {
+                                        impactFeedback.impactOccurred()
+                                        withAnimation {
+                                            deleteHistory(history)
                                         }
-                                        .padding()
-                                        .background(Color(UIColor.secondarySystemBackground))
-                                        .cornerRadius(10)
-                                        .padding(.horizontal, 16)
+                                    }) {
+                                        Image(systemName: "trash")
+                                            .foregroundColor(.red)
+                                            .padding()
                                     }
                                 }
+                                .padding()
+                                .background(Color(UIColor.secondarySystemBackground))
+                                .cornerRadius(10)
+                                .padding(.horizontal, 16)
                             }
                         }
                     }
                 }
                 .padding()
-                .background(Color(UIColor.systemBackground))
+            } else {
+                Text("Select a date to view your workout history")
+                    .foregroundColor(.gray)
+                    .font(.headline)
+                    .padding(.top, 20)
+                    .padding(.leading, 16)
             }
         }
         .onAppear {
@@ -92,12 +90,13 @@ struct LogbookView: View {
     // Loading all exercise history and grouping by date, then by exercise name
     private func loadAllExerciseHistory() {
         DispatchQueue.global(qos: .userInitiated).async {
-            let fetchRequest = FetchDescriptor<ExerciseHistory>(
+            let fetchDescriptor = FetchDescriptor<ExerciseHistory>(
                 sortBy: [SortDescriptor(\.timestamp, order: .reverse)]
             )
 
             do {
-                let allHistory = try modelContext.fetch(fetchRequest)
+                // Fetch the data using the descriptor
+                let allHistory = try modelContext.fetch(fetchDescriptor)
 
                 // Group by date, then by exercise name
                 let grouped = Dictionary(grouping: allHistory) { history in
@@ -145,15 +144,15 @@ struct LogbookView: View {
             let startOfDay = calendar.startOfDay(for: Date())
             let endOfDay = calendar.date(byAdding: .day, value: 1, to: startOfDay)!
 
-            // Fetch today's exercise history
-            let fetchRequest = FetchDescriptor<ExerciseHistory>(
+            // Fetch today's exercise history with a descriptor and predicate
+            let fetchDescriptor = FetchDescriptor<ExerciseHistory>(
                 predicate: #Predicate { history in
                     history.timestamp >= startOfDay && history.timestamp < endOfDay
                 }
             )
 
             do {
-                let todayHistory = try modelContext.fetch(fetchRequest)
+                let todayHistory = try modelContext.fetch(fetchDescriptor)
 
                 DispatchQueue.main.async {
                     // Update the setCount on the main thread
