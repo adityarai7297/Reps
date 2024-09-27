@@ -11,7 +11,6 @@ struct ContentView: View {
     @State private var setCount: Int = 0
     @State private var exercises: [Exercise] = []
     @State private var showingManageExercises = false
-    @State private var isLoading = false // New state for loading
     @State private var refreshTrigger = false // Used to trigger refresh
     @State private var showingLogbook = false
     @State private var catOffset: CGFloat = UIScreen.main.bounds.height // Start off-screen
@@ -42,42 +41,26 @@ struct ContentView: View {
                         .gradientBackground(index: index)
                     }
                 }
-
-                // Loading view when managing exercises is loading
-                if isLoading {
-                    Color.black.opacity(0.5)
-                        .edgesIgnoringSafeArea(.all)
-                        .overlay(
-                            ProgressView()
-                                .progressViewStyle(CircularProgressViewStyle())
-                                .tint(.white)
-                        )
-                }
             }
             .navigationBarItems(
-                leading: Button(action: {
-                    impactFeedback.impactOccurred() // Add this line
-                    showingLogbook.toggle()
-                }) {
-                    Image(systemName: "book.pages")
-                        .font(.title2)
-                        .foregroundColor(exercises.isEmpty ? .white : .black)
-                },
-                trailing: Button(action: {
-                    impactFeedback.impactOccurred() // Add this line
-                    // Start loading when manage exercises is triggered
-                    isLoading = true
-                    currentIndex = 0
-                    // Simulate a delay before showing the modal to mimic actual loading time
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                        showingManageExercises = true
-                        isLoading = false
-                    }
-                }) {
-                    Image(systemName: "list.bullet")
-                        .foregroundColor(exercises.isEmpty ? .white : .black)
-                }
-            )
+                            leading: Button(action: {
+                                impactFeedback.impactOccurred() // Add this line
+                                showingLogbook.toggle()
+                            }) {
+                                Image(systemName: "book.pages")
+                                    .font(.title2)
+                                    .foregroundColor(exercises.isEmpty ? .white : .black)
+                            },
+                            trailing: Button(action: {
+                                impactFeedback.impactOccurred() // Add this line
+                                // Reset to the first exercise
+                                currentIndex = 0
+                                showingManageExercises.toggle()
+                            }) {
+                                Image(systemName: "list.bullet")
+                                    .foregroundColor(exercises.isEmpty ? .white : .black)
+                            }
+                        )
             .sheet(isPresented: $showingLogbook) {
                 LogbookView(setCount: $setCount, refreshTrigger: $refreshTrigger) // Pass refreshTrigger
                     .environment(\.modelContext, modelContext)
@@ -99,7 +82,7 @@ struct ContentView: View {
         }
         .preferredColorScheme(.dark)
     }
-
+    
     // The loadExercises function that fetches exercises from the model context
     private func loadExercises() {
         DispatchQueue.global(qos: .userInitiated).async {
