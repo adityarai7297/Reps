@@ -8,7 +8,17 @@ struct LogbookView: View {
     @Binding var setCount: Int // Bind the set count from the parent view (ContentView)
     @Binding var refreshTrigger: Bool // Add this binding to notify changes
     @State private var impactFeedback = UIImpactFeedbackGenerator(style: .heavy)
-    
+
+    // Computed property to construct workoutData
+    var workoutData: [Date: Int] {
+        groupedByDate.reduce(into: [:]) { result, entry in
+            let (date, exercisesDict) = entry
+            // Sum the counts of ExerciseHistory arrays to get total sets
+            let totalSets = exercisesDict.values.reduce(0) { $0 + $1.count }
+            result[date] = totalSets
+        }
+    }
+
     var body: some View {
         VStack(alignment: .leading) {
             Text("Logbook")
@@ -17,9 +27,9 @@ struct LogbookView: View {
                 .padding(.leading, 16)
                 .padding(.top, 32)
 
-            // FSCalendar implementation
-            FSCalendarView(selectedDate: $selectedDate, workoutDays: Array(groupedByDate.keys))
-                .frame(height: 300)
+            // FSCalendar implementation with workoutData
+            FSCalendarView(selectedDate: $selectedDate, workoutData: workoutData)
+                .frame(height: 400)
                 .padding()
 
             if let date = selectedDate, let workoutsForDate = groupedByDate[Calendar.current.startOfDay(for: date)] {
@@ -98,7 +108,7 @@ struct LogbookView: View {
                 // Fetch the data using the descriptor
                 let allHistory = try modelContext.fetch(fetchDescriptor)
 
-                // Group by date, then by exercise name
+                // Group by date (normalized), then by exercise name
                 let grouped = Dictionary(grouping: allHistory) { history in
                     Calendar.current.startOfDay(for: history.timestamp)
                 }.mapValues { histories in
