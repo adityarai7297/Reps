@@ -3,7 +3,7 @@ import FSCalendar
 
 struct FSCalendarView: UIViewRepresentable {
     @Binding var selectedDate: Date?
-    let workoutDays: [Date] // List of dates that have workout data
+    let workoutDays: [Date]
 
     func makeUIView(context: Context) -> FSCalendar {
         let calendar = FSCalendar()
@@ -11,9 +11,10 @@ struct FSCalendarView: UIViewRepresentable {
         // Customize the calendar appearance
         calendar.appearance.headerTitleColor = UIColor.systemBlue
         calendar.appearance.weekdayTextColor = UIColor.systemBlue
-        calendar.appearance.selectionColor = UIColor.systemBlue
-        calendar.appearance.todayColor = UIColor.systemGray
+        calendar.appearance.selectionColor = UIColor.systemRed
+        calendar.appearance.todayColor = UIColor.systemGreen
         calendar.appearance.titleTodayColor = UIColor.white
+        calendar.appearance.titleDefaultColor = UIColor.white
 
         calendar.delegate = context.coordinator
         calendar.dataSource = context.coordinator
@@ -22,7 +23,33 @@ struct FSCalendarView: UIViewRepresentable {
     }
 
     func updateUIView(_ uiView: FSCalendar, context: Context) {
-        uiView.reloadData() // Reload calendar when workout days or selected date changes
+        // Only reload data if workoutDays have changed
+        if context.coordinator.workoutDays != workoutDays {
+            uiView.reloadData()
+            context.coordinator.workoutDays = workoutDays
+        }
+
+        // Only update selection if the selected date has changed
+        if let selectedDate = selectedDate {
+            if let currentSelectedDate = uiView.selectedDate {
+                if !Calendar.current.isDate(currentSelectedDate, inSameDayAs: selectedDate) {
+                    // Disable animations to prevent ghosting
+                    UIView.performWithoutAnimation {
+                        uiView.select(selectedDate)
+                    }
+                }
+            } else {
+                UIView.performWithoutAnimation {
+                    uiView.select(selectedDate)
+                }
+            }
+        } else {
+            if let currentSelectedDate = uiView.selectedDate {
+                UIView.performWithoutAnimation {
+                    uiView.deselect(currentSelectedDate)
+                }
+            }
+        }
     }
 
     func makeCoordinator() -> Coordinator {
@@ -31,32 +58,37 @@ struct FSCalendarView: UIViewRepresentable {
 
     class Coordinator: NSObject, FSCalendarDelegate, FSCalendarDataSource {
         var parent: FSCalendarView
+        var workoutDays: [Date]
 
         init(_ parent: FSCalendarView) {
             self.parent = parent
+            self.workoutDays = parent.workoutDays
         }
 
         func calendar(_ calendar: FSCalendar, numberOfEventsFor date: Date) -> Int {
-            // If the date has workouts, return 1 to show an indicator dot
-            if parent.workoutDays.contains(where: { Calendar.current.isDate($0, inSameDayAs: date) }) {
+            if workoutDays.contains(where: { Calendar.current.isDate($0, inSameDayAs: date) }) {
                 return 1
             }
             return 0
         }
 
         func calendar(_ calendar: FSCalendar, didSelect date: Date, at monthPosition: FSCalendarMonthPosition) {
-            // Update selected date when a date is tapped
             parent.selectedDate = date
+            if monthPosition != .current {
+                calendar.setCurrentPage(date, animated: true)
+            }
         }
 
         func minimumDate(for calendar: FSCalendar) -> Date {
-            // Set the minimum date for the calendar
             return Calendar.current.date(byAdding: .year, value: -1, to: Date()) ?? Date()
         }
 
         func maximumDate(for calendar: FSCalendar) -> Date {
-            // Set the maximum date for the calendar
             return Date()
+        }
+
+        func calendar(_ calendar: FSCalendar, appearance: FSCalendarAppearance, titleDefaultColorFor date: Date) -> UIColor? {
+            return UIColor.white
         }
     }
 }
