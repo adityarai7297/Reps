@@ -19,7 +19,7 @@ struct LogbookView: View {
 
             // FSCalendar implementation
             FSCalendarView(selectedDate: $selectedDate, workoutDays: Array(groupedByDate.keys))
-                .frame(height: 400)
+                .frame(height: 300)
                 .padding()
 
             if let date = selectedDate, let workoutsForDate = groupedByDate[Calendar.current.startOfDay(for: date)] {
