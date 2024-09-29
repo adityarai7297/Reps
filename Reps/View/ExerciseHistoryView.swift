@@ -50,21 +50,14 @@ struct ExerciseHistoryView: View {
 
                                 Spacer()
 
-                                // Delete button
-                                Button(action: {
-                                    impactFeedback.impactOccurred()
-                                    withAnimation {
-                                        deleteHistory(history)
-                                    }
-                                }) {
-                                    Image(systemName: "trash")
-                                        .foregroundColor(.red)
-                                        .padding()
-                                }
                             }
                             .padding()
                             .background(Color(UIColor.secondarySystemBackground))
                             .cornerRadius(10)
+                            // Hacky solution: Add a tap gesture to consume taps on the entire block
+                            .onTapGesture {
+                                // Do nothing to prevent tap on the whole block from triggering delete
+                            }
                         }
                     }
                 }
