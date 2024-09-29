@@ -8,6 +8,7 @@ struct LogbookView: View {
     @Binding var setCount: Int // Bind the set count from the parent view (ContentView)
     @Binding var refreshTrigger: Bool // Add this binding to notify changes
     @State private var impactFeedback = UIImpactFeedbackGenerator(style: .heavy)
+    @State private var itemsToDelete: Set<ExerciseHistory> = [] // Track items being deleted
 
     // Computed property to construct workoutData
     var workoutData: [Date: Int] {
@@ -32,7 +33,14 @@ struct LogbookView: View {
                 .frame(height: 400)
                 .padding()
 
-            if let date = selectedDate, let workoutsForDate = groupedByDate[Calendar.current.startOfDay(for: date)] {
+            if groupedByDate.isEmpty {
+                // Show a default view if no history is available
+                Text("No exercise history available")
+                    .foregroundColor(.gray)
+                    .font(.headline)
+                    .padding(.top, 20)
+                    .padding(.leading, 16)
+            } else if let date = selectedDate, let workoutsForDate = groupedByDate[Calendar.current.startOfDay(for: date)] {
                 // Display the workout history for the selected date
                 ScrollView {
                     ForEach(workoutsForDate.keys.sorted(), id: \.self) { exerciseName in
@@ -43,42 +51,50 @@ struct LogbookView: View {
                                 .foregroundColor(.primary)
 
                             ForEach(workoutsForDate[exerciseName] ?? [], id: \.self) { history in
-                                HStack {
-                                    VStack(alignment: .leading, spacing: 8) {
-                                        Text("Weight: \(history.weight, specifier: "%.1f") lbs")
-                                            .font(.headline)
-                                            .foregroundColor(.primary)
+                                if !itemsToDelete.contains(history) {
+                                    HStack {
+                                        VStack(alignment: .leading, spacing: 8) {
+                                            Text("Weight: \(history.weight, specifier: "%.1f") lbs")
+                                                .font(.headline)
+                                                .foregroundColor(.primary)
 
-                                        Text("Reps: \(history.reps, specifier: "%.0f")")
-                                            .font(.headline)
-                                            .foregroundColor(.primary)
+                                            Text("Reps: \(history.reps, specifier: "%.0f")")
+                                                .font(.headline)
+                                                .foregroundColor(.primary)
 
-                                        Text("RPE: \(history.rpe, specifier: "%.0f")%")
-                                            .font(.headline)
-                                            .foregroundColor(.primary)
+                                            Text("RPE: \(history.rpe, specifier: "%.0f")%")
+                                                .font(.headline)
+                                                .foregroundColor(.primary)
 
-                                        Text("Time: \(formattedTime(history.timestamp))")
-                                            .font(.headline)
-                                            .foregroundColor(.primary)
-                                    }
-                                    Spacer()
-
-                                    // Delete button for exercise history
-                                    Button(action: {
-                                        impactFeedback.impactOccurred()
-                                        withAnimation {
-                                            deleteHistory(history)
+                                            Text("Time: \(formattedTime(history.timestamp))")
+                                                .font(.headline)
+                                                .foregroundColor(.primary)
                                         }
-                                    }) {
-                                        Image(systemName: "trash")
-                                            .foregroundColor(.red)
-                                            .padding()
+                                        Spacer()
+
+                                        // Delete button for exercise history
+                                        Button(action: {
+                                            impactFeedback.impactOccurred()
+                                            // Trigger a deletion animation
+                                            withAnimation(.easeInOut(duration: 0.5)) {
+                                                itemsToDelete.insert(history) // Mark as deleting
+                                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                                                    deleteHistory(history) // Perform deletion after animation
+                                                }
+                                            }
+                                        }) {
+                                            Image(systemName: "trash")
+                                                .foregroundColor(.red)
+                                                .padding()
+                                        }
                                     }
+                                    .padding()
+                                    .background(Color(UIColor.secondarySystemBackground))
+                                    .cornerRadius(10)
+                                    .padding(.horizontal, 16)
+                                    .transition(.scaleAndFade) // Apply custom transition
+                                    .animation(.easeInOut(duration: 0.5), value: itemsToDelete) // Animate deletion
                                 }
-                                .padding()
-                                .background(Color(UIColor.secondarySystemBackground))
-                                .cornerRadius(10)
-                                .padding(.horizontal, 16)
                             }
                         }
                     }
@@ -136,7 +152,8 @@ struct LogbookView: View {
                 try modelContext.save()
 
                 DispatchQueue.main.async {
-                    // Reload the history and recalculate set count on the main thread
+                    // Remove the item from the deletion set and reload
+                    itemsToDelete.remove(history)
                     loadAllExerciseHistory()
                     calculateSetCountForToday()
                     refreshTrigger.toggle() // Notify parent views about the change
@@ -188,5 +205,13 @@ struct LogbookView: View {
         let formatter = DateFormatter()
         formatter.dateStyle = .medium
         return formatter.string(from: date)
+    }
+}
+
+// Custom Transition Modifier for Scale and Fade Animation
+extension AnyTransition {
+    static var scaleAndFade: AnyTransition {
+        AnyTransition.scale(scale: 0.95)
+            .combined(with: .opacity)
     }
 }
