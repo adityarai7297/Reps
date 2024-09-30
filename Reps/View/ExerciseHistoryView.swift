@@ -49,14 +49,17 @@ struct ExerciseHistoryView: View {
                                 }
 
                                 Spacer()
-
                             }
                             .padding()
                             .background(Color(UIColor.secondarySystemBackground))
                             .cornerRadius(10)
-                            // Hacky solution: Add a tap gesture to consume taps on the entire block
-                            .onTapGesture {
-                                // Do nothing to prevent tap on the whole block from triggering delete
+                            // Implement Swipe to Delete
+                            .swipeActions(edge: .trailing) {
+                                Button(role: .destructive) {
+                                    deleteHistory(history)
+                                } label: {
+                                    Label("Delete", systemImage: "trash")
+                                }
                             }
                         }
                     }
@@ -100,6 +103,7 @@ struct ExerciseHistoryView: View {
             try modelContext.save()
             onDelete() // Trigger the set count recalculation
             loadExerciseHistory() // Reload the history after deletion
+            impactFeedback.impactOccurred() // Haptic feedback on delete
         } catch {
             print("Failed to delete exercise history: \(error)")
         }
