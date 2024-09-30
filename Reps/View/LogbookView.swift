@@ -41,14 +41,13 @@ struct LogbookView: View {
                     .padding(.top, 20)
                     .padding(.leading, 16)
             } else if let date = selectedDate, let workoutsForDate = groupedByDate[Calendar.current.startOfDay(for: date)] {
-                // Display the workout history for the selected date
-                ScrollView {
+                // Replace ScrollView with List to support swipe actions
+                List {
                     ForEach(workoutsForDate.keys.sorted(), id: \.self) { exerciseName in
-                        VStack(alignment: .leading) {
-                            Text(exerciseName)
-                                .font(.headline)
-                                .padding(.leading, 16)
-                                .foregroundColor(.primary)
+                        Section(header: Text(exerciseName)
+                                    .font(.headline)
+                                    .padding(.leading, 16)
+                                    .foregroundColor(.primary)) {
 
                             ForEach(workoutsForDate[exerciseName] ?? [], id: \.self) { history in
                                 if !itemsToDelete.contains(history) {
@@ -71,35 +70,32 @@ struct LogbookView: View {
                                                 .foregroundColor(.primary)
                                         }
                                         Spacer()
-
-                                        // Delete button for exercise history
-                                        Button(action: {
-                                            impactFeedback.impactOccurred()
-                                            // Trigger a deletion animation
-                                            withAnimation(.easeInOut(duration: 0.5)) {
+                                    }
+                                    .padding()
+                                    .background(Color(UIColor.secondarySystemBackground))
+                                    .cornerRadius(10)
+                                    .transition(.scaleAndFade) // Apply custom transition
+                                    .animation(.easeInOut(duration: 0.5), value: itemsToDelete) // Animate deletion
+                                    .swipeActions(edge: .trailing) {
+                                        Button(role: .destructive) {
+                                            impactFeedback.impactOccurred() // Haptic feedback
+                                            withAnimation {
                                                 itemsToDelete.insert(history) // Mark as deleting
                                                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                                                     deleteHistory(history) // Perform deletion after animation
                                                 }
                                             }
-                                        }) {
-                                            Image(systemName: "trash")
-                                                .foregroundColor(.red)
-                                                .padding()
+                                        } label: {
+                                            Label("Delete", systemImage: "trash")
                                         }
                                     }
-                                    .padding()
-                                    .background(Color(UIColor.secondarySystemBackground))
-                                    .cornerRadius(10)
-                                    .padding(.horizontal, 16)
-                                    .transition(.scaleAndFade) // Apply custom transition
-                                    .animation(.easeInOut(duration: 0.5), value: itemsToDelete) // Animate deletion
                                 }
                             }
                         }
                     }
                 }
-                .padding()
+                .listStyle(PlainListStyle()) // Ensure it behaves similarly to ScrollView
+                .padding(.horizontal, 16) // Maintain the same padding as the original ScrollView
             } else {
                 Text("Select a date to view your workout history")
                     .foregroundColor(.gray)
