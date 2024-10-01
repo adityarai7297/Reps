@@ -53,18 +53,22 @@ struct LogbookView: View {
                                 if !itemsToDelete.contains(history) {
                                     HStack {
                                         VStack(alignment: .leading, spacing: 8) {
-                                            Text("Weight: \(history.weight, specifier: "%.1f") lbs")
+                                            // Display weight, removing ".0" if it's a whole number
+                                            Text("Weight: \(history.weight == floor(history.weight) ? String(format: "%.0f", history.weight) : String(format: "%.1f", history.weight)) lbs")
                                                 .font(.headline)
                                                 .foregroundColor(.primary)
 
-                                            Text("Reps: \(history.reps, specifier: "%.0f")")
+                                            // Display reps, removing ".0" if it's a whole number
+                                            Text("Reps: \(history.reps == floor(history.reps) ? String(format: "%.0f", history.reps) : String(format: "%.1f", history.reps))")
                                                 .font(.headline)
                                                 .foregroundColor(.primary)
 
-                                            Text("RPE: \(history.rpe, specifier: "%.0f")%")
+                                            // Display RPE, removing ".0" if it's a whole number
+                                            Text("RPE: \(history.rpe == floor(history.rpe) ? String(format: "%.0f", history.rpe) : String(format: "%.1f", history.rpe))%")
                                                 .font(.headline)
                                                 .foregroundColor(.primary)
 
+                                            // Time display remains unchanged
                                             Text("Time: \(formattedTime(history.timestamp))")
                                                 .font(.headline)
                                                 .foregroundColor(.primary)
