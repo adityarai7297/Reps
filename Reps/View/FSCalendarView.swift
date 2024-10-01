@@ -12,7 +12,7 @@ struct FSCalendarView: UIViewRepresentable {
         calendar.appearance.headerTitleColor = UIColor.systemBlue
         calendar.appearance.weekdayTextColor = UIColor.systemBlue
         calendar.appearance.selectionColor = UIColor.systemBlue // Highlight selected date in blue
-        calendar.appearance.todayColor = UIColor.systemGreen
+        calendar.appearance.todayColor = UIColor.clear // Remove default green color for today
         calendar.appearance.titleTodayColor = UIColor.white
         calendar.appearance.titleDefaultColor = UIColor.white
         calendar.appearance.borderRadius = 0.2 // Set to create rounded squares instead of circles
@@ -92,23 +92,30 @@ struct FSCalendarView: UIViewRepresentable {
         // Customize the fill color for each date based on the number of sets
         func calendar(_ calendar: FSCalendar, appearance: FSCalendarAppearance, fillDefaultColorFor date: Date) -> UIColor? {
             // Get the number of sets for the date
-            let sets = workoutData.first(where: { Calendar.current.isDate($0.key, inSameDayAs: date) })?.value
+            if let sets = workoutData.first(where: { Calendar.current.isDate($0.key, inSameDayAs: date) })?.value {
+                if sets > 0 {
+                    // Define the range for number of sets
+                    let maxSets = 25.0 // Adjust based on your maximum expected sets
+                    let minSets = 1.0
 
-            if let sets = sets {
-                // Define the range for number of sets
-                let maxSets = 25.0 // Adjust based on your maximum expected sets
-                let minSets = 1.0
+                    // Normalize the sets to a value between 0 and 1
+                    let normalizedSets = CGFloat((Double(sets) - minSets) / (maxSets - minSets))
+                    let clampedNormalizedSets = max(0.0, min(1.0, normalizedSets))
 
-                // Normalize the sets to a value between 0 and 1
-                let normalizedSets = CGFloat((Double(sets) - minSets) / (maxSets - minSets))
-                let clampedNormalizedSets = max(0.0, min(1.0, normalizedSets))
+                    // Set the transparency based on the normalized set count (more sets = less transparent)
+                    let alphaValue = clampedNormalizedSets * 0.7 + 0.1 // Ensures a minimum opacity
+                    let greenColor = UIColor.systemGreen.withAlphaComponent(alphaValue)
 
-                // Set the transparency based on the normalized set count (more sets = less transparent)
-                let alphaValue = clampedNormalizedSets * 0.7 + 0.1 // Ensures a minimum opacity
-                let greenColor = UIColor.systemGreen.withAlphaComponent(alphaValue)
-
-                return greenColor
+                    return greenColor
+                } else {
+                    // No sets performed, return nil to indicate no color should be filled
+                    return nil
+                }
+            } else if Calendar.current.isDateInToday(date) {
+                // Ensure the current day is not highlighted if it has 0 sets
+                return nil
             } else {
+                // No data for this date, so return nil (no fill color)
                 return nil
             }
         }
