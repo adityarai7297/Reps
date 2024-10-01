@@ -16,6 +16,7 @@ struct LogbookView: View {
             let (date, exercisesDict) = entry
             // Sum the counts of ExerciseHistory arrays to get total sets
             let totalSets = exercisesDict.values.reduce(0) { $0 + $1.count }
+            // Only include dates with non-zero sets
             result[date] = totalSets
         }
     }
