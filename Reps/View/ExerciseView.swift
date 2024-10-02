@@ -3,14 +3,14 @@ import SwiftData
 
 struct ExerciseView: View {
     @Binding var exercise: Exercise
-    @Binding var refreshTrigger: Bool // Add this binding
+    @Binding var refreshTrigger: Bool
     @State private var showCheckmark: Bool = false
     @State private var showingHistory = false
     @Environment(\.modelContext) private var modelContext
     @State private var currentWeight: CGFloat = 0
     @State private var currentReps: CGFloat = 0
     @State private var currentRPE: CGFloat = 0
-    @State private var setCount: Int = 0 // This tracks the number of sets for today
+    @State private var setCount: Int = 0
     @State private var impactFeedback = UIImpactFeedbackGenerator(style: .heavy)
     let weightWheelConfig: WheelPicker.Config
     let repWheelConfig: WheelPicker.Config
@@ -147,7 +147,6 @@ struct ExerciseView: View {
     }
 
     // **Data Fetching and Saving Methods**
-
     private func loadCurrentValues() {
         let exerciseName = exercise.name
 
