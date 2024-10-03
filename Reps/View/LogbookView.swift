@@ -57,40 +57,37 @@ struct LogbookView: View {
                                             // Display weight, removing ".0" if it's a whole number
                                             HStack {
                                                 Text("Weight: ")
-                                                    .font(.headline) // Less bold and smaller font for the label
+                                                    .font(.headline)
                                                     .foregroundColor(.secondary)
                                                 Text("\(history.weight == floor(history.weight) ? String(format: "%.0f", history.weight) : String(format: "%.1f", history.weight)) lbs")
-                                                    .font(.headline) // Larger and bolder font for the actual value
+                                                    .font(.headline)
                                                     .foregroundColor(.primary)
                                             }
 
-                                            // Display reps, removing ".0" if it's a whole number
                                             HStack {
                                                 Text("Reps: ")
-                                                    .font(.headline) // Less bold and smaller font for the label
+                                                    .font(.headline)
                                                     .foregroundColor(.secondary)
                                                 Text("\(history.reps == floor(history.reps) ? String(format: "%.0f", history.reps) : String(format: "%.1f", history.reps))")
-                                                    .font(.headline) // Larger and bolder font for the actual value
+                                                    .font(.headline)
                                                     .foregroundColor(.primary)
                                             }
 
-                                            // Display RPE, removing ".0" if it's a whole number
                                             HStack {
                                                 Text("RPE: ")
-                                                    .font(.headline) // Less bold and smaller font for the label
+                                                    .font(.headline)
                                                     .foregroundColor(.secondary)
                                                 Text("\(history.rpe == floor(history.rpe) ? String(format: "%.0f", history.rpe) : String(format: "%.1f", history.rpe))%")
-                                                    .font(.headline) // Larger and bolder font for the actual value
+                                                    .font(.headline)
                                                     .foregroundColor(.primary)
                                             }
 
-                                            // Time display remains unchanged
                                             HStack {
                                                 Text("Time: ")
-                                                    .font(.headline) // Less bold and smaller font for the label
+                                                    .font(.headline)
                                                     .foregroundColor(.secondary)
                                                 Text("\(formattedTime(history.timestamp))")
-                                                    .font(.headline) // Larger and bolder font for the actual value
+                                                    .font(.headline)
                                                     .foregroundColor(.primary)
                                             }
                                         }
@@ -99,15 +96,16 @@ struct LogbookView: View {
                                     .padding()
                                     .background(Color(UIColor.secondarySystemBackground))
                                     .cornerRadius(10)
-                                    .transition(.scaleAndFade) // Apply custom transition
-                                    .animation(.easeInOut(duration: 0.5), value: itemsToDelete) // Animate deletion
+                                    .transition(.scaleAndFade)
+                                    .animation(.easeInOut(duration: 0.5), value: itemsToDelete)
                                     .swipeActions(edge: .trailing) {
                                         Button(role: .destructive) {
-                                            impactFeedback.impactOccurred() // Haptic feedback
+                                            impactFeedback.impactOccurred()
                                             withAnimation {
-                                                itemsToDelete.insert(history) // Mark as deleting
+                                                itemsToDelete.insert(history)
+                                                // Perform deletion after a delay for animation
                                                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                                                    deleteHistory(history) // Perform deletion after animation
+                                                    deleteHistory(history)
                                                 }
                                             }
                                         } label: {
@@ -119,8 +117,8 @@ struct LogbookView: View {
                         }
                     }
                 }
-                .listStyle(PlainListStyle()) // Ensure it behaves similarly to ScrollView
-                .padding(.horizontal, 16) // Maintain the same padding as the original ScrollView
+                .listStyle(PlainListStyle())
+                .padding(.horizontal, 16)
             } else {
                 Text("Select a date to view your workout history")
                     .foregroundColor(.gray)
@@ -134,60 +132,52 @@ struct LogbookView: View {
         }
     }
 
-    // Loading all exercise history and grouping by date, then by exercise name
     private func loadAllExerciseHistory() {
-        DispatchQueue.global(qos: .userInitiated).async {
+        // Always perform fetching on the main thread for SwiftData
+        DispatchQueue.main.async {
             let fetchDescriptor = FetchDescriptor<ExerciseHistory>(
                 sortBy: [SortDescriptor(\.timestamp, order: .reverse)]
             )
 
             do {
-                // Fetch the data using the descriptor
                 let allHistory = try modelContext.fetch(fetchDescriptor)
 
-                // Group by date (normalized), then by exercise name
                 let grouped = Dictionary(grouping: allHistory) { history in
                     Calendar.current.startOfDay(for: history.timestamp)
                 }.mapValues { histories in
                     Dictionary(grouping: histories) { $0.exerciseName }
                 }
 
-                DispatchQueue.main.async {
-                    // Update the state on the main thread
-                    groupedByDate = grouped
-
-                    // Recalculate the set count for today
-                    calculateSetCountForToday()
-                }
+                // Update the UI on the main thread
+                groupedByDate = grouped
+                calculateSetCountForToday()
             } catch {
                 print("Failed to load exercise history: \(error)")
             }
         }
     }
 
-    // Deleting history and reloading
     private func deleteHistory(_ history: ExerciseHistory) {
-        DispatchQueue.global(qos: .userInitiated).async {
+        // Always perform deletion on the main thread for SwiftData
+        DispatchQueue.main.async {
             modelContext.delete(history)
             do {
                 try modelContext.save()
 
-                DispatchQueue.main.async {
-                    // Remove the item from the deletion set and reload
-                    itemsToDelete.remove(history)
-                    loadAllExerciseHistory()
-                    calculateSetCountForToday()
-                    refreshTrigger.toggle() // Notify parent views about the change
-                }
+                // Remove the item from the deletion set and reload
+                itemsToDelete.remove(history)
+                loadAllExerciseHistory()
+                calculateSetCountForToday()
+                refreshTrigger.toggle() // Notify parent views about the change
             } catch {
                 print("Failed to delete exercise history: \(error)")
             }
         }
     }
 
-    // This function calculates today's set count
     private func calculateSetCountForToday() {
-        DispatchQueue.global(qos: .userInitiated).async {
+        // Always perform fetching on the main thread for SwiftData
+        DispatchQueue.main.async {
             let calendar = Calendar.current
             let startOfDay = calendar.startOfDay(for: Date())
             let endOfDay = calendar.date(byAdding: .day, value: 1, to: startOfDay)!
@@ -201,16 +191,11 @@ struct LogbookView: View {
 
             do {
                 let todayHistory = try modelContext.fetch(fetchDescriptor)
-
-                DispatchQueue.main.async {
-                    // Update the setCount on the main thread
-                    setCount = todayHistory.count
-                }
+                // Update the setCount on the main thread
+                setCount = todayHistory.count
             } catch {
-                DispatchQueue.main.async {
-                    // Ensure setCount is reset on the main thread in case of failure
-                    setCount = 0
-                }
+                // Ensure setCount is reset on the main thread in case of failure
+                setCount = 0
                 print("Failed to calculate set count: \(error)")
             }
         }
@@ -219,12 +204,6 @@ struct LogbookView: View {
     private func formattedTime(_ date: Date) -> String {
         let formatter = DateFormatter()
         formatter.timeStyle = .short
-        return formatter.string(from: date)
-    }
-
-    private func formattedDate(_ date: Date) -> String {
-        let formatter = DateFormatter()
-        formatter.dateStyle = .medium
         return formatter.string(from: date)
     }
 }
