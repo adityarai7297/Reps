@@ -32,24 +32,44 @@ struct ExerciseHistoryView: View {
                             HStack {
                                 VStack(alignment: .leading, spacing: 8) {
                                     // Display weight, removing ".0" if it's a whole number
-                                    Text("Weight: \(history.weight == floor(history.weight) ? String(format: "%.0f", history.weight) : String(format: "%.1f", history.weight)) lbs")
-                                        .font(.headline)
-                                        .foregroundColor(.white)
-                                    
+                                    HStack {
+                                        Text("Weight: ")
+                                            .font(.headline) // Less bold and smaller font for the label
+                                            .foregroundColor(.secondary)
+                                        Text("\(history.weight == floor(history.weight) ? String(format: "%.0f", history.weight) : String(format: "%.1f", history.weight)) lbs")
+                                            .font(.headline) // Larger and bolder font for the actual value
+                                            .foregroundColor(.primary)
+                                    }
+
                                     // Display reps, removing ".0" if it's a whole number
-                                    Text("Reps: \(history.reps == floor(history.reps) ? String(format: "%.0f", history.reps) : String(format: "%.1f", history.reps))")
-                                        .font(.headline)
-                                        .foregroundColor(.white)
+                                    HStack {
+                                        Text("Reps: ")
+                                            .font(.headline) // Less bold and smaller font for the label
+                                            .foregroundColor(.secondary)
+                                        Text("\(history.reps == floor(history.reps) ? String(format: "%.0f", history.reps) : String(format: "%.1f", history.reps))")
+                                            .font(.headline) // Larger and bolder font for the actual value
+                                            .foregroundColor(.primary)
+                                    }
 
                                     // Display RPE, removing ".0" if it's a whole number
-                                    Text("RPE: \(history.rpe == floor(history.rpe) ? String(format: "%.0f", history.rpe) : String(format: "%.1f", history.rpe))%")
-                                        .font(.headline)
-                                        .foregroundColor(.white)
+                                    HStack {
+                                        Text("RPE: ")
+                                            .font(.headline) // Less bold and smaller font for the label
+                                            .foregroundColor(.secondary)
+                                        Text("\(history.rpe == floor(history.rpe) ? String(format: "%.0f", history.rpe) : String(format: "%.1f", history.rpe))%")
+                                            .font(.headline) // Larger and bolder font for the actual value
+                                            .foregroundColor(.primary)
+                                    }
 
                                     // Time display remains unchanged
-                                    Text("Time: \(formattedTime(history.timestamp))")
-                                        .font(.headline)
-                                        .foregroundColor(.white)
+                                    HStack {
+                                        Text("Time: ")
+                                            .font(.headline) // Less bold and smaller font for the label
+                                            .foregroundColor(.secondary)
+                                        Text("\(formattedTime(history.timestamp))")
+                                            .font(.headline) // Larger and bolder font for the actual value
+                                            .foregroundColor(.primary)
+                                    }
                                 }
 
                                 Spacer()

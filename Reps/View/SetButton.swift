@@ -1,18 +1,19 @@
 import SwiftUI
+import UIKit
 
 struct SetButton: View {
     @Binding var showCheckmark: Bool
     @Binding var setCount: Int
-    @GestureState private var isPressing = false
-    @State private var progress: CGFloat = 0.0
-    var action: () -> Void
+    @State var fb = false
+    @GestureState var topG = false
+    var action: () -> Void // Closure to perform the action
 
     // Haptic feedback generator
     private let feedbackGenerator = UIImpactFeedbackGenerator(style: .heavy)
 
     var body: some View {
         VStack(spacing: 10) {
-            // Success Message
+            // **Success Message Above the Set Button**
             if showCheckmark {
                 ZStack {
                     RoundedRectangle(cornerRadius: 25)
@@ -30,39 +31,33 @@ struct SetButton: View {
                             .fontWeight(.bold)
                     }
                 }
-                .transition(.scale)
                 .animation(.spring(response: 0.2, dampingFraction: 0.7), value: showCheckmark)
             }
 
-            // **Set Button with Progress Overlay**
+            // **Set Button**
             ZStack {
-                // Original Set Button Design
                 Circle()
                     .stroke(lineWidth: 0.5)
                     .frame(width: 92, height: 92)
-
+                
                 Text("SET")
                     .font(.system(size: 28))
                     .fontWeight(.bold)
                     .foregroundColor(.black)
-
-                // Circular Progress Overlay
-                Circle()
-                    .trim(from: 0, to: progress)  // Progress based on gesture
-                    .stroke(Color.blue, lineWidth: 6) // Visible stroke for progress
-                    .frame(width: 92, height: 92)
-                    .rotationEffect(.degrees(-90))  // Start progress from top
-                    .opacity(isPressing ? 1.0 : 0.0) // Show during press only
             }
+            .overlay(
+                Circle()
+                    .trim(from: 0, to: topG ? 1 : 0)
+                    .stroke(style: StrokeStyle(lineWidth: 4, lineCap: .round))
+                    .rotation(.degrees(-90))
+            )
+            .contentShape(Circle().inset(by: -15))
+            .animation(.easeInOut.speed(0.8), value: topG)
+            .scaleEffect(topG ? 1.1 : 1)
             .gesture(
-                LongPressGesture(minimumDuration: 0.4)
-                    .updating($isPressing) { currentState, gestureState, _ in
+                LongPressGesture(minimumDuration: 0.4, maximumDistance: 1)
+                    .updating($topG) { currentState, gestureState, _ in
                         gestureState = currentState
-                        if currentState {
-                            withAnimation(.linear(duration: 0.4)) {
-                                progress = 1.0 // Animate progress
-                            }
-                        }
                     }
                     .onEnded { _ in
                         withAnimation(.spring(response: 0.2, dampingFraction: 0.7)) {
@@ -72,19 +67,17 @@ struct SetButton: View {
                         // Trigger haptic feedback
                         feedbackGenerator.impactOccurred()
 
-                        // Perform action
+                        // Call the closure to perform the action
                         action()
-
-                        // Reset progress and checkmark after delay
+                        
                         DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                             withAnimation(.spring(response: 0.2, dampingFraction: 0.7)) {
                                 showCheckmark = false
-                                progress = 0.0 // Reset progress
                             }
                         }
                     }
             )
-            .animation(.easeInOut, value: isPressing)
+            .animation(.spring(response: 0.2, dampingFraction: 0.8), value: topG)
         }
         .onAppear {
             feedbackGenerator.prepare()
