@@ -7,7 +7,8 @@ struct SetButton: View {
     @GestureState var topG = false
     var action: () -> Void // Closure to perform the action
     @State private var showTrimAnimation = false // State to control the trim effect
-    @State private var rotationComplete = false // State to check if rotation is complete
+    @State private var isRotationActive = false // Track when the rotation starts
+    @State private var isFirstTap = true // Track if it's the first tap of the day
 
     // Haptic feedback generator
     private let feedbackGenerator = UIImpactFeedbackGenerator(style: .heavy)
@@ -48,34 +49,46 @@ struct SetButton: View {
                 
                 // Circular trim animation
                 if showTrimAnimation {
-                    CircularTrimView(rotationComplete: $rotationComplete)
+                    CircularTrimView(isRotationActive: $isRotationActive)
                         .frame(width: 92, height: 92) // Match the button size
                         .transition(.opacity)
                 }
             }
             .gesture(
-                LongPressGesture(minimumDuration: 0.15)
+                LongPressGesture(minimumDuration: 0.35)
                     .updating($topG) { currentState, gestureState, _ in
                         gestureState = currentState
                     }
                     .onEnded { _ in
-                        // Trigger the circular trim animation
+                        // Reset the rotation state on each tap
+                        isRotationActive = false
+                        
+                        // Show the trim animation
                         withAnimation(.spring(response: 0.2, dampingFraction: 0.7)) {
-                            showCheckmark = true
-                            showTrimAnimation = true // Show circular trim
+                            showTrimAnimation = true
                         }
 
-                        // Delay haptic feedback until the clockwise rotation completes
+                        // Delay actions slightly, but not dependent on rotation
                         DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
-                            if rotationComplete {
-                                // Trigger haptic feedback after rotation is done
-                                feedbackGenerator.impactOccurred()
+                            // On the first tap of the day, initialize everything properly
+                            if isFirstTap {
+                                // Ensure the rotation flag is now active
+                                isRotationActive = true
+                                isFirstTap = false // Reset flag to allow subsequent sets to sync normally
                             }
 
-                            // Call the closure to perform the action
+                            // Trigger haptic feedback right after the rotation animation starts
+                            feedbackGenerator.impactOccurred()
+
+                            // Update the set count first
                             action()
-                            
-                            // Gradually reverse the animation when releasing the button
+
+                            // Show checkmark after setCount update
+                            withAnimation(.spring(response: 0.2, dampingFraction: 0.7)) {
+                                showCheckmark = true
+                            }
+
+                            // Gradually reverse the animation after the checkmark shows
                             DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
                                 withAnimation(.spring(response: 0.5, dampingFraction: 0.7)) {
                                     showCheckmark = false
@@ -94,7 +107,7 @@ struct SetButton: View {
 }
 
 struct CircularTrimView: View {
-    @Binding var rotationComplete: Bool // Binding to notify when the rotation is completed
+    @Binding var isRotationActive: Bool // Binding to notify when the rotation starts
     @State private var trimEnd: CGFloat = 0
     @State private var rotation: Double = 0
 
@@ -110,12 +123,12 @@ struct CircularTrimView: View {
                     rotation = 360 // Rotate the circle clockwise
                 }
 
-                // Mark rotation as complete after animation ends
+                // Mark rotation as active after animation starts
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
-                    rotationComplete = true
+                    isRotationActive = true
                 }
 
-                // Reverse (counterclockwise) rotation when trimEnd reaches 1
+                // Reverse (counterclockwise) rotation after trim reaches 1
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.9) {
                     withAnimation(Animation.easeInOut(duration: 0.3)) {
                         trimEnd = 0 // Snap back by animating the trim back to 0
