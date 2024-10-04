@@ -69,7 +69,7 @@ struct SetButton: View {
                         }
 
                         // Delay actions slightly, but not dependent on rotation
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                             // On the first tap of the day, initialize everything properly
                             if isFirstTap {
                                 // Ensure the rotation flag is now active
@@ -115,10 +115,10 @@ struct CircularTrimView: View {
         Circle()
             .trim(from: 0, to: trimEnd) // Control the trim from 0 to 1
             .stroke(Color.black, lineWidth: 4) // Black color and thicker stroke
-            .rotationEffect(.degrees(rotation)) // Rotate the trim for a dynamic effect
+            .rotationEffect(.degrees(rotation - 90.0)) // Rotate the trim for a dynamic effect
             .onAppear {
                 // Start clockwise animation
-                withAnimation(Animation.easeInOut(duration: 0.6)) {
+                withAnimation(Animation.easeInOut(duration: 0.4)) {
                     trimEnd = 1 // Animate the trim to complete the circle
                     rotation = 0 // Rotate the circle clockwise
                 }
@@ -129,8 +129,8 @@ struct CircularTrimView: View {
                 }
 
                 // Reverse (counterclockwise) rotation after trim reaches 1
-                DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
-                    withAnimation(Animation.easeInOut(duration: 0.35)) {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
+                    withAnimation(Animation.easeInOut(duration: 0.3)) {
                         trimEnd = 0 // Snap back by animating the trim back to 0
                         rotation = 0 // Rotate counterclockwise
                     }
