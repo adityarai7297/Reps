@@ -284,7 +284,7 @@ struct ManageExercisesView: View {
                 HStack {
                     TextField("New Exercise", text: $newExerciseName)
                         .textFieldStyle(RoundedBorderTextFieldStyle())
-                        .onChange(of: newExerciseName) { _ in
+                        .onChange(of: newExerciseName) {
                             updateSuggestions()
                         }
                         .onTapGesture {

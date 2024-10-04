@@ -74,7 +74,7 @@ struct ContentView: View {
                 loadExercises()
             }
             // Trigger refresh when LogbookView is dismissed
-            .onChange(of: showingLogbook) { newValue in
+            .onChange(of: showingLogbook) { oldValue, newValue in
                 if !newValue {
                     refreshTrigger.toggle()
                 }
