@@ -4,9 +4,10 @@ import UIKit
 struct SetButton: View {
     @Binding var showCheckmark: Bool
     @Binding var setCount: Int
-    @State var fb = false
     @GestureState var topG = false
     var action: () -> Void // Closure to perform the action
+    @State private var showTrimAnimation = false // State to control the trim effect
+    @State private var rotationComplete = false // State to check if rotation is complete
 
     // Haptic feedback generator
     private let feedbackGenerator = UIImpactFeedbackGenerator(style: .heavy)
@@ -44,35 +45,42 @@ struct SetButton: View {
                     .font(.system(size: 28))
                     .fontWeight(.bold)
                     .foregroundColor(.black)
+                
+                // Circular trim animation
+                if showTrimAnimation {
+                    CircularTrimView(rotationComplete: $rotationComplete)
+                        .frame(width: 92, height: 92) // Match the button size
+                        .transition(.opacity)
+                }
             }
-            .overlay(
-                Circle()
-                    .trim(from: 0, to: topG ? 1 : 0)
-                    .stroke(style: StrokeStyle(lineWidth: 4, lineCap: .round))
-                    .rotation(.degrees(-90))
-            )
-            .contentShape(Circle().inset(by: -15))
-            .animation(.easeInOut.speed(0.8), value: topG)
-            .scaleEffect(topG ? 1.1 : 1)
             .gesture(
-                LongPressGesture(minimumDuration: 0.4, maximumDistance: 1)
+                LongPressGesture(minimumDuration: 0.15)
                     .updating($topG) { currentState, gestureState, _ in
                         gestureState = currentState
                     }
                     .onEnded { _ in
+                        // Trigger the circular trim animation
                         withAnimation(.spring(response: 0.2, dampingFraction: 0.7)) {
                             showCheckmark = true
+                            showTrimAnimation = true // Show circular trim
                         }
 
-                        // Trigger haptic feedback
-                        feedbackGenerator.impactOccurred()
+                        // Delay haptic feedback until the clockwise rotation completes
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
+                            if rotationComplete {
+                                // Trigger haptic feedback after rotation is done
+                                feedbackGenerator.impactOccurred()
+                            }
 
-                        // Call the closure to perform the action
-                        action()
-                        
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                            withAnimation(.spring(response: 0.2, dampingFraction: 0.7)) {
-                                showCheckmark = false
+                            // Call the closure to perform the action
+                            action()
+                            
+                            // Gradually reverse the animation when releasing the button
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                                withAnimation(.spring(response: 0.5, dampingFraction: 0.7)) {
+                                    showCheckmark = false
+                                    showTrimAnimation = false // Hide circular trim
+                                }
                             }
                         }
                     }
@@ -82,5 +90,38 @@ struct SetButton: View {
         .onAppear {
             feedbackGenerator.prepare()
         }
+    }
+}
+
+struct CircularTrimView: View {
+    @Binding var rotationComplete: Bool // Binding to notify when the rotation is completed
+    @State private var trimEnd: CGFloat = 0
+    @State private var rotation: Double = 0
+
+    var body: some View {
+        Circle()
+            .trim(from: 0, to: trimEnd) // Control the trim from 0 to 1
+            .stroke(Color.black, lineWidth: 4) // Black color and thicker stroke
+            .rotationEffect(.degrees(rotation)) // Rotate the trim for a dynamic effect
+            .onAppear {
+                // Start clockwise animation
+                withAnimation(Animation.easeInOut(duration: 0.6)) {
+                    trimEnd = 1 // Animate the trim to complete the circle
+                    rotation = 360 // Rotate the circle clockwise
+                }
+
+                // Mark rotation as complete after animation ends
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
+                    rotationComplete = true
+                }
+
+                // Reverse (counterclockwise) rotation when trimEnd reaches 1
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.9) {
+                    withAnimation(Animation.easeInOut(duration: 0.3)) {
+                        trimEnd = 0 // Snap back by animating the trim back to 0
+                        rotation = 0 // Rotate counterclockwise
+                    }
+                }
+            }
     }
 }
