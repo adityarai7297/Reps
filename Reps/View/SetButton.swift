@@ -120,7 +120,7 @@ struct CircularTrimView: View {
                 // Start clockwise animation
                 withAnimation(Animation.easeInOut(duration: 0.6)) {
                     trimEnd = 1 // Animate the trim to complete the circle
-                    rotation = 90 // Rotate the circle clockwise
+                    rotation = 0 // Rotate the circle clockwise
                 }
 
                 // Mark rotation as active after animation starts

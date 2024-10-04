@@ -50,6 +50,9 @@ struct ContentView: View {
                                 Image(systemName: "book.pages")
                                     .font(.title2)
                                     .foregroundColor(exercises.isEmpty ? .white : .black)
+                                    .padding(.top, 40)
+                                    
+                                    .frame(width: 80, height: 80)
                             },
                             trailing: Button(action: {
                                 impactFeedback.impactOccurred() // Add this line
@@ -59,6 +62,9 @@ struct ContentView: View {
                             }) {
                                 Image(systemName: "list.bullet")
                                     .foregroundColor(exercises.isEmpty ? .white : .black)
+                                    .padding(.top, 40)
+                                    
+                                    .frame(width: 80, height: 80)
                             }
                         )
             .sheet(isPresented: $showingLogbook) {
