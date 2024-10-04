@@ -141,7 +141,7 @@ struct ExerciseView: View {
             calculateSetCountForToday()
         }
         // Recalculate set count when refreshTrigger changes
-        .onChange(of: refreshTrigger) { _ in
+        .onChange(of: refreshTrigger) {
             calculateSetCountForToday()
         }
     }
