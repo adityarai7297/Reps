@@ -55,7 +55,7 @@ struct SetButton: View {
                 }
             }
             .gesture(
-                LongPressGesture(minimumDuration: 0.35)
+                LongPressGesture(minimumDuration: 0.3)
                     .updating($topG) { currentState, gestureState, _ in
                         gestureState = currentState
                     }
@@ -120,7 +120,7 @@ struct CircularTrimView: View {
                 // Start clockwise animation
                 withAnimation(Animation.easeInOut(duration: 0.6)) {
                     trimEnd = 1 // Animate the trim to complete the circle
-                    rotation = 360 // Rotate the circle clockwise
+                    rotation = 90 // Rotate the circle clockwise
                 }
 
                 // Mark rotation as active after animation starts
@@ -129,8 +129,8 @@ struct CircularTrimView: View {
                 }
 
                 // Reverse (counterclockwise) rotation after trim reaches 1
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.9) {
-                    withAnimation(Animation.easeInOut(duration: 0.3)) {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+                    withAnimation(Animation.easeInOut(duration: 0.35)) {
                         trimEnd = 0 // Snap back by animating the trim back to 0
                         rotation = 0 // Rotate counterclockwise
                     }
