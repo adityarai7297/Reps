@@ -55,7 +55,7 @@ struct SetButton: View {
                 }
             }
             .gesture(
-                LongPressGesture(minimumDuration: 0.3)
+                LongPressGesture(minimumDuration: 0.2)
                     .updating($topG) { currentState, gestureState, _ in
                         gestureState = currentState
                     }
