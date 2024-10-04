@@ -69,7 +69,7 @@ struct SetButton: View {
                         }
 
                         // Delay actions slightly, but not dependent on rotation
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
                             // On the first tap of the day, initialize everything properly
                             if isFirstTap {
                                 // Ensure the rotation flag is now active
