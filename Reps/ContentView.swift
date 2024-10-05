@@ -96,12 +96,12 @@ struct ContentView: View {
                     showOptions.toggle()
                 }
             }) {
-                Image(systemName: "person.circle")
-                    .font(.system(size: 40))  // Smaller size
-                    .fontWeight(.ultraLight)
+                Image(systemName: "arrow.down.left.topright.rectangle")
+                    .font(.system(size: 30))  // Smaller size
+                    .fontWeight(.light)
             }
             // Bottom-left corner position with a slight vertical offset (20 points from the bottom)
-            .position(x: UIScreen.main.bounds.width*0.1, y: UIScreen.main.bounds.height*0.02)
+            .position(x: UIScreen.main.bounds.width*0.9, y: UIScreen.main.bounds.height*0.02)
 
             // Logbook button (pops out when central button is tapped)
             if showOptions {
