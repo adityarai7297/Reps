@@ -283,7 +283,7 @@ struct ManageExercisesView: View {
             VStack(spacing: 0) {
                 // TextField to add a new exercise
                 HStack {
-                    TextField("New Exercise", text: $newExerciseName)
+                    TextField("Add Exercise", text: $newExerciseName)
                         .textFieldStyle(RoundedBorderTextFieldStyle())
                         .onChange(of: newExerciseName) {
                             updateSuggestions()

@@ -96,8 +96,8 @@ struct ContentView: View {
                     showOptions.toggle()
                 }
             }) {
-                Image(systemName: "arrow.down.left.topright.rectangle")
-                    .font(.system(size: 20))  // Smaller size
+                Image(systemName: "list.bullet")
+                    .font(.system(size: 25))  // Smaller size
                     .fontWeight(.light)
             }
             // Bottom-left corner position with a slight vertical offset (20 points from the bottom)
@@ -130,7 +130,7 @@ struct ContentView: View {
                     showingManageExercises.toggle()
                     showOptions = false // Close options after selection
                 }) {
-                    Image(systemName: "list.bullet")
+                    Image(systemName: "square.and.pencil")
                         .font(.title2)
                         .foregroundColor(.white)
                         .padding()
