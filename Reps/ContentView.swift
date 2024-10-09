@@ -97,7 +97,7 @@ struct ContentView: View {
                 }
             }) {
                 Image(systemName: "arrow.down.left.topright.rectangle")
-                    .font(.system(size: 30))  // Smaller size
+                    .font(.system(size: 20))  // Smaller size
                     .fontWeight(.light)
             }
             // Bottom-left corner position with a slight vertical offset (20 points from the bottom)
