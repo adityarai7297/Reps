@@ -2,15 +2,15 @@ import SwiftUI
 import SwiftData
 
 struct ExerciseView: View {
-    @Binding var exercise: Exercise
-    @Binding var refreshTrigger: Bool // Add this binding
+    @Binding var exercise: Exercise // No need for optional here
+    @Binding var refreshTrigger: Bool
     @State private var showCheckmark: Bool = false
     @State private var showingHistory = false
     @Environment(\.modelContext) private var modelContext
     @State private var currentWeight: CGFloat = 0
     @State private var currentReps: CGFloat = 0
     @State private var currentRPE: CGFloat = 0
-    @State private var setCount: Int = 0 // This tracks the number of sets for today
+    @State private var setCount: Int = 0
     @State private var impactFeedback = UIImpactFeedbackGenerator(style: .heavy)
     let weightWheelConfig: WheelPicker.Config
     let repWheelConfig: WheelPicker.Config
@@ -27,8 +27,7 @@ struct ExerciseView: View {
                 .fontWeight(.medium)
                 .padding(.horizontal)
                 .padding(.top, 40)
-                .frame(width: UIScreen.main.bounds.width/1.4)
-               
+                .frame(width: UIScreen.main.bounds.width / 1.4)
 
             Spacer()
 
@@ -120,7 +119,6 @@ struct ExerciseView: View {
                 .onTapGesture {
                     impactFeedback.impactOccurred()
                     showingHistory.toggle()
-                    
                 }
                 .sheet(isPresented: $showingHistory) {
                     ExerciseHistoryView(exerciseName: exercise.name, onDelete: {
@@ -130,8 +128,6 @@ struct ExerciseView: View {
                 }
             }
             .padding(.bottom, 40)
-            
-            
         }
         .padding(.horizontal)
         .foregroundColor(.black)
@@ -149,6 +145,8 @@ struct ExerciseView: View {
     // **Data Fetching and Saving Methods**
 
     private func loadCurrentValues() {
+        guard !exercise.name.isEmpty else { return }
+        
         let exerciseName = exercise.name
 
         DispatchQueue.global(qos: .userInitiated).async {
@@ -187,6 +185,8 @@ struct ExerciseView: View {
     }
 
     private func saveExerciseHistory() {
+        guard !exercise.name.isEmpty else { return }
+        
         let exerciseName = exercise.name
 
         DispatchQueue.global(qos: .userInitiated).async {
@@ -203,7 +203,6 @@ struct ExerciseView: View {
 
                 DispatchQueue.main.async {
                     calculateSetCountForToday()
-                    // Handle any additional logic if needed
                 }
             } catch {
                 DispatchQueue.main.async {
@@ -214,7 +213,12 @@ struct ExerciseView: View {
     }
 
     private func calculateSetCountForToday() {
-        
+        // Since exercise is non-optional, we can directly check if the name is empty
+        guard !exercise.name.isEmpty else {
+            print("No valid exercise to calculate set count.")
+            setCount = 0
+            return
+        }
         
         let exerciseName = exercise.name
         let calendar = Calendar.current
