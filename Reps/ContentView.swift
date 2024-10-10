@@ -111,11 +111,20 @@ struct ContentView: View {
                     showingLogbook.toggle()
                     showOptions = false // Close options after selection
                 }) {
-                    Image(systemName: "book.pages")
-                        .font(.title2)
-                        .foregroundColor(.white)
-                        .padding()
-                        .background(Circle().fill(Color.blue))
+                    VStack{
+                        Image(systemName: "book.pages")
+                            .font(.title2)
+                            .foregroundColor(.white)
+                            .padding()
+                            .background(Circle().fill(Color.blue))
+                        
+                        Text("Logbook")
+                            .font(.caption)
+                            .padding(.top, 5)
+                            .foregroundColor(.white)
+                        
+                    }
+                    
                 }
                 .offset(x: -60, y: 0) // Position it radially (above-left)
                 .transition(.scale)
@@ -130,11 +139,20 @@ struct ContentView: View {
                     showingManageExercises.toggle()
                     showOptions = false // Close options after selection
                 }) {
-                    Image(systemName: "square.and.pencil")
-                        .font(.title2)
-                        .foregroundColor(.white)
-                        .padding()
-                        .background(Circle().fill(Color.green))
+                    VStack{
+                        Image(systemName: "square.and.pencil")
+                            .font(.title2)
+                            .foregroundColor(.white)
+                            .padding()
+                            .background(Circle().fill(Color.green))
+                        
+                        Text("Exercises")
+                            .font(.caption)
+                            .padding(.top, 5)
+                            .foregroundColor(.white)
+                        
+                    }
+                    
                 }
                 .offset(x: 60, y: 0) // Position it radially (above-right)
                 .transition(.scale)
