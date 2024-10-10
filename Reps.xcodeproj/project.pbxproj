@@ -21,6 +21,7 @@
 		13FEA26F2C2943A000D04BF2 /* WheelPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 13FEA26E2C2943A000D04BF2 /* WheelPicker.swift */; };
 		13FEA2712C2C400600D04BF2 /* SetButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 13FEA2702C2C400600D04BF2 /* SetButton.swift */; };
 		13FEA2732C2D483400D04BF2 /* ExerciseView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 13FEA2722C2D483400D04BF2 /* ExerciseView.swift */; };
+		40DEBA822CB7AEEC00ED44ED /* ExerciseData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40DEBA812CB7AEE200ED44ED /* ExerciseData.swift */; };
 		40FEBBC52CA721490051C2AA /* FSCalendarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40FEBBC42CA721490051C2AA /* FSCalendarView.swift */; };
 		40FEBBC72CA721E80051C2AA /* FSCalendar in Frameworks */ = {isa = PBXBuildFile; productRef = 40FEBBC62CA721E80051C2AA /* FSCalendar */; };
 /* End PBXBuildFile section */
@@ -61,6 +62,7 @@
 		13FEA26E2C2943A000D04BF2 /* WheelPicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WheelPicker.swift; sourceTree = "<group>"; };
 		13FEA2702C2C400600D04BF2 /* SetButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetButton.swift; sourceTree = "<group>"; };
 		13FEA2722C2D483400D04BF2 /* ExerciseView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExerciseView.swift; sourceTree = "<group>"; };
+		40DEBA812CB7AEE200ED44ED /* ExerciseData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExerciseData.swift; sourceTree = "<group>"; };
 		40FEBBC42CA721490051C2AA /* FSCalendarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FSCalendarView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -93,6 +95,7 @@
 		1371B1502C2F9C8100A4254A /* Model */ = {
 			isa = PBXGroup;
 			children = (
+				40DEBA812CB7AEE200ED44ED /* ExerciseData.swift */,
 				1339416E2C86B37800B1EF2B /* Exercise.swift */,
 				133941702C86B39F00B1EF2B /* ExerciseHistory.swift */,
 			);
@@ -302,6 +305,7 @@
 				13FEA2432C27C9D200D04BF2 /* ContentView.swift in Sources */,
 				13FEA26F2C2943A000D04BF2 /* WheelPicker.swift in Sources */,
 				13FEA2712C2C400600D04BF2 /* SetButton.swift in Sources */,
+				40DEBA822CB7AEEC00ED44ED /* ExerciseData.swift in Sources */,
 				133941752C86BB0C00B1EF2B /* ManageExercisesView.swift in Sources */,
 				13BE7B272C8BD849001BED75 /* LogbookView.swift in Sources */,
 				133941732C86B6AF00B1EF2B /* ExerciseHistoryView.swift in Sources */,

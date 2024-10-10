@@ -95,7 +95,7 @@ struct FSCalendarView: UIViewRepresentable {
             if let sets = workoutData.first(where: { Calendar.current.isDate($0.key, inSameDayAs: date) })?.value {
                 if sets > 0 {
                     // Define the range for number of sets
-                    let maxSets = 25.0 // Adjust based on your maximum expected sets
+                    let maxSets = 30.0 // Adjust based on your maximum expected sets
                     let minSets = 1.0
 
                     // Normalize the sets to a value between 0 and 1
