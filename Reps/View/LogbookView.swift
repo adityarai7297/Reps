@@ -4,21 +4,20 @@ import SwiftData
 struct LogbookView: View {
     @Environment(\.modelContext) private var modelContext
     @State private var groupedByDate: [Date: [String: [ExerciseHistory]]] = [:] // Group by date, then by exercise name
-    @State private var groupedByExercise: [String: [Date: [ExerciseHistory]]] = [:] // Group by exercise, then by date
+    @State private var exerciseHistories: [ExerciseHistory] = [] // Holds all fetched ExerciseHistory objects
     @State private var selectedView: Int = 0 // 0 for date, 1 for exercise
     @State private var selectedDate: Date? = nil // The date the user selects on the calendar
+    @State private var expandedExercise: String? = nil // Track which exercise name is expanded
     @Binding var setCount: Int // Bind the set count from the parent view (ContentView)
     @Binding var refreshTrigger: Bool // Add this binding to notify changes
     @State private var impactFeedback = UIImpactFeedbackGenerator(style: .heavy)
     @State private var itemsToDelete: Set<ExerciseHistory> = [] // Track items being deleted
 
-    // Computed property to construct workoutData
+    // Computed property to construct workoutData for calendar display (summarizes sets by date)
     var workoutData: [Date: Int] {
         groupedByDate.reduce(into: [:]) { result, entry in
             let (date, exercisesDict) = entry
-            // Sum the counts of ExerciseHistory arrays to get total sets
             let totalSets = exercisesDict.values.reduce(0) { $0 + $1.count }
-            // Only include dates with non-zero sets
             result[date] = totalSets
         }
     }
@@ -31,7 +30,7 @@ struct LogbookView: View {
                 .padding(.leading, 16)
                 .padding(.top, 32)
 
-            // Segment Control to switch between date view and exercise view
+            // Segment Control to switch between views
             Picker(selection: $selectedView, label: Text("View Selector")) {
                 Text("By Date").tag(0)
                 Text("By Exercise").tag(1)
@@ -41,7 +40,7 @@ struct LogbookView: View {
 
             // Conditionally show content based on selectedView
             if selectedView == 0 {
-                // Existing view grouped by date
+                // Calendar View (Group by Date)
                 FSCalendarView(selectedDate: $selectedDate, workoutData: workoutData)
                     .frame(height: 400)
                     .padding()
@@ -53,6 +52,7 @@ struct LogbookView: View {
                         .padding(.top, 20)
                         .padding(.leading, 16)
                 } else if let date = selectedDate, let workoutsForDate = groupedByDate[Calendar.current.startOfDay(for: date)] {
+                    // Display grouped exercises for the selected date
                     exerciseList(for: workoutsForDate)
                 } else {
                     Text("Select a date to view your workout history")
@@ -62,7 +62,9 @@ struct LogbookView: View {
                         .padding(.leading, 16)
                 }
             } else {
-                // New view grouped by exercise
+                // Endless scroll grouped by Exercise (Group by Exercise)
+                let groupedByExercise = Dictionary(grouping: exerciseHistories, by: { $0.exerciseName })
+
                 if groupedByExercise.isEmpty {
                     Text("No exercise history available")
                         .foregroundColor(.gray)
@@ -72,25 +74,42 @@ struct LogbookView: View {
                 } else {
                     List {
                         ForEach(groupedByExercise.keys.sorted(), id: \.self) { exerciseName in
-                            Section(header: Text(exerciseName)
-                                        .font(.headline)
-                                        .padding(.leading, 16)
-                                        .foregroundColor(.primary)) {
-
-                                // Grouping by date within the exercise
-                                ForEach(groupedByExercise[exerciseName]?.keys.sorted() ?? [], id: \.self) { date in
-                                    Text("Date: \(formattedDate(date))")
-                                        .font(.subheadline)
-                                        .foregroundColor(.secondary)
-
-                                    ForEach(groupedByExercise[exerciseName]?[date] ?? [], id: \.self) { history in
-                                        exerciseRow(history: history)
-                                            .swipeActions(edge: .trailing) {
-                                                deleteButton(for: history)
-                                            }
+                            Section(header: Button(action: {
+                                // Toggle expanded state for the tapped exercise
+                                withAnimation {
+                                    if expandedExercise == exerciseName {
+                                        expandedExercise = nil
+                                    } else {
+                                        expandedExercise = exerciseName
                                     }
                                 }
-                            }
+                            }) {
+                                HStack {
+                                    Text(exerciseName)
+                                        .font(.headline)
+                                        .foregroundColor(.white)
+                                        .padding(.top, 10)
+                                    Spacer()
+                                    Image(systemName: expandedExercise == exerciseName ? "chevron.up" : "chevron.down")
+                                }
+                            }) {
+                                // If this exercise is expanded, show its history
+                                if expandedExercise == exerciseName {
+                                    let historiesByDate = Dictionary(grouping: groupedByExercise[exerciseName] ?? [], by: { Calendar.current.startOfDay(for: $0.timestamp) })
+                                    
+                                    // Display the exercise history grouped by date
+                                    ForEach(historiesByDate.keys.sorted(), id: \.self) { date in
+                                        Section(header: Text(formattedDate(date))) {
+                                            ForEach(historiesByDate[date] ?? [], id: \.self) { history in
+                                                exerciseRow(history: history)
+                                                    .swipeActions(edge: .trailing) {
+                                                        deleteButton(for: history)
+                                                    }
+                                            }
+                                        }
+                                    }
+                                }
+                            }.animation(.easeInOut, value: expandedExercise)
                         }
                     }
                     .listStyle(PlainListStyle())
@@ -103,7 +122,7 @@ struct LogbookView: View {
         }
     }
 
-    // Existing method to list workouts
+    // Existing method to list workouts (grouped by date)
     @ViewBuilder
     private func exerciseList(for workouts: [String: [ExerciseHistory]]) -> some View {
         List {
@@ -162,7 +181,7 @@ struct LogbookView: View {
                     Text("Time: ")
                         .font(.headline)
                         .foregroundColor(.secondary)
-                    Text("\(formattedTime(history.timestamp))")
+                    Text(formattedTime(history.timestamp))
                         .font(.headline)
                         .foregroundColor(.primary)
                 }
@@ -191,7 +210,7 @@ struct LogbookView: View {
         }
     }
 
-    // Modify this method to group by both date and exercise name
+    // Load all exercise history (fetch logic remains unchanged)
     private func loadAllExerciseHistory() {
         DispatchQueue.main.async {
             let fetchDescriptor = FetchDescriptor<ExerciseHistory>(
@@ -201,22 +220,15 @@ struct LogbookView: View {
             do {
                 let allHistory = try modelContext.fetch(fetchDescriptor)
 
-                // Grouping by date first, then by exercise name
-                let groupedByDateTemp = Dictionary(grouping: allHistory) { history in
+                // Group by date for the calendar display
+                groupedByDate = Dictionary(grouping: allHistory) { history in
                     Calendar.current.startOfDay(for: history.timestamp)
                 }.mapValues { histories in
                     Dictionary(grouping: histories) { $0.exerciseName }
                 }
 
-                // Grouping by exercise name first, then by date
-                let groupedByExerciseTemp = Dictionary(grouping: allHistory) { history in
-                    history.exerciseName
-                }.mapValues { histories in
-                    Dictionary(grouping: histories) { Calendar.current.startOfDay(for: $0.timestamp) }
-                }
-
-                groupedByDate = groupedByDateTemp
-                groupedByExercise = groupedByExerciseTemp
+                // Store all histories for "By Exercise" tab
+                exerciseHistories = allHistory
                 calculateSetCountForToday()
             } catch {
                 print("Failed to load exercise history: \(error)")
@@ -224,14 +236,14 @@ struct LogbookView: View {
         }
     }
 
+    // Perform deletion for a specific history
     private func deleteHistory(_ history: ExerciseHistory) {
-        // Always perform deletion on the main thread for SwiftData
         DispatchQueue.main.async {
             modelContext.delete(history)
             do {
                 try modelContext.save()
 
-                // Remove the item from the deletion set and reload
+                // Remove the item from the deletion set and reload data
                 itemsToDelete.remove(history)
                 loadAllExerciseHistory()
                 calculateSetCountForToday()
@@ -242,26 +254,27 @@ struct LogbookView: View {
         }
     }
 
+    // Date formatter for headers
     private func formattedDate(_ date: Date) -> String {
         let formatter = DateFormatter()
         formatter.dateStyle = .medium
         return formatter.string(from: date)
     }
 
+    // Time formatter for each exercise entry
     private func formattedTime(_ date: Date) -> String {
         let formatter = DateFormatter()
         formatter.timeStyle = .short
         return formatter.string(from: date)
     }
 
+    // Calculate the set count for today's workout
     private func calculateSetCountForToday() {
-        // Always perform fetching on the main thread for SwiftData
         DispatchQueue.main.async {
             let calendar = Calendar.current
             let startOfDay = calendar.startOfDay(for: Date())
             let endOfDay = calendar.date(byAdding: .day, value: 1, to: startOfDay)!
 
-            // Fetch today's exercise history with a descriptor and predicate
             let fetchDescriptor = FetchDescriptor<ExerciseHistory>(
                 predicate: #Predicate { history in
                     history.timestamp >= startOfDay && history.timestamp < endOfDay
@@ -270,21 +283,11 @@ struct LogbookView: View {
 
             do {
                 let todayHistory = try modelContext.fetch(fetchDescriptor)
-                // Update the setCount on the main thread
                 setCount = todayHistory.count
             } catch {
-                // Ensure setCount is reset on the main thread in case of failure
                 setCount = 0
                 print("Failed to calculate set count: \(error)")
             }
         }
-    }
-}
-
-// Custom Transition Modifier for Scale and Fade Animation
-extension AnyTransition {
-    static var scaleAndFade: AnyTransition {
-        AnyTransition.scale(scale: 0.95)
-            .combined(with: .opacity)
     }
 }
