@@ -63,6 +63,7 @@ struct ContentView: View {
                         Image(systemName: "calendar")
                             .font(.title2)
                             .foregroundColor(.black)
+                            .scaleEffect(x: 1.1, y: 1.1)
                     }
                 }
 
