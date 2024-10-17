@@ -13,6 +13,9 @@ struct LogbookView: View {
     @State private var impactFeedback = UIImpactFeedbackGenerator(style: .heavy)
     @State private var itemsToDelete: Set<ExerciseHistory> = [] // Track items being deleted
 
+    // Use Optional Binding for the edit modal
+    @State private var historyToEdit: ExerciseHistory? = nil
+
     // Computed property to construct workoutData for calendar display (summarizes sets by date)
     var workoutData: [Date: Int] {
         groupedByDate.reduce(into: [:]) { result, entry in
@@ -96,15 +99,12 @@ struct LogbookView: View {
                                 // If this exercise is expanded, show its history
                                 if expandedExercise == exerciseName {
                                     let historiesByDate = Dictionary(grouping: groupedByExercise[exerciseName] ?? [], by: { Calendar.current.startOfDay(for: $0.timestamp) })
-                                    
+
                                     // Display the exercise history grouped by date
                                     ForEach(historiesByDate.keys.sorted(), id: \.self) { date in
                                         Section(header: Text(formattedDate(date))) {
                                             ForEach(historiesByDate[date] ?? [], id: \.self) { history in
                                                 exerciseRow(history: history)
-                                                    .swipeActions(edge: .trailing) {
-                                                        deleteButton(for: history)
-                                                    }
                                             }
                                         }
                                     }
@@ -120,6 +120,14 @@ struct LogbookView: View {
         .onAppear {
             loadAllExerciseHistory()
         }
+        // Present the edit modal when needed
+        .sheet(item: $historyToEdit, onDismiss: {
+            loadAllExerciseHistory()
+        }) { history in
+            EditExerciseHistoryView(history: history)
+                .presentationDetents([.medium])
+                .presentationDragIndicator(.visible)
+        }
     }
 
     // Existing method to list workouts (grouped by date)
@@ -134,9 +142,6 @@ struct LogbookView: View {
 
                     ForEach(workouts[exerciseName] ?? [], id: \.self) { history in
                         exerciseRow(history: history)
-                            .swipeActions(edge: .trailing) {
-                                deleteButton(for: history)
-                            }
                     }
                 }
             }
@@ -191,6 +196,13 @@ struct LogbookView: View {
         .padding()
         .background(Color(UIColor.secondarySystemBackground))
         .cornerRadius(10)
+        // Swipe actions for editing and deleting
+        .swipeActions(edge: .leading) {
+            editButton(for: history)
+        }
+        .swipeActions(edge: .trailing) {
+            deleteButton(for: history)
+        }
     }
 
     // Swipe to delete action
@@ -208,6 +220,17 @@ struct LogbookView: View {
         } label: {
             Label("Delete", systemImage: "trash")
         }
+    }
+
+    // Swipe to edit action
+    @ViewBuilder
+    private func editButton(for history: ExerciseHistory) -> some View {
+        Button {
+            historyToEdit = history
+        } label: {
+            Label("Edit", systemImage: "pencil")
+        }
+        .tint(.blue)
     }
 
     // Load all exercise history (fetch logic remains unchanged)
@@ -291,3 +314,85 @@ struct LogbookView: View {
         }
     }
 }
+
+// View for editing exercise history
+struct EditExerciseHistoryView: View {
+    @Environment(\.modelContext) private var modelContext
+    @Environment(\.dismiss) private var dismiss
+    @Bindable var history: ExerciseHistory
+
+    var body: some View {
+        NavigationStack {
+            VStack(spacing: 20) {
+                // Weight
+                VStack(alignment: .leading, spacing: 5) {
+                    Text("Weight")
+                        .font(.headline)
+                    HStack {
+                        TextField("Weight", value: $history.weight, formatter: numberFormatter)
+                            .keyboardType(.decimalPad)
+                            .textFieldStyle(.roundedBorder)
+                            .frame(maxWidth: .infinity)
+                        Text("lbs")
+                            .foregroundColor(.secondary)
+                    }
+                }
+                // Reps
+                VStack(alignment: .leading, spacing: 5) {
+                    Text("Reps")
+                        .font(.headline)
+                    TextField("Reps", value: $history.reps, formatter: numberFormatter)
+                        .keyboardType(.numberPad)
+                        .textFieldStyle(.roundedBorder)
+                }
+                // RPE
+                VStack(alignment: .leading, spacing: 5) {
+                    Text("RPE")
+                        .font(.headline)
+                    HStack {
+                        TextField("RPE", value: $history.rpe, formatter: numberFormatter)
+                            .keyboardType(.decimalPad)
+                            .textFieldStyle(.roundedBorder)
+                            .frame(maxWidth: .infinity)
+                        Text("%")
+                            .foregroundColor(.secondary)
+                    }
+                }
+                // Save button
+                Button(action: {
+                    saveChanges()
+                    dismiss()
+                }) {
+                    Text("Save")
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                        .background(Color.blue)
+                        .foregroundColor(.white)
+                        .cornerRadius(10)
+                }
+                .padding(.top, 20)
+                Spacer()
+            }
+            .padding()
+            .navigationTitle("Edit Exercise")
+            .navigationBarTitleDisplayMode(.inline)
+        }
+    }
+
+    private func saveChanges() {
+        do {
+            try modelContext.save()
+        } catch {
+            print("Failed to save edited exercise history: \(error)")
+        }
+    }
+
+    private var numberFormatter: NumberFormatter {
+        let formatter = NumberFormatter()
+        formatter.maximumFractionDigits = 2
+        formatter.minimumFractionDigits = 0
+        formatter.numberStyle = .decimal
+        return formatter
+    }
+}
+
