@@ -15,9 +15,6 @@ struct ContentView: View {
     @State private var showingLogbook = false
     @State private var impactFeedback = UIImpactFeedbackGenerator(style: .medium) // Haptic Feedback
 
-    // For animation
-    @State private var showOptions = false
-
     var body: some View {
         NavigationView {
             ZStack {
@@ -46,10 +43,6 @@ struct ContentView: View {
                         .gradientBackground(index: index)
                     }
                 }
-
-                // Radial button and options
-                radialMenu
-                    .foregroundColor(exercises.isEmpty ? .white : .black) // Set the color conditionally
             }
             .onAppear {
                 loadExercises()
@@ -60,6 +53,34 @@ struct ContentView: View {
                 }
             }
             .preferredColorScheme(.dark)
+            .toolbar {
+                // Logbook button on top left
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button(action: {
+                        impactFeedback.impactOccurred()
+                        showingLogbook.toggle()
+                    }) {
+                        Image(systemName: "calendar")
+                            .font(.title2)
+                            .foregroundColor(.black)
+                    }
+                }
+
+                // Manage Exercises button on top right
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button(action: {
+                        impactFeedback.impactOccurred()
+                        currentIndex = 0
+                        showingManageExercises.toggle()
+                    }) {
+                        Image(systemName: "list.bullet.rectangle")
+                            .font(.title2)
+                            .foregroundColor(exercises.isEmpty ? .white : .black)
+                            .scaleEffect(x: 0.9, y: 1)
+                            
+                    }
+                }
+            }
         }
         // Logbook sheet presentation
         .sheet(isPresented: $showingLogbook) {
@@ -71,92 +92,6 @@ struct ContentView: View {
             ManageExercisesView(refreshTrigger: $refreshTrigger, exercises: $exercises, currentIndex: $currentIndex)
                 .id(refreshTrigger) // Reload the sheet when refreshTrigger changes
                 .environment(\.modelContext, modelContext)
-        }
-    }
-
-    // MARK: - Radial Menu
-    private var radialMenu: some View {
-        ZStack {
-            // Background blur when options are showing
-            if showOptions {
-                Color.black.opacity(0.5)
-                    .edgesIgnoringSafeArea(.all)
-                    .onTapGesture {
-                        withAnimation {
-                            showOptions.toggle()
-                        }
-                    }
-            }
-
-            // Central button (smaller, in the bottom-left corner, black color)
-            Button(action: {
-                // Haptic feedback on central button tap
-                impactFeedback.impactOccurred()
-                withAnimation(.spring()) {
-                    showOptions.toggle()
-                }
-            }) {
-                Image(systemName: "list.bullet")
-                    .font(.system(size: 25))  // Smaller size
-                    .fontWeight(.light)
-            }
-            // Bottom-left corner position with a slight vertical offset (20 points from the bottom)
-            .position(x: UIScreen.main.bounds.width*0.9, y: UIScreen.main.bounds.height*0.02)
-
-            // Logbook button (pops out when central button is tapped)
-            if showOptions {
-                Button(action: {
-                    // Haptic feedback on Logbook button tap
-                    impactFeedback.impactOccurred()
-                    showingLogbook.toggle()
-                    showOptions = false // Close options after selection
-                }) {
-                    VStack{
-                        Image(systemName: "book.pages")
-                            .font(.title2)
-                            .foregroundColor(.white)
-                            .padding()
-                            .background(Circle().fill(Color.blue))
-                        
-                        Text("Logbook")
-                            .font(.caption)
-                            .padding(.top, 5)
-                            .foregroundColor(.white)
-                        
-                    }
-                    
-                }
-                .offset(x: -60, y: 0) // Position it radially (above-left)
-                .transition(.scale)
-            }
-
-            // Manage Exercises button (pops out when central button is tapped)
-            if showOptions {
-                Button(action: {
-                    // Haptic feedback on Manage Exercises button tap
-                    impactFeedback.impactOccurred()
-                    currentIndex = 0
-                    showingManageExercises.toggle()
-                    showOptions = false // Close options after selection
-                }) {
-                    VStack{
-                        Image(systemName: "square.and.pencil")
-                            .font(.title2)
-                            .foregroundColor(.white)
-                            .padding()
-                            .background(Circle().fill(Color.green))
-                        
-                        Text("Exercises")
-                            .font(.caption)
-                            .padding(.top, 5)
-                            .foregroundColor(.white)
-                        
-                    }
-                    
-                }
-                .offset(x: 60, y: 0) // Position it radially (above-right)
-                .transition(.scale)
-            }
         }
     }
 
