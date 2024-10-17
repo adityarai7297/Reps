@@ -8,6 +8,9 @@ struct ExerciseHistoryView: View {
     @State private var impactFeedback = UIImpactFeedbackGenerator(style: .heavy)
 
     @State private var groupedExerciseHistory: [Date: [ExerciseHistory]] = [:]
+    
+    // State for edit modal
+    @State private var historyToEdit: ExerciseHistory? = nil
 
     var body: some View {
         VStack(alignment: .leading) {
@@ -31,43 +34,43 @@ struct ExerciseHistoryView: View {
                         ForEach(groupedExerciseHistory[date]!) { history in
                             HStack {
                                 VStack(alignment: .leading, spacing: 8) {
-                                    // Display weight, removing ".0" if it's a whole number
+                                    // Display weight
                                     HStack {
                                         Text("Weight: ")
-                                            .font(.headline) // Less bold and smaller font for the label
+                                            .font(.headline)
                                             .foregroundColor(.secondary)
                                         Text("\(history.weight == floor(history.weight) ? String(format: "%.0f", history.weight) : String(format: "%.1f", history.weight)) lbs")
-                                            .font(.headline) // Larger and bolder font for the actual value
+                                            .font(.headline)
                                             .foregroundColor(.primary)
                                     }
 
-                                    // Display reps, removing ".0" if it's a whole number
+                                    // Display reps
                                     HStack {
                                         Text("Reps: ")
-                                            .font(.headline) // Less bold and smaller font for the label
+                                            .font(.headline)
                                             .foregroundColor(.secondary)
                                         Text("\(history.reps == floor(history.reps) ? String(format: "%.0f", history.reps) : String(format: "%.1f", history.reps))")
-                                            .font(.headline) // Larger and bolder font for the actual value
+                                            .font(.headline)
                                             .foregroundColor(.primary)
                                     }
 
-                                    // Display RPE, removing ".0" if it's a whole number
+                                    // Display RPE
                                     HStack {
                                         Text("RPE: ")
-                                            .font(.headline) // Less bold and smaller font for the label
+                                            .font(.headline)
                                             .foregroundColor(.secondary)
                                         Text("\(history.rpe == floor(history.rpe) ? String(format: "%.0f", history.rpe) : String(format: "%.1f", history.rpe))%")
-                                            .font(.headline) // Larger and bolder font for the actual value
+                                            .font(.headline)
                                             .foregroundColor(.primary)
                                     }
 
-                                    // Time display remains unchanged
+                                    // Time display
                                     HStack {
                                         Text("Time: ")
-                                            .font(.headline) // Less bold and smaller font for the label
+                                            .font(.headline)
                                             .foregroundColor(.secondary)
                                         Text("\(formattedTime(history.timestamp))")
-                                            .font(.headline) // Larger and bolder font for the actual value
+                                            .font(.headline)
                                             .foregroundColor(.primary)
                                     }
                                 }
@@ -77,13 +80,12 @@ struct ExerciseHistoryView: View {
                             .padding()
                             .background(Color(UIColor.secondarySystemBackground))
                             .cornerRadius(10)
-                            // Implement Swipe to Delete
+                            // Swipe actions for Edit and Delete
+                            .swipeActions(edge: .leading) {
+                                editButton(for: history) // Edit button
+                            }
                             .swipeActions(edge: .trailing) {
-                                Button(role: .destructive) {
-                                    deleteHistory(history)
-                                } label: {
-                                    Label("Delete", systemImage: "trash")
-                                }
+                                deleteButton(for: history) // Delete button
                             }
                         }
                     }
@@ -100,10 +102,19 @@ struct ExerciseHistoryView: View {
         }
         .background(Color.black.edgesIgnoringSafeArea(.all))
         .navigationBarTitleDisplayMode(.inline)
+        // Show the Edit modal
+        .sheet(item: $historyToEdit) { history in
+            EditExerciseHistoryView(history: history)
+                .presentationDetents([.medium])
+                .presentationDragIndicator(.visible)
+                .onDisappear {
+                    loadExerciseHistory()
+                }
+        }
     }
-    
+
+    // Load the exercise history for the current exercise
     private func loadExerciseHistory() {
-        // Fetch all ExerciseHistory objects for the given exercise, sorted by timestamp in descending order
         let fetchRequest = FetchDescriptor<ExerciseHistory>(
             predicate: #Predicate { history in
                 history.exerciseName == exerciseName
@@ -121,27 +132,50 @@ struct ExerciseHistoryView: View {
         }
     }
 
+    // Swipe to delete action
+    private func deleteButton(for history: ExerciseHistory) -> some View {
+        Button(role: .destructive) {
+            deleteHistory(history)
+        } label: {
+            Label("Delete", systemImage: "trash")
+        }
+    }
+
+    // Swipe to edit action
+    private func editButton(for history: ExerciseHistory) -> some View {
+        Button {
+            historyToEdit = history // Open the edit modal
+        } label: {
+            Label("Edit", systemImage: "pencil")
+        }
+        .tint(.blue)
+    }
+
+    // Delete the history entry and reload
     private func deleteHistory(_ history: ExerciseHistory) {
         modelContext.delete(history)
         do {
             try modelContext.save()
-            onDelete() // Trigger the set count recalculation
-            loadExerciseHistory() // Reload the history after deletion
-            impactFeedback.impactOccurred() // Haptic feedback on delete
+            onDelete() // Trigger callback for deletion
+            loadExerciseHistory() // Reload history after deletion
+            impactFeedback.impactOccurred() // Haptic feedback
         } catch {
             print("Failed to delete exercise history: \(error)")
         }
     }
 
-    private func formattedTime(_ date: Date) -> String {
-        let formatter = DateFormatter()
-        formatter.timeStyle = .short
-        return formatter.string(from: date)
-    }
-
+    // Date formatter for headers
     private func formattedDate(_ date: Date) -> String {
         let formatter = DateFormatter()
         formatter.dateStyle = .medium
         return formatter.string(from: date)
     }
+
+    // Time formatter for entries
+    private func formattedTime(_ date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.timeStyle = .short
+        return formatter.string(from: date)
+    }
 }
+

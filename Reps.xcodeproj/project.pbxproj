@@ -22,6 +22,7 @@
 		13FEA2712C2C400600D04BF2 /* SetButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 13FEA2702C2C400600D04BF2 /* SetButton.swift */; };
 		13FEA2732C2D483400D04BF2 /* ExerciseView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 13FEA2722C2D483400D04BF2 /* ExerciseView.swift */; };
 		40DEBA822CB7AEEC00ED44ED /* ExerciseData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40DEBA812CB7AEE200ED44ED /* ExerciseData.swift */; };
+		40DEBA842CC1840800ED44ED /* EditExerciseHistoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40DEBA832CC183FA00ED44ED /* EditExerciseHistoryView.swift */; };
 		40FEBBC52CA721490051C2AA /* FSCalendarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40FEBBC42CA721490051C2AA /* FSCalendarView.swift */; };
 		40FEBBC72CA721E80051C2AA /* FSCalendar in Frameworks */ = {isa = PBXBuildFile; productRef = 40FEBBC62CA721E80051C2AA /* FSCalendar */; };
 /* End PBXBuildFile section */
@@ -63,6 +64,7 @@
 		13FEA2702C2C400600D04BF2 /* SetButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetButton.swift; sourceTree = "<group>"; };
 		13FEA2722C2D483400D04BF2 /* ExerciseView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExerciseView.swift; sourceTree = "<group>"; };
 		40DEBA812CB7AEE200ED44ED /* ExerciseData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExerciseData.swift; sourceTree = "<group>"; };
+		40DEBA832CC183FA00ED44ED /* EditExerciseHistoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditExerciseHistoryView.swift; sourceTree = "<group>"; };
 		40FEBBC42CA721490051C2AA /* FSCalendarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FSCalendarView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -146,6 +148,7 @@
 		13FEA26D2C29436C00D04BF2 /* View */ = {
 			isa = PBXGroup;
 			children = (
+				40DEBA832CC183FA00ED44ED /* EditExerciseHistoryView.swift */,
 				13FEA26E2C2943A000D04BF2 /* WheelPicker.swift */,
 				13FEA2722C2D483400D04BF2 /* ExerciseView.swift */,
 				13FEA2702C2C400600D04BF2 /* SetButton.swift */,
@@ -315,6 +318,7 @@
 				1371B14F2C2ED42500A4254A /* VerticalPager.swift in Sources */,
 				13FEA2412C27C9D200D04BF2 /* RepsApp.swift in Sources */,
 				13FEA2732C2D483400D04BF2 /* ExerciseView.swift in Sources */,
+				40DEBA842CC1840800ED44ED /* EditExerciseHistoryView.swift in Sources */,
 				132EF34E2C367BE000E75796 /* GradientBackground.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
