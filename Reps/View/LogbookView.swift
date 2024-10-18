@@ -106,11 +106,13 @@ struct LogbookView: View {
                                         Section(header: Text(formattedDate(date))) {
                                             ForEach(historiesByDate[date] ?? [], id: \.self) { history in
                                                 exerciseRow(history: history)
+                                                    .id(history.id)  // Add unique identifier to avoid reuse bugs
+                                                    
                                             }
                                         }
                                     }
                                 }
-                            }.animation(.easeInOut, value: expandedExercise)
+                            }
                         }
                     }
                     .listStyle(PlainListStyle())
@@ -143,6 +145,10 @@ struct LogbookView: View {
 
                     ForEach(workouts[exerciseName] ?? [], id: \.self) { history in
                         exerciseRow(history: history)
+                            .id(history.id)  // Add unique identifier to avoid reuse bugs
+                            .listRowBackground(Color.clear) // Disable highlighting
+                            .contentShape(Rectangle())  // Define the tappable area explicitly
+                            .allowsHitTesting(false)    // Disable interaction
                     }
                 }
             }
