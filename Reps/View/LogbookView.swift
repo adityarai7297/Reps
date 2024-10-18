@@ -76,7 +76,8 @@ struct LogbookView: View {
                         .padding(.leading, 16)
                 } else {
                     List {
-                        ForEach(groupedByExercise.keys.sorted(), id: \.self) { exerciseName in
+                        // Reverse the keys for latest first sorting
+                        ForEach(groupedByExercise.keys.sorted(by: >), id: \.self) { exerciseName in
                             Section(header: Button(action: {
                                 // Toggle expanded state for the tapped exercise
                                 withAnimation {
@@ -101,7 +102,7 @@ struct LogbookView: View {
                                     let historiesByDate = Dictionary(grouping: groupedByExercise[exerciseName] ?? [], by: { Calendar.current.startOfDay(for: $0.timestamp) })
 
                                     // Display the exercise history grouped by date
-                                    ForEach(historiesByDate.keys.sorted(), id: \.self) { date in
+                                    ForEach(historiesByDate.keys.sorted(by: >), id: \.self) { date in
                                         Section(header: Text(formattedDate(date))) {
                                             ForEach(historiesByDate[date] ?? [], id: \.self) { history in
                                                 exerciseRow(history: history)
@@ -314,4 +315,3 @@ struct LogbookView: View {
         }
     }
 }
-
