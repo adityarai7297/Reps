@@ -14,6 +14,7 @@ struct ContentView: View {
     @State private var refreshTrigger = false // Used to trigger refresh
     @State private var showingLogbook = false
     @State private var impactFeedback = UIImpactFeedbackGenerator(style: .medium) // Haptic Feedback
+    @State private var randomSeed: Double = Double.random(in: 0..<10000) // control gradient
 
     var body: some View {
         NavigationView {
@@ -40,7 +41,7 @@ struct ContentView: View {
                             color: .clear, // Since gradient is applied
                             userId: userId // Pass the binding here
                         )
-                        .gradientBackground(index: index)
+                        .gradientBackground(index: index, randomSeed: randomSeed)
                     }
                 }
             }
