@@ -8,11 +8,7 @@ struct GradientBackground: ViewModifier {
     
     // Combined and ordered list of gradients by color similarity
     private let gradients: [[Color]] = [
-        [Color(hex: "#1565C0"), Color(hex: "#b92b27")],               // Dark Blue to Dark Red
-        [Color(hex: "#2980B9"), Color(hex: "#6DD5FA"), Color(hex: "#FFFFFF")], // Blue to Light Blue to White
-        [Color(hex: "#FF0099"), Color(hex: "#493240")],               // Pink to Dark Purple
-        [Color(hex: "#1f4037"), Color(hex: "#99f2c8")],               // Dark Green to Light Mint
-        [Color(hex: "#7F7FD5"), Color(hex: "#86A8E7"), Color(hex: "#91EAE4")], // Purple to Light Blue
+        [Color(hex: "#FFFFFF"), Color(hex: "#6DD5FA"), Color(hex: "#2980B9")], // Blue to Light Blue to White
         [Color(hex: "#f12711"), Color(hex: "#f5af19")],               // Red to Orange
         [Color(hex: "#009FFF"), Color(hex: "#ec2F4B")],               // Blue to Red
         [Color(hex: "#654ea3"), Color(hex: "#eaafc8")],               // Purple to Light Pink
@@ -23,9 +19,11 @@ struct GradientBackground: ViewModifier {
         [Color(hex: "#e1eec3"), Color(hex: "#f05053")],               // Light Green to Red
         [Color(hex: "#f7ff00"), Color(hex: "#db36a4")],               // Yellow to Pink
         [Color(hex: "#FDFC47"), Color(hex: "#24FE41")],               // Yellow to Green
+        [Color(hex: "#12c2e9"), Color(hex: "#c471ed"), Color(hex: "#f64f59")],
         [Color(hex: "#40E0D0"), Color(hex: "#FF8C00"), Color(hex: "#FF0080")], // Turquoise to Orange to Pink
         [Color(hex: "#833ab4"), Color(hex: "#fd1d1d"), Color(hex: "#FF0080")],  // Dark Purple to Red to Pink
-        [Color(hex: "#5614B0"), Color(hex: "#DBD65C")]                // Dark Purple to Yellow-Gold
+        [Color(hex: "#5614B0"), Color(hex: "#DBD65C")],
+        [Color(hex: "#833ab4"), Color(hex: "#fd1d1d"), Color(hex: "#fcb045")]
     ]
     
     func body(content: Content) -> some View {
