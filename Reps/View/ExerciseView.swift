@@ -17,6 +17,7 @@ struct ExerciseView: View {
     let RPEWheelConfig: WheelPicker.Config
     let color: Color
     let userId: String
+    @EnvironmentObject var themeManager: ThemeManager
 
     var body: some View {
         VStack {
@@ -28,11 +29,12 @@ struct ExerciseView: View {
                 .padding(.horizontal)
                 .padding(.top, 40)
                 .frame(width: UIScreen.main.bounds.width / 1.4)
+                .foregroundColor(themeManager.textColor)
 
             Spacer()
 
             Rectangle()
-                .fill(Color.black)
+                .fill(themeManager.separatorColor)
                 .frame(height: 0.2)
 
             Spacer()
@@ -44,11 +46,13 @@ struct ExerciseView: View {
                         .font(.largeTitle.bold())
                         .contentTransition(.numericText(value: currentWeight))
                         .animation(.easeInOut(duration: 0.2), value: currentWeight)
+                        .foregroundColor(themeManager.textColor)
 
                     Text("lbs")
                         .font(.title2)
                         .fontWeight(.light)
                         .textScale(.secondary)
+                        .foregroundColor(themeManager.secondaryTextColor)
                 }
 
                 WheelPicker(config: weightWheelConfig, value: $currentWeight)
@@ -64,11 +68,13 @@ struct ExerciseView: View {
                         .font(.largeTitle.bold())
                         .contentTransition(.numericText(value: currentReps))
                         .animation(.easeInOut(duration: 0.2), value: currentReps)
+                        .foregroundColor(themeManager.textColor)
 
                     Text("reps")
                         .font(.title2)
                         .fontWeight(.light)
                         .textScale(.secondary)
+                        .foregroundColor(themeManager.secondaryTextColor)
                 }
 
                 WheelPicker(config: repWheelConfig, value: $currentReps)
@@ -84,11 +90,13 @@ struct ExerciseView: View {
                         .font(.largeTitle.bold())
                         .contentTransition(.numericText(value: currentRPE))
                         .animation(.easeInOut(duration: 0.2), value: currentRPE)
+                        .foregroundColor(themeManager.textColor)
 
                     Text("% RPE")
                         .font(.title2)
                         .fontWeight(.light)
                         .textScale(.secondary)
+                        .foregroundColor(themeManager.secondaryTextColor)
                 }
 
                 WheelPicker(config: RPEWheelConfig, value: $currentRPE)
@@ -112,6 +120,7 @@ struct ExerciseView: View {
                 HStack(spacing: 5) {
                     Text("\(setCount)")
                         .font(.title)
+                        .foregroundColor(themeManager.textColor)
 
                     Image(systemName: "checkmark.circle.fill")
                         .resizable()

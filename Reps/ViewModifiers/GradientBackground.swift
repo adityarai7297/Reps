@@ -1,43 +1,34 @@
 import SwiftUI
 
 struct GradientBackground: ViewModifier {
-    @State private var phase = 0.0
-    
-    let timer = Timer.publish(every: 0.016, on: .main, in: .common).autoconnect()
-    
-    // Adjusted colors for more visible inner glow effect
-    private let gradientColors: [Color] = [
-        Color.green,                 // Solid inner glow
-        Color.green.opacity(0.8),    // Strong fade
-        Color.green.opacity(0.4),    // Mid fade
-        Color.clear                  // Transparent edge
-    ]
+    let color: Color
+    @EnvironmentObject var themeManager: ThemeManager
     
     private func calculateGlowSpread(_ geometry: GeometryProxy) -> CGFloat {
         #if os(iOS)
         let pointsPerInch = UIScreen.main.scale * 72.0
-        let glowWidth = pointsPerInch / 18.0
+        let glowWidth = pointsPerInch / 24.0
         #else
-        let glowWidth: CGFloat = 4.0
+        let glowWidth: CGFloat = 3.0
         #endif
         
         let screenSmallestDimension = min(geometry.size.width, geometry.size.height)
-        return min(glowWidth, screenSmallestDimension * 0.15)
+        return min(glowWidth, screenSmallestDimension * 0.1)
     }
     
     func body(content: Content) -> some View {
         GeometryReader { geometry in
             ZStack {
-                // Base white background
-                Color.white
+                // Base background
+                themeManager.backgroundColor
                 
-                // Inner glow
-                Color.green.opacity(0.7)
+                // Gradient layers
+                Color(color)
+                    .opacity(themeManager.isDarkMode ? 0.5 : 0.3)
                     .blur(radius: calculateGlowSpread(geometry) * 0.8)
                     .mask {
-                        // Create inverse mask with gradient edges
                         ZStack {
-                            Rectangle().fill(.white)
+                            Rectangle().fill(themeManager.isDarkMode ? .black : .white)
                             RoundedRectangle(cornerRadius: 40)
                                 .padding(calculateGlowSpread(geometry) * 0.45)
                                 .blur(radius: calculateGlowSpread(geometry) * 0.4)
@@ -45,12 +36,12 @@ struct GradientBackground: ViewModifier {
                         }
                     }
                 
-                // Second layer for extra dispersion
-                Color.green.opacity(0.5)
+                Color(color)
+                    .opacity(themeManager.isDarkMode ? 0.3 : 0.2)
                     .blur(radius: calculateGlowSpread(geometry) * 1.0)
                     .mask {
                         ZStack {
-                            Rectangle().fill(.white)
+                            Rectangle().fill(themeManager.isDarkMode ? .black : .white)
                             RoundedRectangle(cornerRadius: 40)
                                 .padding(calculateGlowSpread(geometry) * 0.8)
                                 .blur(radius: calculateGlowSpread(geometry) * 0.6)
@@ -58,23 +49,17 @@ struct GradientBackground: ViewModifier {
                         }
                     }
                 
-                // Content on top
                 content
             }
         }
         .clipShape(RoundedRectangle(cornerRadius: 40))
-        .onReceive(timer) { _ in
-            withAnimation(.linear(duration: 0.016)) {
-                phase += 0.016
-            }
-        }
     }
 }
 
 // Extension to make it easier to use
 extension View {
-    func gradientBackground() -> some View {
-        modifier(GradientBackground())
+    func gradientBackground(color: Color = .green) -> some View {
+        modifier(GradientBackground(color: color))
     }
 }
 
