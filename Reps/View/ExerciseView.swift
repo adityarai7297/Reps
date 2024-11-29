@@ -99,9 +99,13 @@ struct ExerciseView: View {
 
             // **Set Button Section**
             HStack(spacing: 15) {
-                SetButton(showCheckmark: $showCheckmark, setCount: $setCount, action: {
-                    saveExerciseHistory()
-                })
+                SetButton(
+                    showCheckmark: $showCheckmark,
+                    setCount: $setCount,
+                    action: {
+                        saveExerciseHistory()
+                    }
+                )
                 .frame(maxWidth: .infinity, alignment: .center)
                 .offset(x: UIScreen.main.bounds.width / 12)
 
