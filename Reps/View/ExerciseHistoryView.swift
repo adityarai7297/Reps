@@ -90,17 +90,17 @@ struct ExerciseHistoryView: View {
                         }
                     }
                 }
-                .listRowBackground(Color.black)
+                .listRowBackground(Color(UIColor.systemBackground))
                 .animation(.default, value: groupedExerciseHistory)
             }
             .listStyle(PlainListStyle())
-            .background(Color.black)
+            .background(Color(UIColor.systemBackground))
             .onAppear {
                 loadExerciseHistory()
             }
             .navigationTitle(exerciseName)
         }
-        .background(Color.black.edgesIgnoringSafeArea(.all))
+        .background(Color(UIColor.systemBackground).edgesIgnoringSafeArea(.all))
         .navigationBarTitleDisplayMode(.inline)
         // Show the Edit modal
         .sheet(item: $historyToEdit) { history in
