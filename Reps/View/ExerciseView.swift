@@ -124,6 +124,7 @@ struct ExerciseView: View {
 
                     Image(systemName: "checkmark.circle.fill")
                         .resizable()
+                        .foregroundColor(themeManager.navigationIconColor)
                         .frame(width: 24, height: 24)
                 }
                 .opacity(setCount > 0 ? 1 : 0)
