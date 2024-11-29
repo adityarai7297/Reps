@@ -9,12 +9,14 @@ struct VerticalPager<Content: View>: View {
     @State private var impactFeedback = UIImpactFeedbackGenerator(style: .rigid)
     @State private var velocityTracker: CGFloat = 0
     @State private var bounceOffset: CGFloat = 0
+    @State private var animatedIndex: CGFloat = 0
     
-    // Constants for fine-tuning
-    private let velocityThreshold: CGFloat = 300
-    private let dragThreshold: CGFloat = 100
-    private let springResponse: Double = 0.35
-    private let springDamping: Double = 0.8
+    // Optimized constants for ultra-smooth animations
+    private let velocityThreshold: CGFloat = 150  // Even lower threshold
+    private let dragThreshold: CGFloat = 40      // Much lower for instant response
+    private let springResponse: Double = 0.25    // Faster response
+    private let springDamping: Double = 0.7      // Less damping for quicker movement
+    private let bounceAmount: CGFloat = 12       // Smaller bounce for faster recovery
     
     var body: some View {
         GeometryReader { geometry in
@@ -24,17 +26,26 @@ struct VerticalPager<Content: View>: View {
                 ForEach((max(0, currentIndex - 2)...min(pageCount - 1, currentIndex + 2)), id: \.self) { index in
                     contentAtIndex(index)
                         .frame(width: geometry.size.width, height: height)
-                        .offset(y: CGFloat(index - currentIndex) * height + dragOffset + bounceOffset)
+                        .offset(y: (CGFloat(index) - animatedIndex) * height + dragOffset + bounceOffset)
                 }
             }
+            .onChange(of: currentIndex) { newIndex in
+                withAnimation(.spring(response: springResponse, dampingFraction: springDamping)) {
+                    animatedIndex = CGFloat(newIndex)
+                }
+            }
+            .onAppear {
+                animatedIndex = CGFloat(currentIndex)
+            }
             .simultaneousGesture(
-                DragGesture(minimumDistance: 30, coordinateSpace: .local)
+                DragGesture(minimumDistance: 15, coordinateSpace: .local)  // Lower minimum distance
                     .updating($dragOffset) { value, state, _ in
                         let verticalDrag = abs(value.translation.height)
                         let horizontalDrag = abs(value.translation.width)
-                        if verticalDrag > horizontalDrag && verticalDrag > 50 {
+                        if verticalDrag > horizontalDrag && verticalDrag > 15 {
                             state = value.translation.height
                             velocityTracker = value.velocity.height
+                            impactFeedback.prepare()
                         }
                     }
                     .onEnded { value in
@@ -43,42 +54,34 @@ struct VerticalPager<Content: View>: View {
                         
                         let verticalDrag = abs(dragDistance)
                         let horizontalDrag = abs(value.translation.width)
-                        guard verticalDrag > horizontalDrag && verticalDrag > 50 else { return }
-                        
-                        impactFeedback.prepare()
+                        guard verticalDrag > horizontalDrag && verticalDrag > 15 else { return }
                         
                         if velocity < -velocityThreshold || dragDistance < -dragThreshold {
                             if currentIndex < pageCount - 1 {
-                                impactFeedback.impactOccurred()
-                                withAnimation(.spring(response: springResponse, dampingFraction: springDamping)) {
-                                    currentIndex += 1
-                                    bounceOffset = 0
-                                }
+                                currentIndex += 1
+                                impactFeedback.impactOccurred(intensity: 0.6)
                             } else {
-                                withAnimation(.spring(response: 0.2, dampingFraction: 0.5)) {
-                                    bounceOffset = 20
+                                withAnimation(.spring(response: 0.2, dampingFraction: 0.6)) {
+                                    bounceOffset = bounceAmount
                                 }
-                                withAnimation(.spring(response: 0.2, dampingFraction: 0.5).delay(0.1)) {
+                                withAnimation(.spring(response: 0.2, dampingFraction: 0.6).delay(0.1)) {
                                     bounceOffset = 0
                                 }
                             }
                         } else if velocity > velocityThreshold || dragDistance > dragThreshold {
                             if currentIndex > 0 {
-                                impactFeedback.impactOccurred()
-                                withAnimation(.spring(response: springResponse, dampingFraction: springDamping)) {
-                                    currentIndex -= 1
-                                    bounceOffset = 0
-                                }
+                                currentIndex -= 1
+                                impactFeedback.impactOccurred(intensity: 0.6)
                             } else {
-                                withAnimation(.spring(response: 0.2, dampingFraction: 0.5)) {
-                                    bounceOffset = -20
+                                withAnimation(.spring(response: 0.2, dampingFraction: 0.6)) {
+                                    bounceOffset = -bounceAmount
                                 }
-                                withAnimation(.spring(response: 0.2, dampingFraction: 0.5).delay(0.1)) {
+                                withAnimation(.spring(response: 0.2, dampingFraction: 0.6).delay(0.1)) {
                                     bounceOffset = 0
                                 }
                             }
                         } else {
-                            withAnimation(.spring(response: 0.2, dampingFraction: 0.7)) {
+                            withAnimation(.spring(response: 0.2, dampingFraction: 0.6)) {
                                 bounceOffset = 0
                             }
                         }
