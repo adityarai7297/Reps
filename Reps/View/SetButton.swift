@@ -5,6 +5,7 @@ struct SetButton: View {
     @State private var buttonScale: CGFloat = 1.0
     @Binding var showCheckmark: Bool
     @Binding var setCount: Int
+    @EnvironmentObject var themeManager: ThemeManager
     let action: () -> Void
     
     private let feedbackGenerator = UIImpactFeedbackGenerator(style: .heavy)
@@ -35,13 +36,13 @@ struct SetButton: View {
             // Set Button
             ZStack {
                 Circle()
-                    .stroke(lineWidth: 0.5)
+                    .stroke(themeManager.textColor, lineWidth: 0.5)
                     .frame(width: 92, height: 92)
 
                 Text("SET")
                     .font(.system(size: 28))
                     .fontWeight(.bold)
-                    .foregroundColor(.black)
+                    .foregroundColor(themeManager.textColor)
             }
             .scaleEffect(buttonScale)
             .onTapGesture {

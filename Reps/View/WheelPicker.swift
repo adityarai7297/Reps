@@ -7,7 +7,9 @@ struct WheelPicker: View {
     @Binding var value: CGFloat
     /// View Properties
     @State private var isLoaded: Bool = false
-    @State private var lastHapticValue: CGFloat = 0 // Store the last value to detect when to trigger haptics
+    @State private var lastHapticValue: CGFloat = 0
+    @EnvironmentObject var themeManager: ThemeManager
+    // Store the last value to detect when to trigger haptics
 
     // Haptic feedback generator
     let feedbackGenerator = UIImpactFeedbackGenerator(style: .light)
@@ -25,7 +27,7 @@ struct WheelPicker: View {
                         let remainder = index % config.steps
                         
                         Divider()
-                            .background(.black)
+                            .background(themeManager.wheelPickerColor)
                             .frame(width: 0.1, height: remainder == 0 ? 20 : 10, alignment: .center)
                             .frame(maxHeight: 20, alignment: .bottom)
                             .overlay(alignment: .bottom) {
@@ -33,6 +35,7 @@ struct WheelPicker: View {
                                     Text("\((index / config.steps) * config.multiplier)")
                                         .font(.caption)
                                         .fontWeight(.semibold)
+                                        .foregroundColor(themeManager.wheelPickerColor)
                                         .textScale(.secondary)
                                         .fixedSize()
                                         .offset(y: 20)
@@ -61,6 +64,7 @@ struct WheelPicker: View {
             }))
             .overlay(alignment: .center) {
                 Rectangle()
+                    .fill(Color.white)
                     .frame(width: 1, height: 40)
                     .padding(.bottom, 20)
             }

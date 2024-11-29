@@ -15,19 +15,50 @@ struct ContentView: View {
     @State private var showingLogbook = false
     @State private var impactFeedback = UIImpactFeedbackGenerator(style: .medium) // Haptic Feedback
     @State private var startingHueIndex: Int = Int.random(in: 0..<7)
+    @StateObject private var themeManager = ThemeManager()
+
+    private let exerciseColors: [Color] = [
+        Color(hex: "#FF6B6B"),  // Coral Red
+        Color(hex: "#4ECDC4"),  // Turquoise
+        Color(hex: "#45B7D1"),  // Ocean Blue
+        Color(hex: "#96CEB4"),  // Sage Green
+        Color(hex: "#9B5DE5"),  // Purple
+        Color(hex: "#FF9A8B"),  // Peach
+        Color(hex: "#FF7F50"),  // Coral
+        Color(hex: "#00CED1"),  // Dark Turquoise
+        Color(hex: "#FF69B4"),  // Hot Pink
+        Color(hex: "#32CD32"),  // Lime Green
+        Color(hex: "#FF4500"),  // Orange Red
+        Color(hex: "#4169E1"),  // Royal Blue
+        Color(hex: "#8A2BE2"),  // Blue Violet
+        Color(hex: "#20B2AA"),  // Light Sea Green
+        Color(hex: "#FF1493"),  // Deep Pink
+        Color(hex: "#00FA9A"),  // Medium Spring Green
+        Color(hex: "#1E90FF"),  // Dodger Blue
+        Color(hex: "#DC143C"),  // Crimson
+        Color(hex: "#7B68EE"),  // Medium Slate Blue
+        Color(hex: "#2E8B57"),  // Sea Green
+        Color(hex: "#BA55D3"),  // Medium Orchid
+        Color(hex: "#FF8C00"),  // Dark Orange
+        Color(hex: "#4682B4"),  // Steel Blue
+        Color(hex: "#D83F87"),  // Pink Purple
+    ]
 
     var body: some View {
         NavigationView {
             ZStack {
+                themeManager.backgroundColor.ignoresSafeArea()
+                
                 if exercises.isEmpty {
                     // No exercises UI
                     VStack {
                         Text("Start adding exercises!")
                             .font(.headline)
+                            .foregroundColor(themeManager.textColor)
                             .padding()
                         Image("CatWorkingOut")
                             .resizable()
-                            .frame(width: 300, height: 220) // Adjust size as needed
+                            .frame(width: 300, height: 220)
                     }
                 } else {
                     // Exercise pager when exercises are available
@@ -41,7 +72,7 @@ struct ContentView: View {
                             color: .clear,
                             userId: userId
                         )
-                        .gradientBackground()
+                        .gradientBackground(color: exerciseColors[index % exerciseColors.count])
                     }
                 }
             }
@@ -63,7 +94,7 @@ struct ContentView: View {
                     }) {
                         Image(systemName: "calendar")
                             .font(.title2)
-                            .foregroundColor(.black)
+                            .foregroundColor(themeManager.navigationIconColor)
                             .scaleEffect(x: 1.1, y: 1.1)
                     }
                 }
@@ -77,23 +108,26 @@ struct ContentView: View {
                     }) {
                         Image(systemName: "list.bullet.rectangle")
                             .font(.title2)
-                            .foregroundColor(exercises.isEmpty ? .white : .black)
+                            .foregroundColor(themeManager.navigationIconColor)
                             .scaleEffect(x: 0.9, y: 1)
                             
                     }
                 }
             }
         }
+        .environmentObject(themeManager)
         // Logbook sheet presentation
         .sheet(isPresented: $showingLogbook) {
             LogbookView(setCount: $setCount, refreshTrigger: $refreshTrigger)
                 .environment(\.modelContext, modelContext)
+                .environmentObject(themeManager)
         }
         // Manage exercises sheet presentation
         .sheet(isPresented: $showingManageExercises) {
             ManageExercisesView(refreshTrigger: $refreshTrigger, exercises: $exercises, currentIndex: $currentIndex)
-                .id(refreshTrigger) // Reload the sheet when refreshTrigger changes
+                .id(refreshTrigger)
                 .environment(\.modelContext, modelContext)
+                .environmentObject(themeManager)
         }
     }
 
