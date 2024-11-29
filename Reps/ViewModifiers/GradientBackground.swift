@@ -1,49 +1,80 @@
 import SwiftUI
 
 struct GradientBackground: ViewModifier {
-    @State private var startPoint = UnitPoint.topLeading
-    @State private var endPoint = UnitPoint.bottomTrailing
-
-    var index: Int
+    @State private var phase = 0.0
     
-    // Combined and ordered list of gradients by color similarity
-    private let gradients: [[Color]] = [
-        [Color(hex: "#FFFFFF"), Color(hex: "#6DD5FA"), Color(hex: "#2980B9")], // Blue to Light Blue to White
-        [Color(hex: "#f12711"), Color(hex: "#f5af19")],               // Red to Orange
-        [Color(hex: "#009FFF"), Color(hex: "#ec2F4B")],               // Blue to Red
-        [Color(hex: "#654ea3"), Color(hex: "#eaafc8")],               // Purple to Light Pink
-        [Color(hex: "#8A2387"), Color(hex: "#E94057"), Color(hex: "#F27121")], // Dark Purple to Orange
-        [Color(hex: "#00F260"), Color(hex: "#0575E6")],               // Green to Blue
-        [Color(hex: "#DCE35B"), Color(hex: "#45B649")],               // Light Green to Dark Green
-        [Color(hex: "#5433FF"), Color(hex: "#20BDFF"), Color(hex: "#A5FECB")], // Purple to Light Blue to Mint
-        [Color(hex: "#e1eec3"), Color(hex: "#f05053")],               // Light Green to Red
-        [Color(hex: "#f7ff00"), Color(hex: "#db36a4")],               // Yellow to Pink
-        [Color(hex: "#FDFC47"), Color(hex: "#24FE41")],               // Yellow to Green
-        [Color(hex: "#12c2e9"), Color(hex: "#c471ed"), Color(hex: "#f64f59")],
-        [Color(hex: "#40E0D0"), Color(hex: "#FF8C00"), Color(hex: "#FF0080")], // Turquoise to Orange to Pink
-        [Color(hex: "#833ab4"), Color(hex: "#fd1d1d"), Color(hex: "#FF0080")],  // Dark Purple to Red to Pink
-        [Color(hex: "#5614B0"), Color(hex: "#DBD65C")],
-        [Color(hex: "#833ab4"), Color(hex: "#fd1d1d"), Color(hex: "#fcb045")]
+    let timer = Timer.publish(every: 0.016, on: .main, in: .common).autoconnect()
+    
+    // Adjusted colors for more visible inner glow effect
+    private let gradientColors: [Color] = [
+        Color.green,                 // Solid inner glow
+        Color.green.opacity(0.8),    // Strong fade
+        Color.green.opacity(0.4),    // Mid fade
+        Color.clear                  // Transparent edge
     ]
     
-    func body(content: Content) -> some View {
-        // Select a gradient based on index, cycling through the array
-        let gradientColors = gradients[index % gradients.count]
+    private func calculateGlowSpread(_ geometry: GeometryProxy) -> CGFloat {
+        #if os(iOS)
+        let pointsPerInch = UIScreen.main.scale * 72.0
+        let glowWidth = pointsPerInch / 18.0
+        #else
+        let glowWidth: CGFloat = 4.0
+        #endif
         
-        content
-            .background(
-                LinearGradient(
-                    gradient: Gradient(colors: gradientColors),
-                    startPoint: startPoint,
-                    endPoint: endPoint
-                )
-            )
+        let screenSmallestDimension = min(geometry.size.width, geometry.size.height)
+        return min(glowWidth, screenSmallestDimension * 0.15)
+    }
+    
+    func body(content: Content) -> some View {
+        GeometryReader { geometry in
+            ZStack {
+                // Base white background
+                Color.white
+                
+                // Inner glow
+                Color.green.opacity(0.7)
+                    .blur(radius: calculateGlowSpread(geometry) * 0.8)
+                    .mask {
+                        // Create inverse mask with gradient edges
+                        ZStack {
+                            Rectangle().fill(.white)
+                            RoundedRectangle(cornerRadius: 40)
+                                .padding(calculateGlowSpread(geometry) * 0.45)
+                                .blur(radius: calculateGlowSpread(geometry) * 0.4)
+                                .blendMode(.destinationOut)
+                        }
+                    }
+                
+                // Second layer for extra dispersion
+                Color.green.opacity(0.5)
+                    .blur(radius: calculateGlowSpread(geometry) * 1.0)
+                    .mask {
+                        ZStack {
+                            Rectangle().fill(.white)
+                            RoundedRectangle(cornerRadius: 40)
+                                .padding(calculateGlowSpread(geometry) * 0.8)
+                                .blur(radius: calculateGlowSpread(geometry) * 0.6)
+                                .blendMode(.destinationOut)
+                        }
+                    }
+                
+                // Content on top
+                content
+            }
+        }
+        .clipShape(RoundedRectangle(cornerRadius: 40))
+        .onReceive(timer) { _ in
+            withAnimation(.linear(duration: 0.016)) {
+                phase += 0.016
+            }
+        }
     }
 }
 
+// Extension to make it easier to use
 extension View {
-    func gradientBackground(index: Int) -> some View {
-        self.modifier(GradientBackground(index: index))
+    func gradientBackground() -> some View {
+        modifier(GradientBackground())
     }
 }
 

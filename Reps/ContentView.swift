@@ -38,10 +38,10 @@ struct ContentView: View {
                             weightWheelConfig: weightWheelConfig,
                             repWheelConfig: repWheelConfig,
                             RPEWheelConfig: exertionWheelConfig,
-                            color: .clear, // Since gradient is applied
-                            userId: userId // Pass the binding here
+                            color: .clear,
+                            userId: userId
                         )
-                        .gradientBackground(index: index)
+                        .gradientBackground()
                     }
                 }
             }
