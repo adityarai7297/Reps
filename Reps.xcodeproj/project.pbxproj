@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 56;
+	objectVersion = 70;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -70,6 +70,10 @@
 		40FEBBC42CA721490051C2AA /* FSCalendarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FSCalendarView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		408827952CFE6E63000DC83C /* Shared */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Shared; sourceTree = "<group>"; };
+/* End PBXFileSystemSynchronizedRootGroup section */
+
 /* Begin PBXFrameworksBuildPhase section */
 		13FEA23A2C27C9D200D04BF2 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
@@ -127,6 +131,7 @@
 		13FEA23F2C27C9D200D04BF2 /* Reps */ = {
 			isa = PBXGroup;
 			children = (
+				408827952CFE6E63000DC83C /* Shared */,
 				4089FA152C95761B00F96526 /* ViewModifiers */,
 				1371B1502C2F9C8100A4254A /* Model */,
 				13FEA26D2C29436C00D04BF2 /* View */,
@@ -186,6 +191,9 @@
 			buildRules = (
 			);
 			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				408827952CFE6E63000DC83C /* Shared */,
 			);
 			name = Reps;
 			packageProductDependencies = (

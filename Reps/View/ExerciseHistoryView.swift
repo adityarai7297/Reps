@@ -3,106 +3,60 @@ import SwiftData
 
 struct ExerciseHistoryView: View {
     @Environment(\.modelContext) private var modelContext
+    @Environment(\.dismiss) private var dismiss
     var exerciseName: String
-    var onDelete: () -> Void // Callback to notify parent view of deletion
+    var onDelete: () -> Void
     @State private var impactFeedback = UIImpactFeedbackGenerator(style: .heavy)
-
     @State private var groupedExerciseHistory: [Date: [ExerciseHistory]] = [:]
-    
-    // State for edit modal
     @State private var historyToEdit: ExerciseHistory? = nil
 
     var body: some View {
-        VStack(alignment: .leading) {
+        VStack(spacing: 0) {
+            // Header
             HStack {
                 Text(exerciseName)
                     .font(.system(size: 34, weight: .bold))
                     .foregroundColor(.white)
-                    .padding(.leading, 16)
-                    .padding(.top, 32)
-
                 Spacer()
             }
-            .padding(.bottom, 16)
+            .padding(.horizontal, 20)
+            .padding(.top, 16)
+            .padding(.bottom, 24)
 
-            List {
-                ForEach(Array(groupedExerciseHistory.keys.sorted(by: >)), id: \.self) { date in
-                    Section(header: Text(formattedDate(date))
-                                .font(.headline)
+            // History List
+            ScrollView {
+                VStack(spacing: 20) {
+                    ForEach(Array(groupedExerciseHistory.keys.sorted(by: >)), id: \.self) { date in
+                        VStack(alignment: .leading, spacing: 16) {
+                            // Date Header
+                            Text(Formatter.date(date))
+                                .font(.system(size: 18, weight: .semibold))
                                 .foregroundColor(.gray)
-                                .padding(.leading, 16)) {
-                        ForEach(groupedExerciseHistory[date]!) { history in
-                            HStack {
-                                VStack(alignment: .leading, spacing: 8) {
-                                    // Display weight
-                                    HStack {
-                                        Text("Weight: ")
-                                            .font(.headline)
-                                            .foregroundColor(.secondary)
-                                        Text("\(history.weight == floor(history.weight) ? String(format: "%.0f", history.weight) : String(format: "%.1f", history.weight)) lbs")
-                                            .font(.headline)
-                                            .foregroundColor(.primary)
+                                .padding(.horizontal, 20)
+                            
+                            // Exercise Records
+                            ForEach(groupedExerciseHistory[date] ?? []) { history in
+                                ExerciseHistoryCard(
+                                    history: history,
+                                    onDelete: { history in
+                                        deleteHistory(history)
+                                    },
+                                    onEdit: { history in
+                                        historyToEdit = history
                                     }
-
-                                    // Display reps
-                                    HStack {
-                                        Text("Reps: ")
-                                            .font(.headline)
-                                            .foregroundColor(.secondary)
-                                        Text("\(history.reps == floor(history.reps) ? String(format: "%.0f", history.reps) : String(format: "%.1f", history.reps))")
-                                            .font(.headline)
-                                            .foregroundColor(.primary)
-                                    }
-
-                                    // Display RPE
-                                    HStack {
-                                        Text("RPE: ")
-                                            .font(.headline)
-                                            .foregroundColor(.secondary)
-                                        Text("\(history.rpe == floor(history.rpe) ? String(format: "%.0f", history.rpe) : String(format: "%.1f", history.rpe))%")
-                                            .font(.headline)
-                                            .foregroundColor(.primary)
-                                    }
-
-                                    // Time display
-                                    HStack {
-                                        Text("Time: ")
-                                            .font(.headline)
-                                            .foregroundColor(.secondary)
-                                        Text("\(formattedTime(history.timestamp))")
-                                            .font(.headline)
-                                            .foregroundColor(.primary)
-                                    }
-                                }
-
-                                Spacer()
-                            }
-                            .padding()
-                            .background(Color(UIColor.secondarySystemBackground))
-                            .cornerRadius(10)
-                            // Swipe actions for Edit and Delete
-                            .swipeActions(edge: .leading) {
-                                editButton(for: history) // Edit button
-                            }
-                            .swipeActions(edge: .trailing) {
-                                deleteButton(for: history) // Delete button
+                                )
                             }
                         }
+                        .padding(.bottom, 8)
                     }
                 }
-                .listRowBackground(Color(UIColor.systemBackground))
-                .animation(.default, value: groupedExerciseHistory)
+                .padding(.horizontal, 20)
             }
-            .listStyle(PlainListStyle())
-            .background(Color(UIColor.systemBackground))
-            .onAppear {
-                loadExerciseHistory()
-            }
-            .navigationTitle(exerciseName)
         }
-        .background(Color(UIColor.systemBackground).edgesIgnoringSafeArea(.all))
-        .navigationBarTitleDisplayMode(.inline)
-        // Show the Edit modal
+        .background(Color.black)
+        .onAppear {
+            loadExerciseHistory()
+        }
         .sheet(item: $historyToEdit) { history in
             EditExerciseHistoryView(history: history)
                 .presentationDetents([.medium])
@@ -113,7 +67,6 @@ struct ExerciseHistoryView: View {
         }
     }
 
-    // Load the exercise history for the current exercise
     private func loadExerciseHistory() {
         let fetchRequest = FetchDescriptor<ExerciseHistory>(
             predicate: #Predicate { history in
@@ -132,50 +85,60 @@ struct ExerciseHistoryView: View {
         }
     }
 
-    // Swipe to delete action
-    private func deleteButton(for history: ExerciseHistory) -> some View {
-        Button(role: .destructive) {
-            deleteHistory(history)
-        } label: {
-            Label("Delete", systemImage: "trash")
-        }
-    }
-
-    // Swipe to edit action
-    private func editButton(for history: ExerciseHistory) -> some View {
-        Button {
-            historyToEdit = history // Open the edit modal
-        } label: {
-            Label("Edit", systemImage: "pencil")
-        }
-        .tint(.blue)
-    }
-
-    // Delete the history entry and reload
     private func deleteHistory(_ history: ExerciseHistory) {
         modelContext.delete(history)
         do {
             try modelContext.save()
-            onDelete() // Trigger callback for deletion
-            loadExerciseHistory() // Reload history after deletion
-            impactFeedback.impactOccurred() // Haptic feedback
+            onDelete()
+            loadExerciseHistory()
+            impactFeedback.impactOccurred()
         } catch {
             print("Failed to delete exercise history: \(error)")
         }
     }
+}
 
-    // Date formatter for headers
-    private func formattedDate(_ date: Date) -> String {
-        let formatter = DateFormatter()
-        formatter.dateStyle = .medium
-        return formatter.string(from: date)
-    }
+// MARK: - Supporting Views
 
-    // Time formatter for entries
-    private func formattedTime(_ date: Date) -> String {
-        let formatter = DateFormatter()
-        formatter.timeStyle = .short
-        return formatter.string(from: date)
+private struct ExerciseHistoryCard: View {
+    let history: ExerciseHistory
+    let onDelete: (ExerciseHistory) -> Void
+    let onEdit: (ExerciseHistory) -> Void
+    
+    var body: some View {
+        HStack(spacing: 16) {
+            // Stats
+            VStack(alignment: .leading, spacing: 8) {
+                StatRow(label: "Weight", value: "\(Formatter.decimal(history.weight)) lbs")
+                StatRow(label: "Reps", value: Formatter.decimal(history.reps))
+                StatRow(label: "RPE", value: "\(Formatter.decimal(history.rpe))%")
+                StatRow(label: "Time", value: Formatter.time(history.timestamp))
+            }
+            
+            Spacer()
+            
+            // Action buttons
+            HStack(spacing: 12) {
+                Button(action: { onEdit(history) }) {
+                    Image(systemName: "pencil")
+                        .foregroundColor(.blue)
+                        .padding(8)
+                        .background(Color.blue.opacity(0.2))
+                        .cornerRadius(8)
+                }
+                
+                Button(action: { onDelete(history) }) {
+                    Image(systemName: "trash")
+                        .foregroundColor(.red)
+                        .padding(8)
+                        .background(Color.red.opacity(0.2))
+                        .cornerRadius(8)
+                }
+            }
+        }
+        .padding(16)
+        .background(Color.black.opacity(0.3))
+        .cornerRadius(12)
     }
 }
 

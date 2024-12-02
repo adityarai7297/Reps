@@ -8,15 +8,25 @@ struct FSCalendarView: UIViewRepresentable {
     func makeUIView(context: Context) -> FSCalendar {
         let calendar = FSCalendar()
 
-        // Customize the calendar appearance
-        calendar.appearance.headerTitleColor = UIColor.systemBlue
-        calendar.appearance.weekdayTextColor = UIColor.systemBlue
-        calendar.appearance.selectionColor = UIColor.systemBlue // Highlight selected date in blue
-        calendar.appearance.todayColor = UIColor.clear // Remove default green color for today
-        calendar.appearance.titleTodayColor = UIColor.white
-        calendar.appearance.titleDefaultColor = UIColor.white
-        calendar.appearance.borderRadius = 0.2 // Set to create rounded squares instead of circles
-
+        // Configure calendar appearance for dark theme
+        calendar.backgroundColor = .clear
+        calendar.appearance.titleDefaultColor = .white
+        calendar.appearance.titleSelectionColor = .black
+        calendar.appearance.headerTitleColor = .white
+        calendar.appearance.weekdayTextColor = .gray
+        calendar.appearance.headerTitleFont = .systemFont(ofSize: 17, weight: .semibold)
+        calendar.appearance.weekdayFont = .systemFont(ofSize: 14, weight: .medium)
+        calendar.appearance.titleFont = .systemFont(ofSize: 15, weight: .regular)
+        
+        // Selection styling
+        calendar.appearance.selectionColor = UIColor.systemYellow
+        calendar.appearance.todayColor = UIColor.systemYellow.withAlphaComponent(0.3)
+        calendar.appearance.titleTodayColor = .white
+        
+        // Event styling
+        calendar.appearance.eventDefaultColor = UIColor.systemYellow
+        calendar.appearance.eventSelectionColor = UIColor.systemYellow
+        
         calendar.delegate = context.coordinator
         calendar.dataSource = context.coordinator
 
