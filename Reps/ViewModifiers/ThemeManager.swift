@@ -4,7 +4,7 @@ class ThemeManager: ObservableObject {
     @AppStorage("isDarkMode") var isDarkMode: Bool = true
     
     var backgroundColor: Color {
-        isDarkMode ? Color(UIColor.secondarySystemBackground) : .white
+        isDarkMode ? .black : .white
     }
     
     var textColor: Color {

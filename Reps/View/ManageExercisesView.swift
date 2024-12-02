@@ -6,7 +6,7 @@ struct ManageExercisesView: View {
     @Environment(\.modelContext) private var modelContext
     @Binding var refreshTrigger: Bool
     @Binding var exercises: [Exercise]
-    @Binding var currentIndex: Int // To update the pager view index
+    @Binding var currentIndex: Int
     @State private var newExerciseName: String = ""
     @State private var editingExercise: Exercise?
     @State private var showSuggestions: Bool = false
@@ -18,169 +18,139 @@ struct ManageExercisesView: View {
 
     let allPossibleExercises = ExerciseData.allExercises
 
-
     var body: some View {
-        NavigationView {
-            VStack(spacing: 0) {
-                // TextField to add a new exercise
+        VStack(spacing: 0) {
+            // Header
+            HStack {
+                Text("Manage Exercises")
+                    .font(.system(size: 34, weight: .bold))
+                    .foregroundColor(.white)
+                Spacer()
+            }
+            .padding(.horizontal, 20)
+            .padding(.top, 16)
+            .padding(.bottom, 24)
+
+            // Add Exercise Section
+            VStack(spacing: 16) {
                 HStack {
-                    TextField("Add Exercise", text: $newExerciseName)
+                    TextField("Add new exercise", text: $newExerciseName)
                         .textFieldStyle(RoundedBorderTextFieldStyle())
-                        .onChange(of: newExerciseName) {
+                        .onChange(of: newExerciseName) { _, _ in
                             updateSuggestions()
                         }
-                        .onTapGesture {
-                            showSuggestions = true
-                        }
-                        .padding(.horizontal)
-
-                    Button(action: {
-                        addExercise()
-                    }) {
+                    
+                    Button(action: addExercise) {
                         Image(systemName: "plus.circle.fill")
-                            .foregroundColor(.green)
+                            .foregroundColor(.yellow)
                             .font(.system(size: 24))
                     }
-                    .padding(.trailing)
+                    .disabled(newExerciseName.isEmpty)
                 }
-                .padding(.top)
+                .padding(.horizontal, 20)
 
-                // Suggestion list under TextField
+                // Suggestions
                 if showSuggestions && !suggestedExercises.isEmpty {
-                    VStack {
-                        List {
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        HStack(spacing: 8) {
                             ForEach(suggestedExercises, id: \.self) { suggestion in
                                 Button(action: {
                                     newExerciseName = suggestion
-                                    addExercise()
+                                    showSuggestions = false
                                 }) {
-                                    HStack {
-                                        Text(suggestion)
-                                        Spacer()
-                                    }
-                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                    Text(suggestion)
+                                        .foregroundColor(.white)
+                                        .padding(.horizontal, 12)
+                                        .padding(.vertical, 8)
+                                        .background(Color.yellow.opacity(0.2))
+                                        .cornerRadius(8)
                                 }
-                                .buttonStyle(PlainButtonStyle())
                             }
                         }
-                        .listStyle(PlainListStyle())
-                        .frame(height: min(200, CGFloat(suggestedExercises.count * 44)))
-                        .cornerRadius(8)
-                        .shadow(radius: 5)
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 8)
-                                .stroke(Color.gray.opacity(0.5), lineWidth: 1)
-                        )
-                        .padding(.horizontal)
+                        .padding(.horizontal, 20)
                     }
                 }
+            }
+            .padding(.bottom, 20)
 
-                // List of added exercises with reorder functionality
-                List {
-                    ForEach(exercises.indices, id: \.self) { index in
-                        HStack {
-                            Text(exercises[index].name)
-                                .frame(maxWidth: .infinity, alignment: .leading)
-                        }
-                        .padding(.vertical, 8)
-                        .contentShape(Rectangle())
-                        .onTapGesture {
+            // Exercise List
+            List {
+                ForEach(exercises.indices, id: \.self) { index in
+                    ExerciseRow(
+                        exercise: exercises[index],
+                        onTap: {
                             impactFeedback.impactOccurred()
                             currentIndex = index
                             dismiss()
+                        },
+                        onEdit: {
+                            startEditing(exercise: exercises[index])
+                        },
+                        onDelete: {
+                            deleteExercise(exercises[index])
                         }
-                        .swipeActions(edge: .leading, allowsFullSwipe: false) {
-                            Button("Edit") {
-                                startEditing(exercise: exercises[index])
-                            }
-                            .tint(.blue)
-                        }
-                        .swipeActions(edge: .trailing, allowsFullSwipe: false) {
-                            Button("Delete") {
-                                deleteExercise(exercises[index])
-                            }
-                            .tint(.red)
-                        }
-                        .gesture(
-                            LongPressGesture(minimumDuration: 0.5)
-                                .onEnded { _ in
-                                    impactFeedback.impactOccurred()
-                                }
-                        )
-                    }
-                    .onMove(perform: moveExercise)
+                    )
+                    .listRowBackground(Color.clear)
+                    .listRowInsets(EdgeInsets(top: 4, leading: 20, bottom: 4, trailing: 20))
                 }
-                .listStyle(PlainListStyle())
+                .onMove(perform: moveExercise)
             }
-            .navigationTitle("Manage Exercises")
-            .alert(isPresented: $showDuplicateAlert) {
-                Alert(
-                    title: Text("Duplicate Exercise"),
-                    message: Text("This exercise already exists."),
-                    dismissButton: .default(Text("OK"))
-                )
-            }
-            .sheet(isPresented: $showingEditSheet) {
-                VStack {
-                    TextField("Exercise Name", text: $editedExerciseName)
-                        .textFieldStyle(RoundedBorderTextFieldStyle())
-                        .padding()
-
-                    Button("Save") {
-                        if let exercise = editingExercise {
-                            saveChanges(for: exercise)
-                        }
-                        showingEditSheet = false
+            .listStyle(PlainListStyle())
+            .background(Color.black)
+        }
+        .background(Color.black)
+        .alert(isPresented: $showDuplicateAlert) {
+            Alert(
+                title: Text("Duplicate Exercise"),
+                message: Text("This exercise already exists."),
+                dismissButton: .default(Text("OK"))
+            )
+        }
+        .sheet(isPresented: $showingEditSheet) {
+            EditExerciseSheet(
+                exerciseName: $editedExerciseName,
+                onSave: {
+                    if let exercise = editingExercise {
+                        saveChanges(for: exercise)
                     }
-                    .padding()
-
-                    Button("Cancel") {
-                        showingEditSheet = false
-                    }
-                    .padding()
+                    showingEditSheet = false
+                },
+                onCancel: {
+                    showingEditSheet = false
                 }
-                .presentationDetents([.fraction(0.3)])
-            }
+            )
         }
     }
 
     // MARK: - Helper Functions
 
-    // Start editing an exercise
     private func startEditing(exercise: Exercise) {
         editingExercise = exercise
         editedExerciseName = exercise.name
         showingEditSheet = true
     }
 
-    // Add a new exercise
     private func addExercise() {
         guard !newExerciseName.isEmpty else { return }
 
-        // Check for duplicates
         if exercises.contains(where: { $0.name.caseInsensitiveCompare(newExerciseName) == .orderedSame }) {
             showDuplicateAlert = true
         } else {
             let newExercise = Exercise(name: newExerciseName)
             exercises.append(newExercise)
-
-            // Perform modelContext operations on the main thread
             modelContext.insert(newExercise)
             saveContext()
-
-            newExerciseName = ""  // Clear the text field
+            newExerciseName = ""
             showSuggestions = false
         }
     }
 
-    // Save changes to an exercise
     private func saveChanges(for exercise: Exercise) {
         guard !editedExerciseName.isEmpty, let index = exercises.firstIndex(of: exercise) else { return }
 
         let oldName = exercise.name
         exercises[index].name = editedExerciseName
 
-        // Perform modelContext operations on the main thread
         let historyFetchRequest = FetchDescriptor<ExerciseHistory>(
             sortBy: [SortDescriptor(\.timestamp, order: .reverse)]
         )
@@ -189,7 +159,6 @@ struct ManageExercisesView: View {
             let allHistories = try modelContext.fetch(historyFetchRequest)
             let historiesToUpdate = allHistories.filter { $0.exerciseName == oldName }
 
-            // Update each history record with the new exercise name
             for history in historiesToUpdate {
                 history.exerciseName = editedExerciseName
             }
@@ -200,37 +169,26 @@ struct ManageExercisesView: View {
         }
     }
 
-    // Delete an exercise
     private func deleteExercise(_ exercise: Exercise?) {
         guard let exercise = exercise,
               let index = exercises.firstIndex(of: exercise) else {
             return
         }
 
-        // Check if the last exercise is being deleted
         if exercises.count == 1 {
-            // Set currentIndex to a safe value
             currentIndex = 0
-            
-            // Delay the deletion and dismissal to ensure safe state transition
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
                 exercises.remove(at: index)
-                dismiss() // Dismiss the modal when the last exercise is deleted
+                dismiss()
             }
         } else {
-            // Safe deletion for non-last items
             exercises.remove(at: index)
-            
-            // Adjust the current index if needed
             if currentIndex >= exercises.count {
                 currentIndex = exercises.count - 1
             }
-
-            // Trigger a refresh
             refreshTrigger.toggle()
         }
 
-        // Continue with deleting the exercise and its history from Core Data
         let exerciseNameToDelete = exercise.name
         let historyFetchRequest = FetchDescriptor<ExerciseHistory>(
             sortBy: [SortDescriptor(\.timestamp, order: .reverse)]
@@ -251,7 +209,6 @@ struct ManageExercisesView: View {
         }
     }
 
-    // Save the Core Data context
     private func saveContext() {
         do {
             try modelContext.save()
@@ -260,7 +217,6 @@ struct ManageExercisesView: View {
         }
     }
 
-    // Update exercise suggestions based on the input
     private func updateSuggestions() {
         guard newExerciseName.count >= 2 else {
             suggestedExercises = []
@@ -268,33 +224,28 @@ struct ManageExercisesView: View {
             return
         }
 
-        DispatchQueue.global(qos: .userInitiated).async {
-            let suggestions = allPossibleExercises.filter {
-                $0.lowercased().contains(newExerciseName.lowercased())
-            }
-
-            DispatchQueue.main.async {
-                suggestedExercises = suggestions
-                showSuggestions = !suggestions.isEmpty
-            }
+        let filteredExercises = allPossibleExercises.filter {
+            $0.localizedCaseInsensitiveContains(newExerciseName)
         }
+
+        suggestedExercises = Array(filteredExercises.prefix(5))
+        showSuggestions = !suggestedExercises.isEmpty
     }
 
-    // Move exercises and recalculate set count after reordering
     private func moveExercise(from source: IndexSet, to destination: Int) {
         exercises.move(fromOffsets: source, toOffset: destination)
         
-        // Recalculate set count for each moved exercise
-        for index in source {
-            let movedExercise = exercises[index]
-            calculateSetCountForExercise(movedExercise)
-        }
-        
-        // Trigger refresh
+        // Just trigger refresh after moving
         refreshTrigger.toggle()
+        
+        // Save the new order
+        do {
+            try modelContext.save()
+        } catch {
+            print("Failed to save exercise order: \(error)")
+        }
     }
 
-    // Recalculate set count for a given exercise
     private func calculateSetCountForExercise(_ exercise: Exercise) {
         let exerciseName = exercise.name
         let calendar = Calendar.current
@@ -323,5 +274,92 @@ struct ManageExercisesView: View {
                 }
             }
         }
+    }
+}
+
+// MARK: - Supporting Views
+
+struct ExerciseRow: View {
+    let exercise: Exercise
+    let onTap: () -> Void
+    let onEdit: () -> Void
+    let onDelete: () -> Void
+    
+    var body: some View {
+        Button(action: onTap) {
+            HStack {
+                Image(systemName: "line.3.horizontal")
+                    .foregroundColor(.gray)
+                    .padding(.trailing, 8)
+                
+                Text(exercise.name)
+                    .font(.system(size: 17, weight: .medium))
+                    .foregroundColor(.white)
+                Spacer()
+                
+                HStack(spacing: 12) {
+                    Button(action: onEdit) {
+                        Image(systemName: "pencil")
+                            .foregroundColor(.blue)
+                            .padding(8)
+                            .background(Color.blue.opacity(0.2))
+                            .cornerRadius(8)
+                    }
+                    
+                    Button(action: onDelete) {
+                        Image(systemName: "trash")
+                            .foregroundColor(.red)
+                            .padding(8)
+                            .background(Color.red.opacity(0.2))
+                            .cornerRadius(8)
+                    }
+                }
+            }
+            .padding()
+            .background(Color.black.opacity(0.3))
+            .cornerRadius(12)
+        }
+    }
+}
+
+struct EditExerciseSheet: View {
+    @Binding var exerciseName: String
+    let onSave: () -> Void
+    let onCancel: () -> Void
+    
+    var body: some View {
+        VStack(spacing: 20) {
+            Text("Edit Exercise")
+                .font(.system(size: 20, weight: .bold))
+                .foregroundColor(.white)
+            
+            TextField("Exercise Name", text: $exerciseName)
+                .textFieldStyle(RoundedBorderTextFieldStyle())
+                .padding(.horizontal)
+            
+            HStack(spacing: 16) {
+                Button(action: onCancel) {
+                    Text("Cancel")
+                        .foregroundColor(.gray)
+                        .padding(.vertical, 12)
+                        .padding(.horizontal, 24)
+                        .background(Color.gray.opacity(0.2))
+                        .cornerRadius(8)
+                }
+                
+                Button(action: onSave) {
+                    Text("Save")
+                        .foregroundColor(.black)
+                        .padding(.vertical, 12)
+                        .padding(.horizontal, 24)
+                        .background(Color.yellow)
+                        .cornerRadius(8)
+                }
+            }
+        }
+        .padding(24)
+        .background(Color.black)
+        .presentationDetents([.height(200)])
+        .presentationDragIndicator(.visible)
     }
 }

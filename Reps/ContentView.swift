@@ -14,34 +14,25 @@ struct ContentView: View {
     @State private var refreshTrigger = false // Used to trigger refresh
     @State private var showingLogbook = false
     @State private var impactFeedback = UIImpactFeedbackGenerator(style: .medium) // Haptic Feedback
-    @State private var startingHueIndex: Int = Int.random(in: 0..<7)
+    @State private var startingHueIndex: Int = 0
     @StateObject private var themeManager = ThemeManager()
 
     private let exerciseColors: [Color] = [
-        Color(hex: "#FF6B6B"),  // Coral Red
-        Color(hex: "#4ECDC4"),  // Turquoise
-        Color(hex: "#45B7D1"),  // Ocean Blue
-        Color(hex: "#96CEB4"),  // Sage Green
-        Color(hex: "#9B5DE5"),  // Purple
-        Color(hex: "#FF9A8B"),  // Peach
-        Color(hex: "#FF7F50"),  // Coral
-        Color(hex: "#00CED1"),  // Dark Turquoise
-        Color(hex: "#FF69B4"),  // Hot Pink
-        Color(hex: "#32CD32"),  // Lime Green
-        Color(hex: "#FF4500"),  // Orange Red
-        Color(hex: "#4169E1"),  // Royal Blue
-        Color(hex: "#8A2BE2"),  // Blue Violet
-        Color(hex: "#20B2AA"),  // Light Sea Green
-        Color(hex: "#FF1493"),  // Deep Pink
-        Color(hex: "#00FA9A"),  // Medium Spring Green
-        Color(hex: "#1E90FF"),  // Dodger Blue
-        Color(hex: "#DC143C"),  // Crimson
-        Color(hex: "#7B68EE"),  // Medium Slate Blue
-        Color(hex: "#2E8B57"),  // Sea Green
-        Color(hex: "#BA55D3"),  // Medium Orchid
-        Color(hex: "#FF8C00"),  // Dark Orange
-        Color(hex: "#4682B4"),  // Steel Blue
-        Color(hex: "#D83F87"),  // Pink Purple
+        Color(hex: "#9B5DE5"),  // Purple p
+        Color(hex: "#00CED1"),  // Dark Turquoise b
+        Color(hex: "#32CD32"),  // Lime Green g
+        Color(hex: "#FF4500"),  // Orange Red r
+        Color(hex: "#FF1493"),  // Deep Pink p
+        Color(hex: "#4169E1"),  // Royal Blue b
+        Color(hex: "#00FA9A"),  // Medium Spring Green g
+        Color(hex: "#DC143C"),  // Crimson r
+        Color(hex: "#D83F87"),  // Pink Purple p
+        Color(hex: "#8A2BE2"),  // Blue Violet b
+        Color(hex: "#2E8B57"),  // Sea Green g
+        Color(hex: "#FF8C00"),  // Dark Orange r
+        Color(hex: "#BA55D3"),  // Medium Orchid p
+        Color(hex: "#1E90FF"),  // Dodger Blue b
+        
     ]
 
     var body: some View {
