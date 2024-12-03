@@ -1,6 +1,7 @@
 import SwiftUI
 import SwiftData
 
+// MARK: - Logbook View
 struct LogbookView: View {
     @Environment(\.modelContext) private var modelContext
     @EnvironmentObject private var themeManager: ThemeManager
@@ -43,20 +44,20 @@ struct LogbookView: View {
 
             // View Selector
             HStack(spacing: 0) {
-                ForEach(["By Date", "By Exercise"], id: \.self) { tab in
+                ForEach(["By Date", "By Exercise", "Graphs"], id: \.self) { tab in
                     Button(action: {
                         withAnimation {
-                            selectedView = tab == "By Date" ? 0 : 1
+                            selectedView = tab == "By Date" ? 0 : (tab == "By Exercise" ? 1 : 2)
                         }
                     }) {
                         Text(tab)
                             .font(.system(size: 16, weight: .medium))
-                            .foregroundColor(selectedView == (tab == "By Date" ? 0 : 1) ? .white : .gray)
+                            .foregroundColor(selectedView == (tab == "By Date" ? 0 : (tab == "By Exercise" ? 1 : 2)) ? .white : .gray)
                             .frame(maxWidth: .infinity)
                             .padding(.vertical, 12)
                     }
                     .background(
-                        selectedView == (tab == "By Date" ? 0 : 1) ?
+                        selectedView == (tab == "By Date" ? 0 : (tab == "By Exercise" ? 1 : 2)) ?
                             Color.yellow.opacity(0.2) : Color.clear
                     )
                 }
@@ -107,7 +108,7 @@ struct LogbookView: View {
                     }
                     .padding(.bottom, 20)
                 }
-            } else {
+            } else if selectedView == 1 {
                 // By Exercise View
                 ScrollView {
                     VStack(spacing: 20) {
@@ -139,6 +140,9 @@ struct LogbookView: View {
                     .padding(.horizontal, 20)
                     .padding(.bottom, 20)
                 }
+            } else {
+                // Graphs View
+                GraphsView()
             }
         }
         .background(Color.black)
