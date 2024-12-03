@@ -1,8 +1,9 @@
 import SwiftUI
 import SwiftData
 
+@MainActor
 struct ExerciseView: View {
-    @Binding var exercise: Exercise // No need for optional here
+    @Binding var exercise: Exercise
     @Binding var refreshTrigger: Bool
     @State private var showCheckmark: Bool = false
     @State private var showingHistory = false
@@ -111,7 +112,9 @@ struct ExerciseView: View {
                     showCheckmark: $showCheckmark,
                     setCount: $setCount,
                     action: {
-                        saveExerciseHistory()
+                        Task {
+                            await saveExerciseHistory()
+                        }
                     }
                 )
                 .frame(maxWidth: .infinity, alignment: .center)
@@ -136,7 +139,9 @@ struct ExerciseView: View {
                 }
                 .sheet(isPresented: $showingHistory) {
                     ExerciseHistoryView(exerciseName: exercise.name, onDelete: {
-                        calculateSetCountForToday()
+                        Task {
+                            await calculateSetCountForToday()
+                        }
                     })
                     .environment(\.modelContext, modelContext)
                 }
@@ -147,120 +152,97 @@ struct ExerciseView: View {
         .foregroundColor(.black)
         .background(color)
         .onAppear {
-            loadCurrentValues()
-            calculateSetCountForToday()
+            Task {
+                await loadCurrentValues()
+                await calculateSetCountForToday()
+            }
         }
         // Recalculate set count when refreshTrigger changes
         .onChange(of: refreshTrigger) {
-            calculateSetCountForToday()
+            Task {
+                await calculateSetCountForToday()
+            }
         }
     }
 
     // **Data Fetching and Saving Methods**
 
-    private func loadCurrentValues() {
+    private func loadCurrentValues() async {
         guard !exercise.name.isEmpty else { return }
-        
         let exerciseName = exercise.name
-
-        DispatchQueue.global(qos: .userInitiated).async {
-            let predicate = #Predicate<ExerciseHistory> { history in
-                history.exerciseName == exerciseName
-            }
-
-            let fetchRequest = FetchDescriptor<ExerciseHistory>(
-                predicate: predicate,
+        
+        do {
+            let descriptor = FetchDescriptor<ExerciseHistory>(
+                predicate: #Predicate<ExerciseHistory> { history in
+                    history.exerciseName == exerciseName
+                },
                 sortBy: [SortDescriptor(\.timestamp, order: .reverse)]
             )
-
-            do {
-                let fetchedHistory = try modelContext.fetch(fetchRequest)
-
-                DispatchQueue.main.async {
-                    if let lastHistory = fetchedHistory.first {
-                        currentWeight = lastHistory.weight
-                        currentReps = lastHistory.reps
-                        currentRPE = lastHistory.rpe
-                    } else {
-                        currentWeight = 0
-                        currentReps = 0
-                        currentRPE = 0
-                    }
-                }
-            } catch {
-                DispatchQueue.main.async {
-                    print("Failed to load current values: \(error)")
-                    currentWeight = 0
-                    currentReps = 0
-                    currentRPE = 0
-                }
+            
+            let fetchedHistory = try modelContext.fetch(descriptor)
+            
+            if let lastHistory = fetchedHistory.first {
+                currentWeight = lastHistory.weight
+                currentReps = lastHistory.reps
+                currentRPE = lastHistory.rpe
+            } else {
+                currentWeight = 0
+                currentReps = 0
+                currentRPE = 0
             }
+        } catch {
+            print("Failed to load current values: \(error)")
+            currentWeight = 0
+            currentReps = 0
+            currentRPE = 0
         }
     }
 
-    private func saveExerciseHistory() {
+    private func saveExerciseHistory() async {
         guard !exercise.name.isEmpty else { return }
-        
         let exerciseName = exercise.name
-
-        DispatchQueue.global(qos: .userInitiated).async {
-            let newHistory = ExerciseHistory(
-                exerciseName: exerciseName,
-                weight: currentWeight,
-                reps: currentReps,
-                rpe: currentRPE
-            )
-            modelContext.insert(newHistory)
-
-            do {
-                try modelContext.save()
-
-                DispatchQueue.main.async {
-                    calculateSetCountForToday()
-                }
-            } catch {
-                DispatchQueue.main.async {
-                    print("Failed to save exercise history: \(error)")
-                }
-            }
+        
+        let newHistory = ExerciseHistory(
+            exerciseName: exerciseName,
+            weight: currentWeight,
+            reps: currentReps,
+            rpe: currentRPE
+        )
+        
+        modelContext.insert(newHistory)
+        
+        do {
+            try modelContext.save()
+            await calculateSetCountForToday()
+        } catch {
+            print("Failed to save exercise history: \(error)")
         }
     }
 
-    private func calculateSetCountForToday() {
-        // Since exercise is non-optional, we can directly check if the name is empty
-        guard !exercise.name.isEmpty else {
-            print("No valid exercise to calculate set count.")
+    private func calculateSetCountForToday() async {
+        guard !exercise.name.isEmpty else { 
             setCount = 0
-            return
+            return 
         }
-        
         let exerciseName = exercise.name
         let calendar = Calendar.current
         let startOfDay = calendar.startOfDay(for: Date())
         let endOfDay = calendar.date(byAdding: .day, value: 1, to: startOfDay)!
 
-        DispatchQueue.global(qos: .userInitiated).async {
-            let predicate = #Predicate<ExerciseHistory> { history in
+        let descriptor = FetchDescriptor<ExerciseHistory>(
+            predicate: #Predicate<ExerciseHistory> { history in
                 history.exerciseName == exerciseName &&
-                history.timestamp >= startOfDay && history.timestamp < endOfDay
+                history.timestamp >= startOfDay &&
+                history.timestamp < endOfDay
             }
+        )
 
-            let fetchRequest = FetchDescriptor<ExerciseHistory>(
-                predicate: predicate
-            )
-
-            do {
-                let todayHistory = try modelContext.fetch(fetchRequest)
-
-                DispatchQueue.main.async {
-                    setCount = todayHistory.count
-                }
-            } catch {
-                DispatchQueue.main.async {
-                    print("Failed to calculate set count: \(error)")
-                    setCount = 0
-                }
-            }
+        do {
+            let todayHistory = try modelContext.fetch(descriptor)
+            setCount = todayHistory.count
+        } catch {
+            setCount = 0
+            print("Failed to calculate set count: \(error)")
         }
     }
 }
