@@ -60,238 +60,204 @@ public struct ExerciseGraph: View {
     let maxValue: Double
     let color: Color
     @State private var selectedPoint: GraphPoint?
-    @State private var showTooltip = false
-    @State private var tooltipPosition: CGPoint = .zero
     @State private var animationProgress: CGFloat = 0
     private let hapticFeedback = UIImpactFeedbackGenerator(style: .light)
     
     public init(title: String, points: [GraphPoint], color: Color = .green) {
         self.title = title
-        self.points = points.filter { !$0.value.isNaN } // Filter out NaN values
+        self.points = points.filter { !$0.value.isNaN }
         self.maxValue = points.map { $0.value }.max() ?? 0
         self.color = color
     }
     
-    private func tooltipView(for point: GraphPoint, at position: CGPoint) -> some View {
+    private func tooltipView(for point: GraphPoint, index: Int, totalPoints: Int) -> some View {
         VStack(alignment: .leading, spacing: 4) {
-            Text(Formatter.date(point.date))
-                .font(.system(size: 12, weight: .medium))
-                .foregroundColor(.gray)
             Text(point.label)
                 .font(.system(size: 14, weight: .semibold))
                 .foregroundColor(color)
+            Text(Formatter.date(point.date))
+                .font(.system(size: 12, weight: .medium))
+                .foregroundColor(.gray)
         }
-        .padding(8)
+        .padding(.horizontal, 12)
+        .padding(.vertical, 8)
         .background(
             RoundedRectangle(cornerRadius: 8)
                 .fill(Color.black.opacity(0.8))
-                .shadow(color: color.opacity(0.2), radius: 8, x: 0, y: 4)
+                .shadow(color: color.opacity(0.2), radius: 4, x: 0, y: 2)
         )
-        .position(x: position.x, y: max(position.y - 50, 30))
-        .transition(.opacity.combined(with: .scale))
+        .offset(x: index == 0 ? 40 : (index == totalPoints - 1 ? -40 : 0))
     }
     
     public var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            // Title and selected value
-            HStack {
-                Text(title)
-                    .font(.system(size: 16, weight: .medium))
-                    .foregroundColor(.white)
-                
-                if let selectedPoint = selectedPoint {
-                    Spacer()
-                    Text(selectedPoint.label)
-                        .font(.system(size: 14, weight: .medium))
-                        .foregroundColor(color)
-                        .transition(.opacity)
-                }
-            }
+            // Title
+            Text(title)
+                .font(.system(size: 16, weight: .medium))
+                .foregroundColor(.white)
             
-            // Graph area with bottom padding for x-axis labels
-            VStack(spacing: 0) {
-                GeometryReader { geometry in
-                    ZStack(alignment: .topLeading) {
-                        // Grid lines with subtle gradient
-                        VStack(alignment: .leading, spacing: 0) {
-                            ForEach(0..<5) { i in
-                                LinearGradient(
-                                    gradient: Gradient(colors: [
-                                        Color.gray.opacity(0.2),
-                                        Color.gray.opacity(0.1)
-                                    ]),
-                                    startPoint: .leading,
-                                    endPoint: .trailing
-                                )
-                                .frame(height: 1)
-                                .offset(y: geometry.size.height / 4 * CGFloat(i))
+            // Graph area
+            GeometryReader { geometry in
+                ZStack(alignment: .topLeading) {
+                    // Grid lines
+                    VStack(alignment: .leading, spacing: 0) {
+                        ForEach(0..<5) { i in
+                            LinearGradient(
+                                gradient: Gradient(colors: [
+                                    Color.gray.opacity(0.2),
+                                    Color.gray.opacity(0.1)
+                                ]),
+                                startPoint: .leading,
+                                endPoint: .trailing
+                            )
+                            .frame(height: 1)
+                            .offset(y: geometry.size.height / 4 * CGFloat(i))
+                        }
+                    }
+                    
+                    if !points.isEmpty {
+                        // Graph area with gradient fill
+                        Path { path in
+                            let width = geometry.size.width
+                            let height = geometry.size.height
+                            let xStep = width / CGFloat(max(points.count - 1, 1))
+                            
+                            path.move(to: CGPoint(
+                                x: 0,
+                                y: height - (CGFloat(points[0].value) / CGFloat(maxValue)) * height * animationProgress
+                            ))
+                            
+                            for (index, point) in points.enumerated() {
+                                let x = CGFloat(index) * xStep
+                                let y = height - (CGFloat(point.value) / CGFloat(maxValue)) * height * animationProgress
+                                
+                                if index == 0 {
+                                    path.move(to: CGPoint(x: x, y: y))
+                                } else {
+                                    let control1 = CGPoint(
+                                        x: x - xStep / 2,
+                                        y: path.currentPoint?.y ?? y
+                                    )
+                                    let control2 = CGPoint(
+                                        x: x - xStep / 2,
+                                        y: y
+                                    )
+                                    path.addCurve(
+                                        to: CGPoint(x: x, y: y),
+                                        control1: control1,
+                                        control2: control2
+                                    )
+                                }
+                            }
+                            
+                            // Add points for gradient fill
+                            path.addLine(to: CGPoint(x: width, y: height))
+                            path.addLine(to: CGPoint(x: 0, y: height))
+                            path.closeSubpath()
+                        }
+                        .fill(
+                            LinearGradient(
+                                gradient: Gradient(colors: [
+                                    color.opacity(0.3),
+                                    color.opacity(0.1)
+                                ]),
+                                startPoint: .top,
+                                endPoint: .bottom
+                            )
+                        )
+                        
+                        // Graph line
+                        Path { path in
+                            let width = geometry.size.width
+                            let height = geometry.size.height
+                            let xStep = width / CGFloat(max(points.count - 1, 1))
+                            
+                            path.move(to: CGPoint(
+                                x: 0,
+                                y: height - (CGFloat(points[0].value) / CGFloat(maxValue)) * height * animationProgress
+                            ))
+                            
+                            for (index, point) in points.enumerated() {
+                                let x = CGFloat(index) * xStep
+                                let y = height - (CGFloat(point.value) / CGFloat(maxValue)) * height * animationProgress
+                                
+                                if index == 0 {
+                                    path.move(to: CGPoint(x: x, y: y))
+                                } else {
+                                    let control1 = CGPoint(
+                                        x: x - xStep / 2,
+                                        y: path.currentPoint?.y ?? y
+                                    )
+                                    let control2 = CGPoint(
+                                        x: x - xStep / 2,
+                                        y: y
+                                    )
+                                    path.addCurve(
+                                        to: CGPoint(x: x, y: y),
+                                        control1: control1,
+                                        control2: control2
+                                    )
+                                }
                             }
                         }
+                        .stroke(color, lineWidth: 2)
+                        .shadow(color: color.opacity(0.3), radius: 4, x: 0, y: 2)
                         
-                        if !points.isEmpty {
-                            // Graph area with gradient fill
-                            Path { path in
-                                let width = geometry.size.width
-                                let height = geometry.size.height
-                                let xStep = width / CGFloat(max(points.count - 1, 1))
-                                
-                                path.move(to: CGPoint(
-                                    x: 0,
-                                    y: height - (CGFloat(points[0].value) / CGFloat(maxValue)) * height * animationProgress
-                                ))
-                                
-                                for (index, point) in points.enumerated() {
-                                    let x = CGFloat(index) * xStep
-                                    let y = height - (CGFloat(point.value) / CGFloat(maxValue)) * height * animationProgress
-                                    
-                                    if index == 0 {
-                                        path.move(to: CGPoint(x: x, y: y))
-                                    } else {
-                                        let control1 = CGPoint(
-                                            x: x - xStep / 2,
-                                            y: path.currentPoint?.y ?? y
-                                        )
-                                        let control2 = CGPoint(
-                                            x: x - xStep / 2,
-                                            y: y
-                                        )
-                                        path.addCurve(
-                                            to: CGPoint(x: x, y: y),
-                                            control1: control1,
-                                            control2: control2
-                                        )
-                                    }
-                                }
-                                
-                                // Add points for gradient fill
-                                path.addLine(to: CGPoint(x: width, y: height))
-                                path.addLine(to: CGPoint(x: 0, y: height))
-                                path.closeSubpath()
-                            }
-                            .fill(
-                                LinearGradient(
-                                    gradient: Gradient(colors: [
-                                        color.opacity(0.3),
-                                        color.opacity(0.1)
-                                    ]),
-                                    startPoint: .top,
-                                    endPoint: .bottom
-                                )
-                            )
+                        // Points and tooltips
+                        ForEach(Array(points.enumerated()), id: \.element.id) { index, point in
+                            let x = CGFloat(index) * (geometry.size.width / CGFloat(max(points.count - 1, 1)))
+                            let y = geometry.size.height - (CGFloat(point.value) / CGFloat(maxValue)) * geometry.size.height * animationProgress
                             
-                            // Graph line
-                            Path { path in
-                                let width = geometry.size.width
-                                let height = geometry.size.height
-                                let xStep = width / CGFloat(max(points.count - 1, 1))
-                                
-                                path.move(to: CGPoint(
-                                    x: 0,
-                                    y: height - (CGFloat(points[0].value) / CGFloat(maxValue)) * height * animationProgress
-                                ))
-                                
-                                for (index, point) in points.enumerated() {
-                                    let x = CGFloat(index) * xStep
-                                    let y = height - (CGFloat(point.value) / CGFloat(maxValue)) * height * animationProgress
-                                    
-                                    if index == 0 {
-                                        path.move(to: CGPoint(x: x, y: y))
-                                    } else {
-                                        let control1 = CGPoint(
-                                            x: x - xStep / 2,
-                                            y: path.currentPoint?.y ?? y
-                                        )
-                                        let control2 = CGPoint(
-                                            x: x - xStep / 2,
-                                            y: y
-                                        )
-                                        path.addCurve(
-                                            to: CGPoint(x: x, y: y),
-                                            control1: control1,
-                                            control2: control2
-                                        )
-                                    }
-                                }
-                            }
-                            .stroke(color, lineWidth: 2)
-                            .shadow(color: color.opacity(0.3), radius: 4, x: 0, y: 2)
-                            
-                            // Interactive touch points
-                            ForEach(Array(points.enumerated()), id: \.element.id) { index, point in
-                                let x = CGFloat(index) * (geometry.size.width / CGFloat(max(points.count - 1, 1)))
-                                let y = geometry.size.height - (CGFloat(point.value) / CGFloat(maxValue)) * geometry.size.height * animationProgress
-                                
+                            ZStack {
+                                // Point
                                 Circle()
-                                    .fill(selectedPoint?.id == point.id ? color : Color.white)
-                                    .frame(width: 8, height: 8)
-                                    .overlay(
-                                        Circle()
-                                            .stroke(color, lineWidth: 2)
-                                    )
-                                    .position(x: x, y: y)
-                                    .scaleEffect(selectedPoint?.id == point.id ? 1.2 : 1.0)
-                                    .animation(.spring(response: 0.3), value: selectedPoint?.id)
-                            }
-                            
-                            // Invisible touch areas for better interaction
-                            ForEach(Array(points.enumerated()), id: \.element.id) { index, point in
-                                let x = CGFloat(index) * (geometry.size.width / CGFloat(max(points.count - 1, 1)))
-                                let y = geometry.size.height - (CGFloat(point.value) / CGFloat(maxValue)) * geometry.size.height * animationProgress
-                                
-                                Circle()
-                                    .fill(Color.clear)
-                                    .frame(width: 44, height: 44)
-                                    .position(x: x, y: y)
+                                    .fill(selectedPoint?.id == point.id ? color : .white)
+                                    .frame(width: 12, height: 12)
+                                    .overlay(Circle().stroke(color, lineWidth: 2))
                                     .onTapGesture {
                                         hapticFeedback.impactOccurred()
                                         withAnimation(.spring(response: 0.3)) {
-                                            if selectedPoint?.id == point.id {
-                                                selectedPoint = nil
-                                                tooltipPosition = .zero
-                                                showTooltip = false
-                                            } else {
-                                                selectedPoint = point
-                                                tooltipPosition = CGPoint(x: x, y: y)
-                                                showTooltip = true
-                                            }
+                                            selectedPoint = selectedPoint?.id == point.id ? nil : point
                                         }
                                     }
+                                
+                                // Tooltip
+                                if selectedPoint?.id == point.id {
+                                    tooltipView(for: point, index: index, totalPoints: points.count)
+                                        .offset(y: y < 60 ? 25 : -45)
+                                        .transition(.scale.combined(with: .opacity))
+                                }
                             }
-                            
-                            // Tooltip overlay
-                            if showTooltip, let selectedPoint = selectedPoint {
-                                tooltipView(for: selectedPoint, at: tooltipPosition)
-                            }
+                            .position(x: x, y: y)
                         }
                     }
                 }
-                .frame(height: 180)
-                
-                // X-axis labels in separate view to prevent clipping
-                if points.count > 1 {
-                    HStack {
-                        Text(Formatter.date(points.first?.date ?? Date()))
-                            .font(.caption2)
-                            .foregroundColor(.gray)
-                        Spacer()
-                        Text(Formatter.date(points.last?.date ?? Date()))
-                            .font(.caption2)
-                            .foregroundColor(.gray)
-                    }
-                    .padding(.top, 8)
-                }
             }
+            .frame(height: 180)
             .contentShape(Rectangle())
             .onTapGesture {
-                withAnimation(.spring(response: 0.3)) {
+                withAnimation {
                     selectedPoint = nil
-                    showTooltip = false
                 }
             }
             .onAppear {
                 withAnimation(.easeOut(duration: 1.0)) {
                     animationProgress = 1.0
                 }
+            }
+            
+            // X-axis labels
+            if points.count > 1 {
+                HStack {
+                    Text(Formatter.date(points.first?.date ?? Date()))
+                        .font(.caption2)
+                        .foregroundColor(.gray)
+                    Spacer()
+                    Text(Formatter.date(points.last?.date ?? Date()))
+                        .font(.caption2)
+                        .foregroundColor(.gray)
+                }
+                .padding(.top, 8)
             }
         }
         .padding(16)
