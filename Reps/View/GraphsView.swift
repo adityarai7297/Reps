@@ -72,7 +72,7 @@ struct GraphsView: View {
                         } else {
                             // Weight Graph
                             ExerciseGraph(
-                                title: "Weight Progress (lbs)",
+                                title: "Weight",
                                 points: points.weight,
                                 color: .green
                             )
@@ -88,7 +88,7 @@ struct GraphsView: View {
                             
                             // Sets Graph
                             ExerciseGraph(
-                                title: "Sets per Day",
+                                title: "Sets",
                                 points: points.sets,
                                 color: .green
                             )
