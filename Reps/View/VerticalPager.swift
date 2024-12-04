@@ -5,7 +5,6 @@ struct VerticalPager<Content: View>: View {
     @Binding var currentIndex: Int
     let contentAtIndex: (Int) -> Content
     
-    @State private var impactFeedback = UIImpactFeedbackGenerator(style: .rigid)
     @State private var bounceOffset: CGFloat = 0
     @State private var animatedIndex: CGFloat = 0
     
@@ -14,6 +13,14 @@ struct VerticalPager<Content: View>: View {
     private let springResponse: Double = 0.15
     private let springDamping: Double = 0.85
     private let bounceAmount: CGFloat = 8
+    
+    private func triggerHaptic() {
+        let generator = UIImpactFeedbackGenerator(style: .rigid)
+        generator.prepare()
+        DispatchQueue.main.async {
+            generator.impactOccurred(intensity: 0.4)
+        }
+    }
     
     var body: some View {
         GeometryReader { geometry in
@@ -43,8 +50,8 @@ struct VerticalPager<Content: View>: View {
                         
                         if value.translation.height < 0 {  // Swipe up
                             if currentIndex < pageCount - 1 {
+                                triggerHaptic()
                                 currentIndex += 1
-                                impactFeedback.impactOccurred(intensity: 0.4)
                             } else {
                                 withAnimation(.spring(response: 0.15, dampingFraction: 0.8)) {
                                     bounceOffset = bounceAmount
@@ -55,8 +62,8 @@ struct VerticalPager<Content: View>: View {
                             }
                         } else {  // Swipe down
                             if currentIndex > 0 {
+                                triggerHaptic()
                                 currentIndex -= 1
-                                impactFeedback.impactOccurred(intensity: 0.4)
                             } else {
                                 withAnimation(.spring(response: 0.15, dampingFraction: 0.8)) {
                                     bounceOffset = -bounceAmount
