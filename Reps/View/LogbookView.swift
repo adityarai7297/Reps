@@ -7,7 +7,6 @@ struct LogbookView: View {
     @EnvironmentObject private var themeManager: ThemeManager
     @State private var groupedByDate: [Date: [String: [ExerciseHistory]]] = [:]
     @State private var exerciseHistories: [ExerciseHistory] = []
-    @State private var selectedView: Int = 0
     @State private var selectedDate: Date? = nil
     @State private var expandedExercise: String? = nil
     @Binding var setCount: Int
@@ -15,6 +14,8 @@ struct LogbookView: View {
     @State private var impactFeedback = UIImpactFeedbackGenerator(style: .heavy)
     @State private var itemsToDelete: Set<ExerciseHistory> = []
     @State private var historyToEdit: ExerciseHistory? = nil
+    @State private var showingExerciseHistory = false
+    @State private var showingGraphs = false
 
     var workoutData: [Date: Int] {
         groupedByDate.reduce(into: [:]) { result, entry in
@@ -42,112 +43,99 @@ struct LogbookView: View {
             .padding(.top, 16)
             .padding(.bottom, 24)
 
-            // View Selector
-            HStack(spacing: 0) {
-                ForEach(["By Date", "By Exercise", "Graphs"], id: \.self) { tab in
-                    Button(action: {
-                        withAnimation {
-                            selectedView = tab == "By Date" ? 0 : (tab == "By Exercise" ? 1 : 2)
-                        }
-                    }) {
-                        Text(tab)
-                            .font(.system(size: 16, weight: .medium))
-                            .foregroundColor(selectedView == (tab == "By Date" ? 0 : (tab == "By Exercise" ? 1 : 2)) ? .white : .gray)
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 12)
-                    }
-                    .background(
-                        selectedView == (tab == "By Date" ? 0 : (tab == "By Exercise" ? 1 : 2)) ?
-                            Color.yellow.opacity(0.2) : Color.clear
-                    )
-                }
-            }
-            .background(Color.black.opacity(0.3))
-            .cornerRadius(12)
-            .padding(.horizontal, 20)
-            .padding(.bottom, 20)
-
-            if selectedView == 0 {
-                // Calendar View with Recent Activity
-                ScrollView {
-                    VStack(spacing: 20) {
-                        // Calendar
+            ScrollView {
+                VStack(spacing: 24) {
+                    // Activity Heatmap Section
+                    VStack(alignment: .leading, spacing: 16) {
                         FSCalendarView(selectedDate: $selectedDate, workoutData: workoutData)
                             .frame(height: 360)
                             .background(Color.black.opacity(0.3))
                             .cornerRadius(16)
-                            .padding(.horizontal, 20)
-                        
-                        // Recent Activity Section
-                        VStack(alignment: .leading, spacing: 16) {
-                            Text("Recent Activity")
-                                .font(.system(size: 20, weight: .bold))
-                                .foregroundColor(.white)
-                                .padding(.horizontal, 20)
-                            
-                            if let date = selectedDate,
-                               let workoutsForDate = groupedByDate[Calendar.current.startOfDay(for: date)] {
-                                ForEach(Array(workoutsForDate.keys.sorted()), id: \.self) { exerciseName in
-                                    ExerciseActivityCard(
-                                        exerciseName: exerciseName,
-                                        histories: workoutsForDate[exerciseName] ?? [],
-                                        onDelete: { history in
-                                            deleteHistory(history)
-                                        },
-                                        onEdit: { history in
-                                            historyToEdit = history
-                                        }
-                                    )
-                                }
-                            } else {
-                                Text("Select a date to view your workout history")
-                                    .foregroundColor(.gray)
-                                    .padding(.horizontal, 20)
-                            }
-                        }
-                    }
-                    .padding(.bottom, 20)
-                }
-            } else if selectedView == 1 {
-                // By Exercise View
-                ScrollView {
-                    VStack(spacing: 20) {
-                        let groupedByExercise = Dictionary(grouping: exerciseHistories, by: { $0.exerciseName })
-                        
-                        ForEach(groupedByExercise.keys.sorted(), id: \.self) { exerciseName in
-                            ExerciseGroupCard(
-                                exerciseName: exerciseName,
-                                isExpanded: expandedExercise == exerciseName,
-                                histories: groupedByExercise[exerciseName] ?? [],
-                                onToggle: {
-                                    withAnimation {
-                                        if expandedExercise == exerciseName {
-                                            expandedExercise = nil
-                                        } else {
-                                            expandedExercise = exerciseName
-                                        }
-                                    }
-                                },
-                                onDelete: { history in
-                                    deleteHistory(history)
-                                },
-                                onEdit: { history in
-                                    historyToEdit = history
-                                }
-                            )
-                        }
                     }
                     .padding(.horizontal, 20)
-                    .padding(.bottom, 20)
+
+                    // Section Buttons
+                    HStack(spacing: 16) {
+                        // Exercise History Button
+                        SectionButton(
+                            title: "Exercise History",
+                            icon: "dumbbell.fill",
+                            action: {
+                                impactFeedback.impactOccurred()
+                                showingExerciseHistory = true
+                            },
+                            backgroundColor: .purple
+                        )
+                        
+                        // Graphs Button
+                        SectionButton(
+                            title: "Graphs",
+                            icon: "chart.line.uptrend.xyaxis",
+                            action: {
+                                impactFeedback.impactOccurred()
+                                showingGraphs = true
+                            },
+                            backgroundColor: .blue
+                        )
+                    }
+                    .padding(.horizontal, 20)
+                    
+                    // Selected Date Workout History
+                    if let date = selectedDate,
+                       let workoutsForDate = groupedByDate[Calendar.current.startOfDay(for: date)] {
+                        VStack(alignment: .leading, spacing: 16) {
+                            Text(Formatter.date(date))
+                                .font(.system(size: 20, weight: .bold))
+                                .foregroundColor(.white)
+                            
+                            ForEach(Array(workoutsForDate.keys.sorted()), id: \.self) { exerciseName in
+                                DailyWorkoutCard(
+                                    exerciseName: exerciseName,
+                                    histories: workoutsForDate[exerciseName] ?? [],
+                                    onDelete: { history in
+                                        deleteHistory(history)
+                                    },
+                                    onEdit: { history in
+                                        historyToEdit = history
+                                    }
+                                )
+                            }
+                        }
+                        .padding(.horizontal, 20)
+                    }
                 }
-            } else {
-                // Graphs View
-                GraphsView()
+                .padding(.bottom, 20)
             }
         }
         .background(Color.black)
         .onAppear {
             loadAllExerciseHistory()
+        }
+        .sheet(isPresented: $showingExerciseHistory) {
+            NavigationView {
+                ExerciseHistoryModalView(exerciseHistories: exerciseHistories)
+                    .navigationBarTitleDisplayMode(.inline)
+                    .toolbar {
+                        ToolbarItem(placement: .principal) {
+                            Text("Exercise History")
+                                .font(.headline)
+                                .foregroundColor(.white)
+                        }
+                    }
+            }
+        }
+        .sheet(isPresented: $showingGraphs) {
+            NavigationView {
+                GraphsView()
+                    .navigationBarTitleDisplayMode(.inline)
+                    .toolbar {
+                        ToolbarItem(placement: .principal) {
+                            Text("Graphs")
+                                .font(.headline)
+                                .foregroundColor(.white)
+                        }
+                    }
+            }
         }
         .sheet(item: $historyToEdit) { history in
             EditExerciseHistoryView(history: history)
@@ -218,7 +206,33 @@ struct LogbookView: View {
 
 // MARK: - Supporting Views
 
-struct ExerciseActivityCard: View {
+struct SectionButton: View {
+    let title: String
+    let icon: String
+    let action: () -> Void
+    let backgroundColor: Color
+    
+    var body: some View {
+        Button(action: action) {
+            HStack(spacing: 12) {
+                Image(systemName: icon)
+                    .font(.system(size: 18))
+                Text(title)
+                    .font(.system(size: 16, weight: .medium))
+                Spacer()
+                Image(systemName: "chevron.right")
+                    .font(.system(size: 14))
+            }
+            .padding(16)
+            .frame(maxWidth: .infinity)
+            .background(backgroundColor.opacity(0.15))
+            .foregroundColor(.white)
+            .cornerRadius(12)
+        }
+    }
+}
+
+struct DailyWorkoutCard: View {
     let exerciseName: String
     let histories: [ExerciseHistory]
     let onDelete: (ExerciseHistory) -> Void
@@ -269,7 +283,41 @@ struct ExerciseActivityCard: View {
         .padding(20)
         .background(Color.black.opacity(0.3))
         .cornerRadius(16)
-        .padding(.horizontal, 20)
+    }
+}
+
+struct ExerciseHistoryModalView: View {
+    let exerciseHistories: [ExerciseHistory]
+    @Environment(\.dismiss) private var dismiss
+    @State private var expandedExercise: String? = nil
+    
+    var body: some View {
+        ScrollView {
+            VStack(spacing: 20) {
+                let groupedByExercise = Dictionary(grouping: exerciseHistories, by: { $0.exerciseName })
+                ForEach(groupedByExercise.keys.sorted(), id: \.self) { exerciseName in
+                    ExerciseGroupCard(
+                        exerciseName: exerciseName,
+                        isExpanded: expandedExercise == exerciseName,
+                        histories: groupedByExercise[exerciseName] ?? [],
+                        onToggle: {
+                            withAnimation {
+                                if expandedExercise == exerciseName {
+                                    expandedExercise = nil
+                                } else {
+                                    expandedExercise = exerciseName
+                                }
+                            }
+                        },
+                        onDelete: { _ in },
+                        onEdit: { _ in }
+                    )
+                }
+            }
+            .padding(.horizontal, 20)
+            .padding(.vertical, 16)
+        }
+        .background(Color.black)
     }
 }
 
