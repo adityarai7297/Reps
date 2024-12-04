@@ -31,26 +31,58 @@ struct ExerciseHistoryView: View {
                             // Date Header
                             Text(Formatter.date(date))
                                 .font(.system(size: 18, weight: .semibold))
-                                .foregroundColor(.gray)
-                                .padding(.horizontal, 20)
+                                .foregroundColor(.white)
+                                .padding(16)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .background(Color.gray.opacity(0.2))
+                                .cornerRadius(12)
                             
                             // Exercise Records
                             ForEach(groupedExerciseHistory[date] ?? []) { history in
-                                ExerciseHistoryCard(
-                                    history: history,
-                                    onDelete: { history in
-                                        deleteHistory(history)
-                                    },
-                                    onEdit: { history in
-                                        historyToEdit = history
+                                HStack(spacing: 16) {
+                                    VStack(alignment: .leading, spacing: 8) {
+                                        StatRow(label: "Weight", value: "\(Formatter.decimal(history.weight)) lbs")
+                                        StatRow(label: "Reps", value: Formatter.decimal(history.reps))
+                                        StatRow(label: "RPE", value: "\(Formatter.decimal(history.rpe))%")
+                                        StatRow(label: "Time", value: Formatter.time(history.timestamp))
                                     }
-                                )
+                                    
+                                    Spacer()
+                                    
+                                    // Action buttons
+                                    HStack(spacing: 12) {
+                                        Button(action: {
+                                            impactFeedback.impactOccurred()
+                                            historyToEdit = history
+                                        }) {
+                                            Image(systemName: "pencil")
+                                                .foregroundColor(.blue)
+                                                .padding(8)
+                                                .background(Color.blue.opacity(0.2))
+                                                .cornerRadius(8)
+                                        }
+                                        
+                                        Button(action: {
+                                            impactFeedback.impactOccurred()
+                                            deleteHistory(history)
+                                        }) {
+                                            Image(systemName: "trash")
+                                                .foregroundColor(.red)
+                                                .padding(8)
+                                                .background(Color.red.opacity(0.2))
+                                                .cornerRadius(8)
+                                        }
+                                    }
+                                }
+                                .padding(16)
+                                .background(Color.gray.opacity(0.15))
+                                .cornerRadius(8)
                             }
                         }
-                        .padding(.bottom, 8)
+                        .padding(.horizontal, 20)
                     }
                 }
-                .padding(.horizontal, 20)
+                .padding(.bottom, 20)
             }
         }
         .background(Color.black)
