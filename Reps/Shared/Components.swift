@@ -34,11 +34,38 @@ public struct Formatter {
         return formatter.string(from: date)
     }
     
-    public static func date(_ date: Date) -> String {
+    public static func date(_ date: Date, format: DateFormat = .medium) -> String {
         let formatter = DateFormatter()
-        formatter.dateStyle = .medium
+        switch format {
+            case .medium:
+                formatter.dateFormat = "MMM d, yyyy"
+            case .monthYear:
+                formatter.dateFormat = "MMM yyyy"
+            case .weekRange:
+                let calendar = Calendar.current
+                let endOfWeek = calendar.date(byAdding: .day, value: 6, to: date) ?? date
+                formatter.dateFormat = "MMM d"
+                let startStr = formatter.string(from: date)
+                let endStr = formatter.string(from: endOfWeek)
+                return "\(startStr) - \(endStr)"
+        }
         return formatter.string(from: date)
     }
+    
+    public enum DateFormat {
+        case medium
+        case monthYear
+        case weekRange
+    }
+}
+
+public enum TimeRange: String, CaseIterable {
+    case week = "W"
+    case month = "M"
+    case threeMonths = "3M"
+    case sixMonths = "6M"
+    case year = "Y"
+    case all = "All"
 }
 
 public struct GraphPoint: Identifiable {
@@ -59,15 +86,28 @@ public struct ExerciseGraph: View {
     let points: [GraphPoint]
     let maxValue: Double
     let color: Color
+    let timeRange: TimeRange
     @State private var selectedPoint: GraphPoint?
     @State private var animationProgress: CGFloat = 0
     private let hapticFeedback = UIImpactFeedbackGenerator(style: .light)
     
-    public init(title: String, points: [GraphPoint], color: Color = .green) {
+    public init(title: String, points: [GraphPoint], color: Color = .green, timeRange: TimeRange = .week) {
         self.title = title
         self.points = points.filter { !$0.value.isNaN }
         self.maxValue = points.map { $0.value }.max() ?? 0
         self.color = color
+        self.timeRange = timeRange
+    }
+    
+    private func dateFormat(for point: GraphPoint) -> String {
+        switch timeRange {
+            case .week:
+                return Formatter.date(point.date)
+            case .month, .threeMonths:
+                return Formatter.date(point.date, format: .weekRange)
+            case .sixMonths, .year, .all:
+                return Formatter.date(point.date, format: .monthYear)
+        }
     }
     
     private func tooltipView(for point: GraphPoint, index: Int, totalPoints: Int) -> some View {
@@ -75,7 +115,7 @@ public struct ExerciseGraph: View {
             Text(point.label)
                 .font(.system(size: 14, weight: .semibold))
                 .foregroundColor(color)
-            Text(Formatter.date(point.date))
+            Text(dateFormat(for: point))
                 .font(.system(size: 12, weight: .medium))
                 .foregroundColor(.gray)
         }

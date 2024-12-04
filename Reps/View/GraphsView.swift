@@ -19,37 +19,6 @@ struct GraphsView: View {
     @State private var selectedMetric: MetricType = .weight
     private let hapticFeedback = UIImpactFeedbackGenerator(style: .light)
     
-    enum TimeRange: String, CaseIterable {
-        case week = "W"
-        case month = "M"
-        case threeMonths = "3M"
-        case sixMonths = "6M"
-        case year = "Y"
-        case all = "All"
-        
-        var days: Int {
-            switch self {
-            case .week: return 7 // 7 days
-            case .month: return 28 // 4 weeks
-            case .threeMonths: return 84 // 12 weeks
-            case .sixMonths: return 180 // 6 months
-            case .year: return 365 // 12 months
-            case .all: return 3650 // 10 years (effectively all)
-            }
-        }
-        
-        var groupingType: GroupingType {
-            switch self {
-            case .week: return .daily
-            case .month: return .weekly
-            case .threeMonths: return .weekly
-            case .sixMonths: return .monthly
-            case .year: return .monthly
-            case .all: return .yearly
-            }
-        }
-    }
-    
     enum MetricType: String, CaseIterable {
         case weight = "Weight"
         case volume = "Volume"
@@ -65,147 +34,14 @@ struct GraphsView: View {
     
     var body: some View {
         VStack(spacing: 20) {
-            // Exercise selector
-            if !exercises.isEmpty {
-                ScrollView(.horizontal, showsIndicators: false) {
-                    HStack(spacing: 12) {
-                        ForEach(Array(exercises), id: \.self) { exercise in
-                            Button(action: {
-                                withAnimation {
-                                    hapticFeedback.impactOccurred()
-                                    selectedExercise = selectedExercise == exercise ? nil : exercise
-                                }
-                            }) {
-                                Text(exercise)
-                                    .font(.system(size: 14, weight: .medium))
-                                    .foregroundColor(selectedExercise == exercise ? .white : .gray)
-                                    .padding(.horizontal, 16)
-                                    .padding(.vertical, 8)
-                                    .background(
-                                        selectedExercise == exercise ? Color.gray.opacity(0.3) : Color.gray.opacity(0.2)
-                                    )
-                                    .cornerRadius(12)
-                            }
-                        }
-                    }
-                    .padding(.horizontal)
-                }
-            }
+            exerciseSelector
             
             if let selectedExercise = selectedExercise {
-                // Metric type selector
-                HStack(spacing: 16) {
-                    ForEach(MetricType.allCases, id: \.self) { metric in
-                        Button(action: {
-                            withAnimation {
-                                hapticFeedback.impactOccurred()
-                                selectedMetric = metric
-                            }
-                        }) {
-                            Text(metric.rawValue)
-                                .font(.system(size: 15, weight: .medium))
-                                .foregroundColor(selectedMetric == metric ? .white : .gray)
-                                .frame(maxWidth: .infinity)
-                                .padding(.vertical, 8)
-                                .background(
-                                    selectedMetric == metric ? Color.gray.opacity(0.3) : Color.gray.opacity(0.2)
-                                )
-                                .cornerRadius(12)
-                        }
-                    }
-                }
-                .padding(.horizontal)
-                
-                // Time range selector
-                HStack(spacing: 16) {
-                    ForEach(TimeRange.allCases, id: \.self) { range in
-                        Button(action: {
-                            withAnimation {
-                                hapticFeedback.impactOccurred()
-                                selectedTimeRange = range
-                            }
-                        }) {
-                            Text(range.rawValue)
-                                .font(.system(size: 13, weight: .medium))
-                                .foregroundColor(selectedTimeRange == range ? .white : .gray)
-                                .padding(.horizontal, 12)
-                                .padding(.vertical, 6)
-                                .background(
-                                    selectedTimeRange == range ? Color.gray.opacity(0.3) : Color.clear
-                                )
-                                .cornerRadius(8)
-                        }
-                    }
-                }
-                .padding(.horizontal)
-                .padding(.vertical, 8)
-                .background(Color.gray.opacity(0.2))
-                .cornerRadius(12)
-                .padding(.horizontal)
-                
-                // Selected Graph
-                let points = getGraphPoints(for: selectedExercise)
-                if points.isEmpty {
-                    Text("No data available for the selected timeframe")
-                        .foregroundColor(.gray)
-                        .padding()
-                        .frame(maxWidth: .infinity)
-                        .background(Color.gray.opacity(0.2))
-                        .cornerRadius(12)
-                        .padding(.horizontal)
-                } else {
-                    ScrollView {
-                        switch selectedMetric {
-                        case .weight:
-                            ExerciseGraph(
-                                title: "Weight",
-                                points: points.weight,
-                                color: .green
-                            )
-                            .background(Color.gray.opacity(0.2))
-                            .cornerRadius(12)
-                            .padding(.horizontal)
-                            .frame(height: 300)
-                            .padding(.bottom, 40) // Extra padding for x-axis labels
-                        case .volume:
-                            ExerciseGraph(
-                                title: "Volume (weight × reps)",
-                                points: points.volume,
-                                color: .green
-                            )
-                            .background(Color.gray.opacity(0.2))
-                            .cornerRadius(12)
-                            .padding(.horizontal)
-                            .frame(height: 300)
-                            .padding(.bottom, 40)
-                        case .reps:
-                            ExerciseGraph(
-                                title: "Average Reps",
-                                points: points.reps,
-                                color: .green
-                            )
-                            .background(Color.gray.opacity(0.2))
-                            .cornerRadius(12)
-                            .padding(.horizontal)
-                            .frame(height: 300)
-                            .padding(.bottom, 40)
-                        }
-                    }
-                }
-                Spacer()
+                metricSelector
+                timeRangeSelector
+                graphContent(for: selectedExercise)
             } else {
-                VStack(spacing: 16) {
-                    Image(systemName: "chart.xyaxis.line")
-                        .font(.system(size: 48))
-                        .foregroundColor(.gray)
-                    Text("Select an exercise to view detailed metrics")
-                        .foregroundColor(.gray)
-                }
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .padding(.vertical, 60)
-                .background(Color.gray.opacity(0.2))
-                .cornerRadius(12)
-                .padding(.horizontal)
+                noExerciseSelectedView
             }
         }
         .padding(.vertical)
@@ -213,6 +49,218 @@ struct GraphsView: View {
         .onAppear {
             loadExerciseHistory()
         }
+    }
+    
+    private var exerciseSelector: some View {
+        Group {
+            if !exercises.isEmpty {
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 12) {
+                        ForEach(Array(exercises), id: \.self) { exercise in
+                            exerciseButton(for: exercise)
+                        }
+                    }
+                    .padding(.horizontal)
+                }
+            }
+        }
+    }
+    
+    private func exerciseButton(for exercise: String) -> some View {
+        Button(action: {
+            withAnimation {
+                hapticFeedback.impactOccurred()
+                selectedExercise = selectedExercise == exercise ? nil : exercise
+            }
+        }) {
+            Text(exercise)
+                .font(.system(size: 14, weight: .medium))
+                .foregroundColor(selectedExercise == exercise ? .white : .gray)
+                .padding(.horizontal, 16)
+                .padding(.vertical, 8)
+                .background(
+                    selectedExercise == exercise ? Color.gray.opacity(0.3) : Color.gray.opacity(0.2)
+                )
+                .cornerRadius(12)
+        }
+    }
+    
+    private var metricSelector: some View {
+        HStack(spacing: 16) {
+            ForEach(MetricType.allCases, id: \.self) { metric in
+                metricButton(for: metric)
+            }
+        }
+        .padding(.horizontal)
+    }
+    
+    private func metricButton(for metric: MetricType) -> some View {
+        Button(action: {
+            withAnimation {
+                hapticFeedback.impactOccurred()
+                selectedMetric = metric
+            }
+        }) {
+            Text(metric.rawValue)
+                .font(.system(size: 15, weight: .medium))
+                .foregroundColor(selectedMetric == metric ? .white : .gray)
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 8)
+                .background(
+                    selectedMetric == metric ? Color.gray.opacity(0.3) : Color.gray.opacity(0.2)
+                )
+                .cornerRadius(12)
+        }
+    }
+    
+    private var timeRangeSelector: some View {
+        HStack(spacing: 16) {
+            ForEach(TimeRange.allCases, id: \.self) { range in
+                timeRangeButton(for: range)
+            }
+        }
+        .padding(.horizontal)
+        .padding(.vertical, 8)
+        .background(Color.gray.opacity(0.2))
+        .cornerRadius(12)
+        .padding(.horizontal)
+    }
+    
+    private func timeRangeButton(for range: TimeRange) -> some View {
+        Button(action: {
+            withAnimation {
+                hapticFeedback.impactOccurred()
+                selectedTimeRange = range
+            }
+        }) {
+            Text(range.rawValue)
+                .font(.system(size: 13, weight: .medium))
+                .foregroundColor(selectedTimeRange == range ? .white : .gray)
+                .padding(.horizontal, 12)
+                .padding(.vertical, 6)
+                .background(
+                    selectedTimeRange == range ? Color.gray.opacity(0.3) : Color.clear
+                )
+                .cornerRadius(8)
+        }
+    }
+    
+    private func graphContent(for exercise: String) -> some View {
+        let points = getGraphPoints(for: exercise)
+        return Group {
+            if points.isEmpty {
+                Text("No data available for the selected timeframe")
+                    .foregroundColor(.gray)
+                    .padding()
+                    .frame(maxWidth: .infinity)
+                    .background(Color.gray.opacity(0.2))
+                    .cornerRadius(12)
+                    .padding(.horizontal)
+            } else {
+                ScrollView {
+                    graphForSelectedMetric(points: points)
+                }
+            }
+        }
+    }
+    
+    private func graphForSelectedMetric(points: MetricPoints) -> some View {
+        Group {
+            switch selectedMetric {
+            case .weight:
+                graphView(title: "Weight", points: points.weight)
+            case .volume:
+                graphView(title: "Volume (weight × reps)", points: points.volume)
+            case .reps:
+                graphView(title: "Average Reps", points: points.reps)
+            }
+        }
+    }
+    
+    private func graphView(title: String, points: [GraphPoint]) -> some View {
+        ExerciseGraph(
+            title: title,
+            points: points,
+            color: .green,
+            timeRange: selectedTimeRange
+        )
+        .background(Color.gray.opacity(0.2))
+        .cornerRadius(12)
+        .padding(.horizontal)
+        .frame(height: 300)
+        .padding(.bottom, 40)
+    }
+    
+    private var noExerciseSelectedView: some View {
+        VStack(spacing: 16) {
+            Image(systemName: "chart.xyaxis.line")
+                .font(.system(size: 48))
+                .foregroundColor(.gray)
+            Text("Select an exercise to view detailed metrics")
+                .foregroundColor(.gray)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .padding(.vertical, 60)
+        .background(Color.gray.opacity(0.2))
+        .cornerRadius(12)
+        .padding(.horizontal)
+    }
+    
+    private func getGroupingType(_ timeRange: TimeRange) -> GroupingType {
+        switch timeRange {
+        case .week:
+            return .daily
+        case .month, .threeMonths:
+            return .weekly
+        case .sixMonths, .year:
+            return .monthly
+        case .all:
+            return .yearly
+        }
+    }
+    
+    private func getDaysToShow(_ timeRange: TimeRange) -> Int {
+        switch timeRange {
+        case .week:
+            return 7
+        case .month:
+            return 28
+        case .threeMonths:
+            return 84
+        case .sixMonths:
+            return 180
+        case .year:
+            return 365
+        case .all:
+            return 3650
+        }
+    }
+    
+    private func getGraphPoints(for exercise: String) -> MetricPoints {
+        let calendar = Calendar.current
+        let now = Date()
+        let days = getDaysToShow(selectedTimeRange)
+        let startDate = calendar.date(byAdding: .day, value: -days, to: now) ?? now
+        
+        let filteredHistories = exerciseHistories.filter { history in
+            history.exerciseName == exercise && history.timestamp >= startDate
+        }
+        
+        var points = MetricPoints()
+        let grouping = getGroupingType(selectedTimeRange)
+        
+        switch grouping {
+        case .daily:
+            points = calculateDailyMetrics(histories: filteredHistories)
+        case .weekly:
+            points = calculateWeeklyMetrics(histories: filteredHistories)
+        case .monthly:
+            points = calculateMonthlyMetrics(histories: filteredHistories)
+        case .yearly:
+            points = calculateYearlyMetrics(histories: filteredHistories)
+        }
+        
+        return points
     }
     
     private struct MetricPoints {
@@ -234,31 +282,6 @@ struct GraphsView: View {
         } catch {
             print("Failed to load exercise history: \(error)")
         }
-    }
-    
-    private func getGraphPoints(for exercise: String) -> MetricPoints {
-        let calendar = Calendar.current
-        let now = Date()
-        let startDate = calendar.date(byAdding: .day, value: -selectedTimeRange.days, to: now) ?? now
-        
-        let filteredHistories = exerciseHistories.filter { history in
-            history.exerciseName == exercise && history.timestamp >= startDate
-        }
-        
-        var points = MetricPoints()
-        
-        switch selectedTimeRange.groupingType {
-        case .daily:
-            points = calculateDailyMetrics(histories: filteredHistories)
-        case .weekly:
-            points = calculateWeeklyMetrics(histories: filteredHistories)
-        case .monthly:
-            points = calculateMonthlyMetrics(histories: filteredHistories)
-        case .yearly:
-            points = calculateYearlyMetrics(histories: filteredHistories)
-        }
-        
-        return points
     }
     
     private func calculateWeeklyMetrics(histories: [ExerciseHistory]) -> MetricPoints {
