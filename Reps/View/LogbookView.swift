@@ -25,7 +25,7 @@ struct LogbookView: View {
     }
 
     var body: some View {
-        VStack(spacing: 0) {
+        VStack(spacing: 20) {            
             // Header
             HStack {
                 Text("Dashboard")
@@ -318,88 +318,103 @@ struct ExerciseHistoryModalView: View {
     private let hapticFeedback = UIImpactFeedbackGenerator(style: .medium)
     
     var body: some View {
-        ScrollView {
-            VStack(spacing: 20) {
-                let groupedByExercise = Dictionary(grouping: exerciseHistories, by: { $0.exerciseName })
-                ForEach(groupedByExercise.keys.sorted(), id: \.self) { exerciseName in
-                    VStack {
-                        Button(action: {
-                            withAnimation {
-                                hapticFeedback.impactOccurred()
-                                if expandedExercise == exerciseName {
-                                    expandedExercise = nil
-                                } else {
-                                    expandedExercise = exerciseName
+        VStack(spacing: 0) {
+            Rectangle()
+                .fill(Color.gray.opacity(0.3))
+                .frame(width: 36, height: 5)
+                .cornerRadius(2.5)
+                .padding(.top, 8)
+                .padding(.bottom, 4)
+            
+            Text("Exercise History")
+                .font(.headline)
+                .foregroundColor(.white)
+                .padding(.top, 16)
+            
+            ScrollView {
+                VStack(spacing: 20) {
+                    let groupedByExercise = Dictionary(grouping: exerciseHistories, by: { $0.exerciseName })
+                    ForEach(groupedByExercise.keys.sorted(), id: \.self) { exerciseName in
+                        VStack {
+                            Button(action: {
+                                withAnimation {
+                                    hapticFeedback.impactOccurred()
+                                    if expandedExercise == exerciseName {
+                                        expandedExercise = nil
+                                    } else {
+                                        expandedExercise = exerciseName
+                                    }
                                 }
-                            }
-                        }) {
-                            HStack {
-                                Text(exerciseName)
-                                    .font(.system(size: 18, weight: .semibold))
-                                    .foregroundColor(.white)
-                                Spacer()
-                                Image(systemName: expandedExercise == exerciseName ? "chevron.up" : "chevron.down")
-                                    .foregroundColor(.gray)
-                            }
-                            .padding(16)
-                            .frame(maxWidth: .infinity)
-                            .background(Color.gray.opacity(0.2))
-                            .cornerRadius(12)
-                        }
-                        
-                        if expandedExercise == exerciseName {
-                            ForEach(groupedByExercise[exerciseName] ?? []) { history in
-                                HStack(spacing: 16) {
-                                    VStack(alignment: .leading, spacing: 8) {
-                                        StatRow(label: "Weight", value: "\(Formatter.decimal(history.weight)) lbs")
-                                        StatRow(label: "Reps", value: Formatter.decimal(history.reps))
-                                        StatRow(label: "RPE", value: "\(Formatter.decimal(history.rpe))%")
-                                        StatRow(label: "Time", value: Formatter.time(history.timestamp))
-                                    }
-                                    
+                            }) {
+                                HStack {
+                                    Text(exerciseName)
+                                        .font(.system(size: 18, weight: .semibold))
+                                        .foregroundColor(.white)
                                     Spacer()
-                                    
-                                    // Action buttons
-                                    HStack(spacing: 12) {
-                                        Button(action: {
-                                            hapticFeedback.impactOccurred()
-                                            historyToEdit = history
-                                        }) {
-                                            Image(systemName: "pencil")
-                                                .foregroundColor(.blue)
-                                                .padding(8)
-                                                .background(Color.blue.opacity(0.2))
-                                                .cornerRadius(8)
-                                        }
-                                        
-                                        Button(action: {
-                                            hapticFeedback.impactOccurred()
-                                            onDelete(history)
-                                            if expandedExercise == exerciseName && groupedByExercise[exerciseName]?.count == 1 {
-                                                expandedExercise = nil
-                                            }
-                                        }) {
-                                            Image(systemName: "trash")
-                                                .foregroundColor(.red)
-                                                .padding(8)
-                                                .background(Color.red.opacity(0.2))
-                                                .cornerRadius(8)
-                                        }
-                                    }
+                                    Image(systemName: expandedExercise == exerciseName ? "chevron.up" : "chevron.down")
+                                        .foregroundColor(.gray)
                                 }
                                 .padding(16)
-                                .background(Color.gray.opacity(0.15))
-                                .cornerRadius(8)
+                                .frame(maxWidth: .infinity)
+                                .background(Color.gray.opacity(0.2))
+                                .cornerRadius(12)
                             }
-                            .padding(.horizontal)
+                            
+                            if expandedExercise == exerciseName {
+                                ForEach(groupedByExercise[exerciseName] ?? []) { history in
+                                    HStack(spacing: 16) {
+                                        VStack(alignment: .leading, spacing: 8) {
+                                            StatRow(label: "Weight", value: "\(Formatter.decimal(history.weight)) lbs")
+                                            StatRow(label: "Reps", value: Formatter.decimal(history.reps))
+                                            StatRow(label: "RPE", value: "\(Formatter.decimal(history.rpe))%")
+                                            StatRow(label: "Time", value: Formatter.time(history.timestamp))
+                                        }
+                                        
+                                        Spacer()
+                                        
+                                        // Action buttons
+                                        HStack(spacing: 12) {
+                                            Button(action: {
+                                                hapticFeedback.impactOccurred()
+                                                historyToEdit = history
+                                            }) {
+                                                Image(systemName: "pencil")
+                                                    .foregroundColor(.blue)
+                                                    .padding(8)
+                                                    .background(Color.blue.opacity(0.2))
+                                                    .cornerRadius(8)
+                                            }
+                                            
+                                            Button(action: {
+                                                hapticFeedback.impactOccurred()
+                                                onDelete(history)
+                                                if expandedExercise == exerciseName && groupedByExercise[exerciseName]?.count == 1 {
+                                                    expandedExercise = nil
+                                                }
+                                            }) {
+                                                Image(systemName: "trash")
+                                                    .foregroundColor(.red)
+                                                    .padding(8)
+                                                    .background(Color.red.opacity(0.2))
+                                                    .cornerRadius(8)
+                                            }
+                                        }
+                                    }
+                                    .padding(16)
+                                    .background(Color.gray.opacity(0.15))
+                                    .cornerRadius(8)
+                                }
+                                .padding(.horizontal)
+                            }
                         }
                     }
                 }
+                .padding(.horizontal, 20)
+                .padding(.vertical, 16)
             }
-            .padding(.horizontal, 20)
-            .padding(.vertical, 16)
         }
         .background(Color.black)
+        .navigationBarHidden(true) // Hide the navigation bar
         .sheet(item: $historyToEdit) { history in
             EditExerciseHistoryView(history: history)
                 .presentationDetents([.medium])

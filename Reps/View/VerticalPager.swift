@@ -29,7 +29,7 @@ struct VerticalPager<Content: View>: View {
                         .offset(y: (CGFloat(index) - animatedIndex) * height + dragOffset + bounceOffset)
                 }
             }
-            .onChange(of: currentIndex) { newIndex in
+            .onChange(of: currentIndex) { oldIndex, newIndex in
                 withAnimation(.spring(response: springResponse, dampingFraction: springDamping)) {
                     animatedIndex = CGFloat(newIndex)
                 }

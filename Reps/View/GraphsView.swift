@@ -33,19 +33,34 @@ struct GraphsView: View {
     }
     
     var body: some View {
-        VStack(spacing: 20) {
-            exerciseSelector
+        VStack(spacing: 0) {
+            Rectangle()
+                .fill(Color.gray.opacity(0.3))
+                .frame(width: 36, height: 5)
+                .cornerRadius(2.5)
+                .padding(.top, 8)
+                .padding(.bottom, 4)
             
-            if let selectedExercise = selectedExercise {
-                metricSelector
-                timeRangeSelector
-                graphContent(for: selectedExercise)
-            } else {
-                noExerciseSelectedView
+            Text("Graphs")
+                .font(.headline)
+                .foregroundColor(.white)
+                .padding(.top, 16)
+            
+            VStack(spacing: 20) {
+                exerciseSelector
+                
+                if let selectedExercise = selectedExercise {
+                    metricSelector
+                    timeRangeSelector
+                    graphContent(for: selectedExercise)
+                } else {
+                    noExerciseSelectedView
+                }
             }
+            .padding(.vertical)
         }
-        .padding(.vertical)
         .background(Color.black)
+        .navigationBarHidden(true)
         .onAppear {
             loadExerciseHistory()
         }
@@ -193,15 +208,12 @@ struct GraphsView: View {
     
     private var noExerciseSelectedView: some View {
         VStack(spacing: 16) {
-            Image(systemName: "chart.xyaxis.line")
-                .font(.system(size: 48))
-                .foregroundColor(.gray)
-            Text("Select an exercise to view detailed metrics")
+            Text("Select an exercise")
                 .foregroundColor(.gray)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .padding(.vertical, 60)
-        .background(Color.gray.opacity(0.2))
+        .background(.black)
         .cornerRadius(12)
         .padding(.horizontal)
     }
