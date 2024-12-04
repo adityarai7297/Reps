@@ -143,6 +143,8 @@ struct LogbookView: View {
                         }
                     }
             }
+            .background(Color.black)
+            .preferredColorScheme(.dark)
         }
         .sheet(item: $historyToEdit) { history in
             EditExerciseHistoryView(history: history)
