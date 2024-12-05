@@ -57,6 +57,7 @@ struct ManageExercisesView: View {
                                 Button(action: {
                                     newExerciseName = suggestion
                                     showSuggestions = false
+                                    addExercise()
                                 }) {
                                     Text(suggestion)
                                         .foregroundColor(.white)

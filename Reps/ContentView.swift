@@ -9,14 +9,14 @@ struct ContentView: View {
     @State private var userId = "XXXXX"
     @State private var currentIndex: Int = 0
     @State private var setCount: Int = 0
-    @State private var exercises: [Exercise] = []
+    @State private var exercises: [Exercise]?
     @State private var showingManageExercises = false
-    @State private var refreshTrigger = false // Used to trigger refresh
+    @State private var refreshTrigger = false
     @State private var showingLogbook = false
-    @State private var impactFeedback = UIImpactFeedbackGenerator(style: .medium) // Haptic Feedback
+    @State private var impactFeedback = UIImpactFeedbackGenerator(style: .medium)
     @State private var startingHueIndex: Int = 0
     @StateObject private var themeManager = ThemeManager()
-
+    
     private let exerciseColors: [Color] = [
         Color(hex: "#9B5DE5"),  // Purple p
         Color(hex: "#00CED1"),  // Dark Turquoise b
@@ -32,30 +32,37 @@ struct ContentView: View {
         Color(hex: "#FF8C00"),  // Dark Orange r
         Color(hex: "#BA55D3"),  // Medium Orchid p
         Color(hex: "#1E90FF"),  // Dodger Blue b
-        
     ]
-
+    
     var body: some View {
         NavigationView {
             ZStack {
                 themeManager.backgroundColor.ignoresSafeArea()
                 
-                if exercises.isEmpty {
-                    // No exercises UI
+                if exercises == nil {
+                    // Loading state
+                    LoadingView()
+                        .transition(.opacity)
+                } else if exercises?.isEmpty == true {
+                    // Empty state
                     VStack {
                         Text("Start adding exercises!")
                             .font(.headline)
                             .foregroundColor(themeManager.textColor)
                             .padding()
-                        Image("CatWorkingOut")
-                            .resizable()
-                            .frame(width: 300, height: 220)
                     }
-                } else {
+                } else if let currentExercises = exercises {
                     // Exercise pager when exercises are available
-                    VerticalPager(pageCount: exercises.count, currentIndex: $currentIndex) { index in
+                    VerticalPager(pageCount: currentExercises.count, currentIndex: $currentIndex) { index in
                         ExerciseView(
-                            exercise: $exercises[index],
+                            exercise: Binding(
+                                get: { currentExercises[index] },
+                                set: { newValue in
+                                    var updatedExercises = currentExercises
+                                    updatedExercises[index] = newValue
+                                    exercises = updatedExercises
+                                }
+                            ),
                             refreshTrigger: $refreshTrigger,
                             weightWheelConfig: weightWheelConfig,
                             repWheelConfig: repWheelConfig,
@@ -67,6 +74,7 @@ struct ContentView: View {
                     }
                 }
             }
+            .animation(.easeInOut(duration: 0.2), value: exercises)  // Animate state changes
             .onAppear {
                 loadExercises()
             }
@@ -75,9 +83,11 @@ struct ContentView: View {
                     refreshTrigger.toggle()
                 }
             }
+            .onChange(of: refreshTrigger) { oldValue, newValue in
+                loadExercises()
+            }
             .preferredColorScheme(.dark)
             .toolbar {
-                // Logbook button on top left
                 ToolbarItem(placement: .navigationBarLeading) {
                     Button(action: {
                         impactFeedback.impactOccurred()
@@ -89,8 +99,7 @@ struct ContentView: View {
                             .scaleEffect(x: 1.1, y: 1.1)
                     }
                 }
-
-                // Manage Exercises button on top right
+                
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button(action: {
                         impactFeedback.impactOccurred()
@@ -101,29 +110,29 @@ struct ContentView: View {
                             .font(.title2)
                             .foregroundColor(themeManager.navigationIconColor)
                             .scaleEffect(x: 0.9, y: 1)
-                            
                     }
                 }
             }
         }
         .environmentObject(themeManager)
-        // Logbook sheet presentation
         .sheet(isPresented: $showingLogbook) {
             LogbookView(setCount: $setCount, refreshTrigger: $refreshTrigger)
                 .environment(\.modelContext, modelContext)
                 .environmentObject(themeManager)
         }
-        // Manage exercises sheet presentation
         .sheet(isPresented: $showingManageExercises) {
-            ManageExercisesView(refreshTrigger: $refreshTrigger, exercises: $exercises, currentIndex: $currentIndex)
+            ManageExercisesView(refreshTrigger: $refreshTrigger, exercises: Binding(
+                get: { exercises ?? [] },
+                set: { exercises = $0 }
+            ), currentIndex: $currentIndex)
                 .id(refreshTrigger)
                 .environment(\.modelContext, modelContext)
                 .environmentObject(themeManager)
         }
     }
-
-    // Load exercises from model context
+    
     private func loadExercises() {
+        exercises = nil  // Show loading state
         DispatchQueue.global(qos: .userInitiated).async {
             let fetchRequest = FetchDescriptor<Exercise>(
                 sortBy: [SortDescriptor(\.name)]
@@ -135,6 +144,9 @@ struct ContentView: View {
                 }
             } catch {
                 print("Failed to load exercises: \(error)")
+                DispatchQueue.main.async {
+                    exercises = []  // Show empty state on error
+                }
             }
         }
     }
