@@ -34,11 +34,17 @@ public struct Formatter {
         return formatter.string(from: date)
     }
     
-    public static func date(_ date: Date, format: DateFormat = .medium) -> String {
+    public static func date(_ date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "EEEE, MMM d, yyyy"
+        return formatter.string(from: date)
+    }
+    
+    public static func dateWithFormat(_ date: Date, format: DateFormat) -> String {
         let formatter = DateFormatter()
         switch format {
             case .medium:
-                formatter.dateFormat = "MMM d, yyyy"
+                formatter.dateFormat = "EEEE, MMM d, yyyy"
             case .monthYear:
                 formatter.dateFormat = "MMM yyyy"
             case .weekRange:
@@ -104,9 +110,9 @@ public struct ExerciseGraph: View {
             case .week:
                 return Formatter.date(point.date)
             case .month, .threeMonths:
-                return Formatter.date(point.date, format: .weekRange)
+                return Formatter.dateWithFormat(point.date, format: .weekRange)
             case .sixMonths, .year, .all:
-                return Formatter.date(point.date, format: .monthYear)
+                return Formatter.dateWithFormat(point.date, format: .monthYear)
         }
     }
     
