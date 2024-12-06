@@ -16,6 +16,8 @@ struct ContentView: View {
     @State private var impactFeedback = UIImpactFeedbackGenerator(style: .medium)
     @State private var startingHueIndex: Int = 0
     @StateObject private var themeManager = ThemeManager()
+    @AppStorage("hasShownSwipeHint") private var hasShownSwipeHint = false
+    @State private var showSwipeHint = false
     
     private let exerciseColors: [Color] = [
         Color(hex: "#9B5DE5"),  // Purple p
@@ -72,6 +74,40 @@ struct ContentView: View {
                         )
                         .gradientBackground(color: exerciseColors[index % exerciseColors.count])
                     }
+                    .blur(radius: showSwipeHint ? 10 : 0)
+                    .animation(.easeInOut(duration: 0.3), value: showSwipeHint)
+                    .overlay(
+                        Group {
+                            if showSwipeHint {
+                                Color.black.opacity(0.3)
+                                    .ignoresSafeArea()
+                                    .transition(.opacity)
+                                VStack {
+                                    Image(systemName: "hand.draw.fill")
+                                        .font(.system(size: 40))
+                                        .foregroundColor(.white)
+                                        .padding(.bottom, 8)
+                                    Text("Swipe up or down\nto change exercise")
+                                        .multilineTextAlignment(.center)
+                                        .foregroundColor(.white)
+                                        .font(.headline)
+                                }
+                                .padding(20)
+                                .background(Color.black.opacity(0.8))
+                                .cornerRadius(15)
+                                .transition(.opacity)
+                                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                                .onAppear {
+                                    DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
+                                        withAnimation(.easeOut(duration: 0.5)) {
+                                            showSwipeHint = false
+                                            hasShownSwipeHint = true
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    )
                 }
             }
             .animation(.easeInOut(duration: 0.2), value: exercises)  // Animate state changes
@@ -85,6 +121,11 @@ struct ContentView: View {
             }
             .onChange(of: refreshTrigger) { oldValue, newValue in
                 loadExercises()
+            }
+            .onChange(of: showingManageExercises) { oldValue, newValue in
+                if !newValue {  // When returning from ManageExercisesView
+                    loadExercises()
+                }
             }
             .preferredColorScheme(.dark)
             .toolbar {
@@ -132,22 +173,22 @@ struct ContentView: View {
     }
     
     private func loadExercises() {
-        exercises = nil  // Show loading state
-        DispatchQueue.global(qos: .userInitiated).async {
-            let fetchRequest = FetchDescriptor<Exercise>(
-                sortBy: [SortDescriptor(\.name)]
-            )
-            do {
-                let fetchedExercises = try modelContext.fetch(fetchRequest)
-                DispatchQueue.main.async {
-                    exercises = fetchedExercises
-                }
-            } catch {
-                print("Failed to load exercises: \(error)")
-                DispatchQueue.main.async {
-                    exercises = []  // Show empty state on error
+        let fetchRequest = FetchDescriptor<Exercise>()
+        do {
+            let loadedExercises = try modelContext.fetch(fetchRequest)
+            exercises = loadedExercises
+            
+            // Show swipe hint if there are 2 or more exercises and it hasn't been shown before
+            if !hasShownSwipeHint && loadedExercises.count >= 2 {
+                // Add a delay before showing the hint
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                    withAnimation(.easeIn(duration: 0.5)) {
+                        showSwipeHint = true
+                    }
                 }
             }
+        } catch {
+            print("Failed to load exercises: \(error)")
         }
     }
 }
