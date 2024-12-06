@@ -14,6 +14,7 @@ struct LogbookView: View {
     @State private var historyToEdit: ExerciseHistory? = nil
     @AppStorage("hasShownActivityHint") private var hasShownActivityHint = false
     @State private var showActivityHint = false
+    private let weekdays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
 
     var workoutData: [Date: Int] {
         groupedByDate.reduce(into: [:]) { result, entry in
@@ -250,6 +251,39 @@ struct LogbookView: View {
         } catch {
             setCount = 0
             print("Failed to calculate set count: \(error)")
+        }
+    }
+} 
+
+// MARK: - GitHub Style Calendar View
+struct GitHubStyleCalendarView: View {
+    @Binding var selectedDate: Date?
+    let workoutData: [Date: Int]
+    private let calendar = Calendar.current
+    private let weekdays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
+    private let squareSize: CGFloat = 16
+    private let squareSpacing: CGFloat = 4
+    private let columnWidth: CGFloat = 20
+    private let hapticFeedback = UIImpactFeedbackGenerator(style: .light)
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack(alignment: .top, spacing: 4) {
+                // Weekday labels column
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("")
+                        .frame(height: 24)
+                    ForEach(weekdays, id: \.self) { day in
+                        Text(day)
+                            .font(.system(size: 15))
+                            .foregroundColor(.gray)
+                            .frame(height: 16)
+                    }
+                }
+                .frame(width: 40)
+                .padding(.trailing, 8)
+                // ... existing code ...
+            }
         }
     }
 } 

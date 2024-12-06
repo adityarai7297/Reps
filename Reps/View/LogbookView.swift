@@ -44,16 +44,6 @@ struct LogbookView: View {
 
             ScrollView {
                 VStack(spacing: 24) {
-                    // Activity Overview with GitHub-style calendar
-                    VStack(alignment: .leading, spacing: 16) {
-                        GitHubStyleCalendarView(selectedDate: $selectedDate, workoutData: workoutData)
-                            .frame(height: 180)
-                            .padding(.vertical, 20)
-                            .background(Color.black.opacity(0.3))
-                            .cornerRadius(16)
-                    }
-                    .padding(.horizontal, 20)
-
                     // Section Buttons
                     HStack(spacing: 16) {
                         // Exercise History Button
@@ -79,7 +69,17 @@ struct LogbookView: View {
                         )
                     }
                     .padding(.horizontal, 20)
-                    
+
+                    // Activity Overview with GitHub-style calendar
+                    VStack(alignment: .leading, spacing: 16) {
+                        GitHubStyleCalendarView(selectedDate: $selectedDate, workoutData: workoutData)
+                            .frame(height: 180)
+                            .padding(.vertical, 20)
+                            .background(Color.black.opacity(0.3))
+                            .cornerRadius(16)
+                    }
+                    .padding(.horizontal, 20)
+
                     // Selected Date Workout History
                     if let date = selectedDate,
                        let workoutsForDate = groupedByDate[Calendar.current.startOfDay(for: date)] {
@@ -507,7 +507,7 @@ struct GitHubStyleCalendarView: View {
     @Binding var selectedDate: Date?
     let workoutData: [Date: Int]
     private let calendar = Calendar.current
-    private let weekdays = ["Mon", "Wed", "Fri"]
+    private let weekdays = ["Sat", "Fri", "Thu", "Wed", "Tue", "Mon", "Sun"]
     private let squareSize: CGFloat = 16
     private let squareSpacing: CGFloat = 4
     private let columnWidth: CGFloat = 20
@@ -517,7 +517,7 @@ struct GitHubStyleCalendarView: View {
         VStack(alignment: .leading, spacing: 12) {
             HStack(alignment: .top, spacing: 4) {
                 // Weekday labels column
-                VStack(alignment: .leading, spacing: 20) {
+                VStack(alignment: .leading, spacing: 4) {
                     Text("")
                         .frame(height: 24)
                     ForEach(weekdays, id: \.self) { day in
@@ -551,17 +551,20 @@ struct GitHubStyleCalendarView: View {
                             
                             // Days grid
                             LazyHGrid(rows: Array(repeating: GridItem(.fixed(squareSize), spacing: squareSpacing), count: 7), spacing: squareSpacing) {
-                                ForEach(dates, id: \.self) { date in
-                                    let count = workoutData[calendar.startOfDay(for: date)] ?? 0
-                                    Rectangle()
-                                        .fill(colorForCount(count))
-                                        .frame(width: squareSize, height: squareSize)
-                                        .cornerRadius(3)
-                                        .onTapGesture {
-                                            hapticFeedback.impactOccurred()
-                                            selectedDate = date
-                                        }
-                                        .id(date)
+                                let weeks = dates.chunked(into: 7)
+                                ForEach(Array(weeks.enumerated()), id: \.offset) { _, week in
+                                    ForEach(week.reversed(), id: \.self) { date in
+                                        let count = workoutData[calendar.startOfDay(for: date)] ?? 0
+                                        Rectangle()
+                                            .fill(colorForCount(count))
+                                            .frame(width: squareSize, height: squareSize)
+                                            .cornerRadius(3)
+                                            .onTapGesture {
+                                                hapticFeedback.impactOccurred()
+                                                selectedDate = date
+                                            }
+                                            .id(date)
+                                    }
                                 }
                             }
                             .padding(.horizontal, 8)
@@ -605,18 +608,32 @@ struct GitHubStyleCalendarView: View {
         let earliestDate = workoutData.keys.min() ?? Date()
         let endDate = Date()
         
-        // Adjust earliest date to the nearest Monday
+        // Get the start of the week containing the earliest date
         let weekday = calendar.component(.weekday, from: earliestDate)
-        let daysToSubtract = (weekday + 5) % 7
-        var currentDate = calendar.date(byAdding: .day, value: -daysToSubtract, to: earliestDate)!
+        let daysToSubtract = weekday - 1 // weekday is 1-based, with 1 being Sunday
+        var currentDate = calendar.date(byAdding: .day, value: -daysToSubtract, to: calendar.startOfDay(for: earliestDate))!
         
         var dates: [Date] = []
+        
+        // Add dates until we reach the end date
         while currentDate <= endDate {
             dates.append(currentDate)
             currentDate = calendar.date(byAdding: .day, value: 1, to: currentDate)!
         }
         
-        return dates.reversed() // Newest to oldest
+        // Add any remaining days to complete the last week
+        let lastWeekday = calendar.component(.weekday, from: currentDate)
+        if lastWeekday > 1 {
+            let daysToAdd = 8 - lastWeekday
+            for _ in 0..<daysToAdd {
+                dates.append(currentDate)
+                currentDate = calendar.date(byAdding: .day, value: 1, to: currentDate)!
+            }
+        }
+        
+        // Group into weeks and reverse each week's order
+        let weeks = dates.chunked(into: 7).map { $0.reversed() }
+        return weeks.flatMap { $0 }.reversed() // Newest to oldest
     }
     
     private struct MonthPosition {
@@ -667,6 +684,14 @@ extension Calendar {
     func startOfMonth(for date: Date) -> Date {
         let components = dateComponents([.year, .month], from: date)
         return self.date(from: components)!
+    }
+}
+
+extension Array {
+    func chunked(into size: Int) -> [[Element]] {
+        return stride(from: 0, to: count, by: size).map {
+            Array(self[$0 ..< Swift.min($0 + size, count)])
+        }
     }
 }
 
