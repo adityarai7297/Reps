@@ -19,40 +19,6 @@ struct ContentView: View {
     @AppStorage("hasShownSwipeHint") private var hasShownSwipeHint = false
     @State private var showSwipeHint = false
     
-    private let exerciseColors: [(Color, Color)] = [
-        // Deep purple to hot pink
-        (Color(red: 0.4, green: 0.1, blue: 0.6),
-         Color(red: 0.8, green: 0.2, blue: 0.4)),
-        
-        // Deep blue to turquoise
-        (Color(red: 0.1, green: 0.2, blue: 0.8),
-         Color(red: 0.2, green: 0.6, blue: 0.7)),
-        
-        // Deep red to orange
-        (Color(red: 0.7, green: 0.1, blue: 0.2),
-         Color(red: 0.9, green: 0.4, blue: 0.1)),
-        
-        // Deep teal to emerald
-        (Color(red: 0.1, green: 0.4, blue: 0.4),
-         Color(red: 0.2, green: 0.6, blue: 0.5)),
-        
-        // Indigo to violet
-        (Color(red: 0.2, green: 0.1, blue: 0.5),
-         Color(red: 0.4, green: 0.1, blue: 0.7)),
-        
-        // Crimson to magenta
-        (Color(red: 0.6, green: 0.1, blue: 0.2),
-         Color(red: 0.8, green: 0.1, blue: 0.5)),
-        
-        // Navy to royal blue
-        (Color(red: 0.1, green: 0.2, blue: 0.4),
-         Color(red: 0.2, green: 0.3, blue: 0.8)),
-        
-        // Burgundy to rose
-        (Color(red: 0.5, green: 0.1, blue: 0.2),
-         Color(red: 0.7, green: 0.2, blue: 0.3))
-    ]
-    
     var body: some View {
         NavigationView {
             ZStack {
@@ -89,7 +55,9 @@ struct ContentView: View {
                             color: .clear,
                             userId: userId
                         )
-                        .gradientBackground(colors: exerciseColors[index % exerciseColors.count])
+                        .background(
+                            GradientPair.animatedGradient(GradientTheme.gradientAt(index: index))
+                        )
                     }
                     .blur(radius: showSwipeHint ? 10 : 0)
                     .animation(.easeInOut(duration: 0.3), value: showSwipeHint)
@@ -127,7 +95,7 @@ struct ContentView: View {
                     )
                 }
             }
-            .animation(.easeInOut(duration: 0.2), value: exercises)  // Animate state changes
+            .animation(.easeInOut(duration: 0.2), value: exercises)
             .onAppear {
                 loadExercises()
             }
@@ -195,9 +163,7 @@ struct ContentView: View {
             let loadedExercises = try modelContext.fetch(fetchRequest)
             exercises = loadedExercises
             
-            // Show swipe hint if there are 2 or more exercises and it hasn't been shown before
             if !hasShownSwipeHint && loadedExercises.count >= 2 {
-                // Add a delay before showing the hint
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                     withAnimation(.easeIn(duration: 0.5)) {
                         showSwipeHint = true
