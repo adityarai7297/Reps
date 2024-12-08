@@ -24,6 +24,7 @@
 		408827942CF95E7E000DC83C /* ThemeManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 408827932CF95E71000DC83C /* ThemeManager.swift */; };
 		4088279A2CFE846D000DC83C /* GraphsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 408827992CFE8425000DC83C /* GraphsView.swift */; };
 		4088279C2D010F7C000DC83C /* LoadingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4088279B2D010F47000DC83C /* LoadingView.swift */; };
+		408827AA2D053982000DC83C /* IrregularGradient in Frameworks */ = {isa = PBXBuildFile; productRef = 408827A92D053982000DC83C /* IrregularGradient */; };
 		40DEBA822CB7AEEC00ED44ED /* ExerciseData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40DEBA812CB7AEE200ED44ED /* ExerciseData.swift */; };
 		40DEBA842CC1840800ED44ED /* EditExerciseHistoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40DEBA832CC183FA00ED44ED /* EditExerciseHistoryView.swift */; };
 		40FEBBC52CA721490051C2AA /* FSCalendarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40FEBBC42CA721490051C2AA /* FSCalendarView.swift */; };
@@ -83,6 +84,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				408827AA2D053982000DC83C /* IrregularGradient in Frameworks */,
 				40FEBBC72CA721E80051C2AA /* FSCalendar in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -204,6 +206,7 @@
 			name = Reps;
 			packageProductDependencies = (
 				40FEBBC62CA721E80051C2AA /* FSCalendar */,
+				408827A92D053982000DC83C /* IrregularGradient */,
 			);
 			productName = Reps;
 			productReference = 13FEA23D2C27C9D200D04BF2 /* Reps.app */;
@@ -279,6 +282,7 @@
 			mainGroup = 13FEA2342C27C9D200D04BF2;
 			packageReferences = (
 				40FEBBC32CA7210B0051C2AA /* XCRemoteSwiftPackageReference "FSCalendar" */,
+				408827A82D053982000DC83C /* XCRemoteSwiftPackageReference "IrregularGradient" */,
 			);
 			productRefGroup = 13FEA23E2C27C9D200D04BF2 /* Products */;
 			projectDirPath = "";
@@ -705,6 +709,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		408827A82D053982000DC83C /* XCRemoteSwiftPackageReference "IrregularGradient" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/joogps/IrregularGradient";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.1.0;
+			};
+		};
 		40FEBBC32CA7210B0051C2AA /* XCRemoteSwiftPackageReference "FSCalendar" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/WenchaoD/FSCalendar";
@@ -716,6 +728,11 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		408827A92D053982000DC83C /* IrregularGradient */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 408827A82D053982000DC83C /* XCRemoteSwiftPackageReference "IrregularGradient" */;
+			productName = IrregularGradient;
+		};
 		40FEBBC62CA721E80051C2AA /* FSCalendar */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 40FEBBC32CA7210B0051C2AA /* XCRemoteSwiftPackageReference "FSCalendar" */;

@@ -19,21 +19,38 @@ struct ContentView: View {
     @AppStorage("hasShownSwipeHint") private var hasShownSwipeHint = false
     @State private var showSwipeHint = false
     
-    private let exerciseColors: [Color] = [
-        Color(hex: "#9B5DE5"),  // Purple p
-        Color(hex: "#00CED1"),  // Dark Turquoise b
-        Color(hex: "#32CD32"),  // Lime Green g
-        Color(hex: "#FF4500"),  // Orange Red r
-        Color(hex: "#FF1493"),  // Deep Pink p
-        Color(hex: "#4169E1"),  // Royal Blue b
-        Color(hex: "#00FA9A"),  // Medium Spring Green g
-        Color(hex: "#DC143C"),  // Crimson r
-        Color(hex: "#D83F87"),  // Pink Purple p
-        Color(hex: "#8A2BE2"),  // Blue Violet b
-        Color(hex: "#2E8B57"),  // Sea Green g
-        Color(hex: "#FF8C00"),  // Dark Orange r
-        Color(hex: "#BA55D3"),  // Medium Orchid p
-        Color(hex: "#1E90FF"),  // Dodger Blue b
+    private let exerciseColors: [(Color, Color)] = [
+        // Deep purple to hot pink
+        (Color(red: 0.4, green: 0.1, blue: 0.6),
+         Color(red: 0.8, green: 0.2, blue: 0.4)),
+        
+        // Deep blue to turquoise
+        (Color(red: 0.1, green: 0.2, blue: 0.8),
+         Color(red: 0.2, green: 0.6, blue: 0.7)),
+        
+        // Deep red to orange
+        (Color(red: 0.7, green: 0.1, blue: 0.2),
+         Color(red: 0.9, green: 0.4, blue: 0.1)),
+        
+        // Deep teal to emerald
+        (Color(red: 0.1, green: 0.4, blue: 0.4),
+         Color(red: 0.2, green: 0.6, blue: 0.5)),
+        
+        // Indigo to violet
+        (Color(red: 0.2, green: 0.1, blue: 0.5),
+         Color(red: 0.4, green: 0.1, blue: 0.7)),
+        
+        // Crimson to magenta
+        (Color(red: 0.6, green: 0.1, blue: 0.2),
+         Color(red: 0.8, green: 0.1, blue: 0.5)),
+        
+        // Navy to royal blue
+        (Color(red: 0.1, green: 0.2, blue: 0.4),
+         Color(red: 0.2, green: 0.3, blue: 0.8)),
+        
+        // Burgundy to rose
+        (Color(red: 0.5, green: 0.1, blue: 0.2),
+         Color(red: 0.7, green: 0.2, blue: 0.3))
     ]
     
     var body: some View {
@@ -62,7 +79,7 @@ struct ContentView: View {
                                 set: { newValue in
                                     var updatedExercises = currentExercises
                                     updatedExercises[index] = newValue
-                                    exercises = updatedExercises
+                                    self.exercises = updatedExercises
                                 }
                             ),
                             refreshTrigger: $refreshTrigger,
@@ -72,7 +89,7 @@ struct ContentView: View {
                             color: .clear,
                             userId: userId
                         )
-                        .gradientBackground(color: exerciseColors[index % exerciseColors.count])
+                        .gradientBackground(colors: exerciseColors[index % exerciseColors.count])
                     }
                     .blur(radius: showSwipeHint ? 10 : 0)
                     .animation(.easeInOut(duration: 0.3), value: showSwipeHint)
