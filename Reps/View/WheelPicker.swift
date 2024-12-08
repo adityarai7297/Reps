@@ -26,9 +26,9 @@ struct WheelPicker: View {
                     ForEach(0...totalSteps, id: \.self) { index in
                         let remainder = index % config.steps
                         
-                        Divider()
-                            .background(themeManager.wheelPickerColor)
-                            .frame(width: 0.1, height: remainder == 0 ? 20 : 10, alignment: .center)
+                        Rectangle()
+                            .fill(themeManager.wheelPickerColor)
+                            .frame(width: 0.6, height: remainder == 0 ? 20 : 10, alignment: .center)
                             .frame(maxHeight: 20, alignment: .bottom)
                             .overlay(alignment: .bottom) {
                                 if remainder == 0 && config.showsText {
