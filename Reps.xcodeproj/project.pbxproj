@@ -25,6 +25,8 @@
 		4088279A2CFE846D000DC83C /* GraphsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 408827992CFE8425000DC83C /* GraphsView.swift */; };
 		4088279C2D010F7C000DC83C /* LoadingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4088279B2D010F47000DC83C /* LoadingView.swift */; };
 		408827AA2D053982000DC83C /* IrregularGradient in Frameworks */ = {isa = PBXBuildFile; productRef = 408827A92D053982000DC83C /* IrregularGradient */; };
+		408827AE2D054A15000DC83C /* AnimatedGradientModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 408827AD2D054A10000DC83C /* AnimatedGradientModifier.swift */; };
+		408827B22D054A95000DC83C /* GradientTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 408827B12D054A8F000DC83C /* GradientTheme.swift */; };
 		40DEBA822CB7AEEC00ED44ED /* ExerciseData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40DEBA812CB7AEE200ED44ED /* ExerciseData.swift */; };
 		40DEBA842CC1840800ED44ED /* EditExerciseHistoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40DEBA832CC183FA00ED44ED /* EditExerciseHistoryView.swift */; };
 		40FEBBC52CA721490051C2AA /* FSCalendarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40FEBBC42CA721490051C2AA /* FSCalendarView.swift */; };
@@ -70,6 +72,8 @@
 		408827932CF95E71000DC83C /* ThemeManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThemeManager.swift; sourceTree = "<group>"; };
 		408827992CFE8425000DC83C /* GraphsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GraphsView.swift; sourceTree = "<group>"; };
 		4088279B2D010F47000DC83C /* LoadingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoadingView.swift; sourceTree = "<group>"; };
+		408827AD2D054A10000DC83C /* AnimatedGradientModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnimatedGradientModifier.swift; sourceTree = "<group>"; };
+		408827B12D054A8F000DC83C /* GradientTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GradientTheme.swift; sourceTree = "<group>"; };
 		40DEBA812CB7AEE200ED44ED /* ExerciseData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExerciseData.swift; sourceTree = "<group>"; };
 		40DEBA832CC183FA00ED44ED /* EditExerciseHistoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditExerciseHistoryView.swift; sourceTree = "<group>"; };
 		40FEBBC42CA721490051C2AA /* FSCalendarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FSCalendarView.swift; sourceTree = "<group>"; };
@@ -179,6 +183,8 @@
 		4089FA152C95761B00F96526 /* ViewModifiers */ = {
 			isa = PBXGroup;
 			children = (
+				408827B12D054A8F000DC83C /* GradientTheme.swift */,
+				408827AD2D054A10000DC83C /* AnimatedGradientModifier.swift */,
 				408827932CF95E71000DC83C /* ThemeManager.swift */,
 				132EF34D2C367BE000E75796 /* GradientBackground.swift */,
 			);
@@ -336,7 +342,9 @@
 				4088279C2D010F7C000DC83C /* LoadingView.swift in Sources */,
 				133941712C86B39F00B1EF2B /* ExerciseHistory.swift in Sources */,
 				1339416F2C86B37800B1EF2B /* Exercise.swift in Sources */,
+				408827AE2D054A15000DC83C /* AnimatedGradientModifier.swift in Sources */,
 				40FEBBC52CA721490051C2AA /* FSCalendarView.swift in Sources */,
+				408827B22D054A95000DC83C /* GradientTheme.swift in Sources */,
 				1371B14F2C2ED42500A4254A /* VerticalPager.swift in Sources */,
 				408827942CF95E7E000DC83C /* ThemeManager.swift in Sources */,
 				4088279A2CFE846D000DC83C /* GraphsView.swift in Sources */,
