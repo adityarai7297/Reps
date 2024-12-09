@@ -15,6 +15,7 @@ struct ManageExercisesView: View {
     @State private var showingEditSheet = false
     @State private var editedExerciseName: String = ""
     @State private var impactFeedback = UIImpactFeedbackGenerator(style: .heavy)
+    @FocusState private var isTextFieldFocused: Bool
 
     let allPossibleExercises = ExerciseData.allExercises
 
@@ -35,11 +36,29 @@ struct ManageExercisesView: View {
             VStack(spacing: 16) {
                 HStack {
                     TextField("Add new exercise", text: $newExerciseName)
-                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                        .focused($isTextFieldFocused)
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 12)
+                        .background(
+                            RoundedRectangle(cornerRadius: 12)
+                                .fill(Color.white.opacity(0.1))
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 12)
+                                        .stroke(isTextFieldFocused ? Color.yellow : Color.clear, lineWidth: 2)
+                                )
+                        )
+                        .foregroundColor(.white)
                         .onChange(of: newExerciseName) { _, _ in
                             updateSuggestions()
                         }
-                    
+                        .onChange(of: isTextFieldFocused) { _, isFocused in
+                            if isFocused {
+                                impactFeedback.prepare()
+                                impactFeedback.impactOccurred(intensity: 0.7)
+                            }
+                        }
+                        .submitLabel(.done)
+                        .autocorrectionDisabled()
                     Button(action: addExercise) {
                         Image(systemName: "plus.circle.fill")
                             .foregroundColor(.yellow)
@@ -57,6 +76,7 @@ struct ManageExercisesView: View {
                                 Button(action: {
                                     newExerciseName = suggestion
                                     showSuggestions = false
+                                    impactFeedback.impactOccurred()
                                     addExercise()
                                 }) {
                                     Text(suggestion)
