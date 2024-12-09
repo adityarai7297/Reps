@@ -54,7 +54,11 @@ struct LogbookView: View {
                                 hapticFeedback.impactOccurred()
                                 showingExerciseHistory = true
                             },
-                            backgroundColor: .purple
+                            colors: [
+                                        Color(red: 0.6, green: 0.2, blue: 0.8),  // Bright purple
+                                        Color(red: 0.4, green: 0.0, blue: 0.8),  // Deep purple
+                                        Color(red: 0.2, green: 0.0, blue: 0.6)   // Dark purple-blue
+                                    ]
                         )
                         
                         // Graphs Button
@@ -65,7 +69,11 @@ struct LogbookView: View {
                                 hapticFeedback.impactOccurred()
                                 showingGraphs = true
                             },
-                            backgroundColor: .blue
+                            colors: [
+                                        Color(red: 0.0, green: 0.6, blue: 1.0),  // Bright blue
+                                        Color(red: 0.0, green: 0.4, blue: 0.9),  // Medium blue
+                                        Color(red: 0.0, green: 0.2, blue: 0.8)   // Deep blue
+                                    ]
                         )
                     }
                     .padding(.horizontal, 20)
@@ -218,24 +226,35 @@ struct SectionButton: View {
     let title: String
     let icon: String
     let action: () -> Void
-    let backgroundColor: Color
+    let colors: [Color]
     
     var body: some View {
         Button(action: action) {
-            HStack(spacing: 12) {
+            VStack(spacing: 12) {
                 Image(systemName: icon)
-                    .font(.system(size: 18))
+                    .font(.system(size: 24))
+                    .foregroundColor(.white)
+                
                 Text(title)
-                    .font(.system(size: 16, weight: .medium))
-                Spacer()
-                Image(systemName: "chevron.right")
-                    .font(.system(size: 14))
+                    .font(.system(size: 16, weight: .semibold))
+                    .foregroundColor(.white)
             }
-            .padding(16)
             .frame(maxWidth: .infinity)
-            .background(backgroundColor.opacity(0.15))
-            .foregroundColor(.white)
-            .cornerRadius(12)
+            .frame(height: 120)
+            .background(
+                RoundedRectangle(cornerRadius: 16)
+                    .fill(
+                        LinearGradient(
+                            colors: colors,
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                    )
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: 16)
+                    .stroke(Color.white.opacity(0.2), lineWidth: 1)
+            )
         }
     }
 }
