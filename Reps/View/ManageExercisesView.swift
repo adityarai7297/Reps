@@ -152,6 +152,7 @@ struct ManageExercisesView: View {
     }
 
     private func addExercise() {
+        impactFeedback.impactOccurred(intensity: 0.7)
         guard !newExerciseName.isEmpty else { return }
 
         if exercises.contains(where: { $0.name.caseInsensitiveCompare(newExerciseName) == .orderedSame }) {
