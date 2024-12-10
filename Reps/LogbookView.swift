@@ -1,3 +1,45 @@
+// MARK: - Small Section Button
+struct SmallSectionButton: View {
+    let title: String
+    let icon: String
+    let action: () -> Void
+    let colors: [Color]
+    
+    var body: some View {
+        Button(action: action) {
+            VStack(spacing: 1) {
+                Image(systemName: icon)
+                    .font(.system(size: 8))
+                    .foregroundColor(.white)
+                    .frame(height: 8)
+                
+                Text(title)
+                    .font(.system(size: 7, weight: .medium))
+                    .foregroundColor(.white)
+                    .frame(height: 7)
+                    .lineLimit(1)
+            }
+            .padding(.vertical, 4)
+            .frame(width: 80, height: 24)
+            .background(
+                RoundedRectangle(cornerRadius: 6)
+                    .fill(
+                        LinearGradient(
+                            colors: colors,
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                    )
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: 6)
+                    .stroke(Color.white.opacity(0.2), lineWidth: 0.5)
+            )
+        }
+        .buttonStyle(PlainButtonStyle())
+    }
+}
+
 struct LogbookView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
@@ -59,9 +101,9 @@ struct LogbookView: View {
                             .animation(.easeInOut(duration: 0.3), value: showActivityHint)
 
                             // Section Buttons
-                            HStack(spacing: 16) {
+                            HStack(spacing: 4) {
                                 // Exercise History Button
-                                SectionButton(
+                                SmallSectionButton(
                                     title: "Exercise History",
                                     icon: "dumbbell.fill",
                                     action: {
@@ -76,7 +118,7 @@ struct LogbookView: View {
                                 )
                                 
                                 // Graphs Button
-                                SectionButton(
+                                SmallSectionButton(
                                     title: "Graphs",
                                     icon: "chart.line.uptrend.xyaxis",
                                     action: {
@@ -90,7 +132,7 @@ struct LogbookView: View {
                                     ]
                                 )
                             }
-                            .padding(.horizontal, 20)
+                            .padding(.horizontal, 12)
                             
                             // Selected Date Workout History
                             if let date = selectedDate,
@@ -292,43 +334,6 @@ struct GitHubStyleCalendarView: View {
                 .padding(.trailing, 8)
                 // ... existing code ...
             }
-        }
-    }
-} 
-
-struct SectionButton: View {
-    let title: String
-    let icon: String
-    let action: () -> Void
-    let colors: [Color]
-    
-    var body: some View {
-        Button(action: action) {
-            VStack(spacing: 12) {
-                Image(systemName: icon)
-                    .font(.system(size: 24))
-                    .foregroundColor(.white)
-                
-                Text(title)
-                    .font(.system(size: 16, weight: .semibold))
-                    .foregroundColor(.white)
-            }
-            .frame(maxWidth: .infinity)
-            .frame(height: 120)
-            .background(
-                RoundedRectangle(cornerRadius: 16)
-                    .fill(
-                        LinearGradient(
-                            colors: colors,
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        )
-                    )
-            )
-            .overlay(
-                RoundedRectangle(cornerRadius: 16)
-                    .stroke(Color.white.opacity(0.2), lineWidth: 1)
-            )
         }
     }
 } 

@@ -222,6 +222,7 @@ struct LogbookView: View {
 
 // MARK: - Supporting Views
 
+// MARK: - Section Button
 struct SectionButton: View {
     let title: String
     let icon: String
@@ -230,19 +231,22 @@ struct SectionButton: View {
     
     var body: some View {
         Button(action: action) {
-            VStack(spacing: 12) {
+            VStack(spacing: 6) {
                 Image(systemName: icon)
-                    .font(.system(size: 24))
+                    .font(.system(size: 20))
                     .foregroundColor(.white)
+                    .frame(height: 22)
                 
                 Text(title)
-                    .font(.system(size: 16, weight: .semibold))
+                    .font(.system(size: 14, weight: .medium))
                     .foregroundColor(.white)
+                    .frame(height: 18)
             }
+            .padding(.vertical, 18)
             .frame(maxWidth: .infinity)
-            .frame(height: 120)
+            .frame(height: 68)
             .background(
-                RoundedRectangle(cornerRadius: 16)
+                RoundedRectangle(cornerRadius: 8)
                     .fill(
                         LinearGradient(
                             colors: colors,
@@ -251,11 +255,8 @@ struct SectionButton: View {
                         )
                     )
             )
-            .overlay(
-                RoundedRectangle(cornerRadius: 16)
-                    .stroke(Color.white.opacity(0.2), lineWidth: 1)
-            )
         }
+        .buttonStyle(PlainButtonStyle())
     }
 }
 
