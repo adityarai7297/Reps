@@ -23,6 +23,7 @@ struct ExerciseView: View {
     @State private var currentHintStep = 0
     @State private var showHint = false
     @State private var isAnimatingIcon = false
+    @State private var showSetHint = false
 
     private var hintOffset: CGFloat {
         let screenHeight = UIScreen.main.bounds.height
@@ -37,17 +38,17 @@ struct ExerciseView: View {
     private var repsHintOffset: CGFloat {
         let screenHeight = UIScreen.main.bounds.height
         if screenHeight <= 667 {
-            return screenHeight * 0.18
+            return screenHeight * 0.22
         }
-        return screenHeight * 0.22
+        return screenHeight * 0.26
     }
 
     private var rpeHintOffset: CGFloat {
         let screenHeight = UIScreen.main.bounds.height
         if screenHeight <= 667 {
-            return screenHeight * 0.16
+            return screenHeight * 0.18
         }
-        return screenHeight * 0.20
+        return screenHeight * 0.22
     }
 
     var body: some View {
@@ -63,6 +64,9 @@ struct ExerciseView: View {
                     .frame(width: UIScreen.main.bounds.width / 1.4)
                     .foregroundColor(themeManager.textColor)
                     .blur(radius: showHint ? 3 : 0)
+                    .onTapGesture {
+                        showingHistory = true
+                    }
 
                 Spacer()
 
@@ -187,6 +191,8 @@ struct ExerciseView: View {
                                     showHint = false
                                     hasShownFirstExerciseHints = true
                                     impactFeedback.impactOccurred()
+                                    // Show set hint immediately
+                                    showSetHint = true
                                 }
                             }
                         )
@@ -211,8 +217,8 @@ struct ExerciseView: View {
                     )
                     .frame(maxWidth: .infinity, alignment: .center)
                     .offset(x: UIScreen.main.bounds.width / 12)
-                    .blur(radius: showHint ? 3 : 0)
-                    .allowsHitTesting(!showHint)
+                    .blur(radius: showHint || showSetHint ? 3 : 0)
+                    .allowsHitTesting(!showHint && !showSetHint)
 
                     HStack(spacing: 5) {
                         Text("\(setCount)")
@@ -224,21 +230,62 @@ struct ExerciseView: View {
                             .foregroundColor(themeManager.navigationIconColor)
                             .frame(width: 24, height: 24)
                     }
+                    .onTapGesture {
+                        impactFeedback.impactOccurred()
+                        showingHistory = true
+                    }
                     .opacity(setCount > 0 ? 1 : 0)
                     .animation(.spring(response: 0.3), value: showCheckmark)
                     .offset(x: -UIScreen.main.bounds.width / 8)
-                    .blur(radius: showHint ? 3 : 0)
-                    .allowsHitTesting(!showHint)
-                    .onTapGesture {
-                        impactFeedback.impactOccurred()
-                        showingHistory.toggle()
-                    }
+                    .blur(radius: showHint || showSetHint ? 3 : 0)
+                    .allowsHitTesting(!showHint && !showSetHint)
                 }
                 .padding(.bottom, 40)
             }
             .padding(.horizontal)
             .foregroundColor(.black)
             .background(color)
+
+            if showSetHint {
+                ZStack {
+                    Rectangle()
+                        .fill(.ultraThinMaterial)
+                        .ignoresSafeArea()
+                    
+                    VStack {
+                        Spacer()
+                        
+                        Text("You're ready to record your first set!")
+                            .foregroundColor(.primary)
+                            .font(.system(size: 20, weight: .semibold))
+                            .padding(.horizontal, 20)
+                            .padding(.bottom, 16)
+                            .multilineTextAlignment(.center)
+                        
+                        SetButton(
+                            showCheckmark: $showCheckmark,
+                            setCount: $setCount,
+                            action: {
+                                Task {
+                                    withAnimation(.spring(response: 0.3)) {
+                                        showSetHint = false
+                                    }
+                                    await saveExerciseHistory()
+                                    hasShownFirstExerciseHints = true
+                                }
+                            }
+                        )
+                        .brightness(0.1)
+                        .shadow(color: .white.opacity(0.3), radius: 10)
+                    }
+                    .padding(.bottom, 40)
+                }
+                .onTapGesture {
+                    withAnimation(.spring(response: 0.3)) {
+                        showSetHint = false
+                    }
+                }
+            }
         }
         .sheet(isPresented: $showingHistory) {
             ExerciseHistoryView(exerciseName: exercise.name, onDelete: {
@@ -346,6 +393,22 @@ struct ExerciseView: View {
             print("Failed to calculate set count: \(error)")
         }
     }
+
+    var setButton: some View {
+        Button(action: {
+            // Your existing set button action
+        }) {
+            // Your existing set button content
+            Text("SET")
+                .font(.headline)
+                .foregroundColor(.white)
+                .frame(maxWidth: .infinity)
+                .padding()
+                .background(Color.blue)
+                .cornerRadius(10)
+        }
+        .padding(.horizontal)
+    }
 }
 
 // MARK: - Hint View
@@ -356,7 +419,7 @@ struct HintView: View {
     @State private var isAnimatingIcon = false
     
     var body: some View {
-        VStack(spacing: 8) {
+        VStack(spacing: 12) {
             Image(systemName: icon)
                 .font(.system(size: 38))
                 .foregroundColor(.white)
