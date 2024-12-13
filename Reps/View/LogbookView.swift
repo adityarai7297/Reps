@@ -15,6 +15,10 @@ struct LogbookView: View {
     @State private var showingExerciseHistory = false
     @State private var showingGraphs = false
     @State private var historyToEdit: ExerciseHistory? = nil
+    @AppStorage("hasShownActivityHint") private var hasShownActivityHint = false
+    @State private var showActivityHint = false
+    @AppStorage("hasShownSwipeHint") private var hasShownSwipeHint = false
+    @State private var showSwipeHint = false
 
     var workoutData: [Date: Int] {
         groupedByDate.reduce(into: [:]) { result, entry in
@@ -80,11 +84,77 @@ struct LogbookView: View {
 
                     // Activity Overview with GitHub-style calendar
                     VStack(alignment: .leading, spacing: 16) {
-                        GitHubStyleCalendarView(selectedDate: $selectedDate, workoutData: workoutData)
-                            .frame(height: 180)
-                            .padding(.vertical, 20)
-                            .background(Color.black.opacity(0.3))
-                            .cornerRadius(16)
+                        ZStack {
+                            GitHubStyleCalendarView(selectedDate: $selectedDate, workoutData: workoutData)
+                                .frame(height: 180)
+                                .padding(.vertical, 20)
+                                .background(Color.black.opacity(0.3))
+                                .cornerRadius(16)
+                                .blur(radius: showActivityHint || showSwipeHint ? 3 : 0)
+                            
+                            if showActivityHint {
+                                VStack {
+                                    Image(systemName: "hand.tap")
+                                        .font(.system(size: 40))
+                                        .foregroundColor(.white)
+                                        .padding(.bottom, 8)
+                                    Text("Tap any day to see your workouts\nfor that date")
+                                        .multilineTextAlignment(.center)
+                                        .foregroundColor(.white)
+                                        .font(.headline)
+                                }
+                                .padding(20)
+                                .background(Color.black.opacity(0.8))
+                                .cornerRadius(15)
+                                .onTapGesture {
+                                    withAnimation {
+                                        showActivityHint = false
+                                        hasShownActivityHint = true
+                                        
+                                        // Show swipe hint after activity hint is dismissed
+                                        if !hasShownSwipeHint {
+                                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                                                withAnimation {
+                                                    showSwipeHint = true
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                            
+                            if showSwipeHint && !showActivityHint {
+                                VStack {
+                                    Image(systemName: "hand.draw")
+                                        .font(.system(size: 40))
+                                        .foregroundColor(.white)
+                                        .padding(.bottom, 8)
+                                    Text("Swipe left and right to\nnavigate through months")
+                                        .multilineTextAlignment(.center)
+                                        .foregroundColor(.white)
+                                        .font(.headline)
+                                    
+                                    Button(action: {
+                                        withAnimation {
+                                            showSwipeHint = false
+                                            hasShownSwipeHint = true
+                                        }
+                                    }) {
+                                        Text("Got it!")
+                                            .font(.system(size: 16, weight: .medium))
+                                            .foregroundColor(.black)
+                                            .padding(.horizontal, 20)
+                                            .padding(.vertical, 8)
+                                            .background(Color.white)
+                                            .cornerRadius(8)
+                                    }
+                                    .padding(.top, 12)
+                                }
+                                .padding(20)
+                                .background(Color.black.opacity(0.8))
+                                .cornerRadius(15)
+                            }
+                        }
                     }
                     .padding(.horizontal, 20)
 
@@ -118,6 +188,45 @@ struct LogbookView: View {
         .background(Color.black)
         .onAppear {
             loadAllExerciseHistory()
+            
+            // Show activity hint if it hasn't been shown before
+            if !hasShownActivityHint {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                    withAnimation(.easeIn(duration: 0.5)) {
+                        showActivityHint = true
+                        // Dismiss the hint after 3 seconds
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
+                            withAnimation {
+                                showActivityHint = false
+                                hasShownActivityHint = true
+                                
+                                // Show swipe hint after activity hint is dismissed
+                                if !hasShownSwipeHint {
+                                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                                        withAnimation {
+                                            showSwipeHint = true
+                                            // Auto-dismiss after 3 seconds if user hasn't dismissed it
+                                            DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
+                                                withAnimation {
+                                                    showSwipeHint = false
+                                                    hasShownSwipeHint = true
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            
+            // Select the most recent date with workout data
+            if selectedDate == nil {
+                if let mostRecentDate = workoutData.keys.sorted().last {
+                    selectedDate = mostRecentDate
+                }
+            }
         }
         .sheet(isPresented: $showingExerciseHistory) {
             NavigationView {
@@ -714,5 +823,4 @@ extension Array {
         }
     }
 }
-
 

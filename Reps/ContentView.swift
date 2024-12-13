@@ -18,6 +18,7 @@ struct ContentView: View {
     @StateObject private var themeManager = ThemeManager()
     @AppStorage("hasShownSwipeHint") private var hasShownSwipeHint = false
     @State private var showSwipeHint = false
+    @State private var isAnimatingIcon = false
     
     var body: some View {
         NavigationView {
@@ -72,6 +73,15 @@ struct ContentView: View {
                                         .font(.system(size: 40))
                                         .foregroundColor(.white)
                                         .padding(.bottom, 8)
+                                        .offset(y: isAnimatingIcon ? -10 : 10)
+                                        .animation(
+                                            Animation.easeInOut(duration: 1)
+                                                .repeatForever(autoreverses: true),
+                                            value: isAnimatingIcon
+                                        )
+                                        .onAppear {
+                                            isAnimatingIcon = true
+                                        }
                                     Text("Swipe up or down\nto change exercise")
                                         .multilineTextAlignment(.center)
                                         .foregroundColor(.white)
