@@ -17,6 +17,7 @@ struct LogbookView: View {
     @State private var historyToEdit: ExerciseHistory? = nil
     @AppStorage("hasShownActivityHint") private var hasShownActivityHint = false
     @State private var showActivityHint = false
+    @State private var activityHintStep = 1
     @AppStorage("hasShownSwipeHint") private var hasShownSwipeHint = false
     @State private var showSwipeHint = false
 
@@ -29,7 +30,7 @@ struct LogbookView: View {
     }
 
     var body: some View {
-        VStack(spacing: 20) {            
+        VStack(spacing: 20) {
             // Header
             HStack {
                 Text("Dashboard")
@@ -94,11 +95,11 @@ struct LogbookView: View {
                             
                             if showActivityHint {
                                 VStack {
-                                    Image(systemName: "hand.tap")
+                                    Image(systemName: activityHintStep == 1 ? "chart.bar" : "hand.tap")
                                         .font(.system(size: 40))
                                         .foregroundColor(.white)
                                         .padding(.bottom, 8)
-                                    Text("Tap any day to see your workouts\nfor that date")
+                                    Text(activityHintStep == 1 ? "Your workout activity will\nstart appearing here" : "Select any day to see history")
                                         .multilineTextAlignment(.center)
                                         .foregroundColor(.white)
                                         .font(.headline)
@@ -108,14 +109,18 @@ struct LogbookView: View {
                                 .cornerRadius(15)
                                 .onTapGesture {
                                     withAnimation {
-                                        showActivityHint = false
-                                        hasShownActivityHint = true
-                                        
-                                        // Show swipe hint after activity hint is dismissed
-                                        if !hasShownSwipeHint {
-                                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                                                withAnimation {
-                                                    showSwipeHint = true
+                                        if activityHintStep == 1 {
+                                            activityHintStep = 2
+                                        } else {
+                                            showActivityHint = false
+                                            hasShownActivityHint = true
+                                            
+                                            // Show swipe hint after activity hint is dismissed
+                                            if !hasShownSwipeHint {
+                                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                                                    withAnimation {
+                                                        showSwipeHint = true
+                                                    }
                                                 }
                                             }
                                         }
@@ -193,23 +198,30 @@ struct LogbookView: View {
             if !hasShownActivityHint {
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                     withAnimation(.easeIn(duration: 0.5)) {
+                        activityHintStep = 1
                         showActivityHint = true
-                        // Dismiss the hint after 3 seconds
+                        // Dismiss first hint after 3 seconds and show second hint
                         DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
                             withAnimation {
-                                showActivityHint = false
-                                hasShownActivityHint = true
-                                
-                                // Show swipe hint after activity hint is dismissed
-                                if !hasShownSwipeHint {
-                                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                                        withAnimation {
-                                            showSwipeHint = true
-                                            // Auto-dismiss after 3 seconds if user hasn't dismissed it
-                                            DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
+                                activityHintStep = 2
+                                // Dismiss second hint after 3 seconds
+                                DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
+                                    withAnimation {
+                                        showActivityHint = false
+                                        hasShownActivityHint = true
+                                        
+                                        // Show swipe hint after activity hint is dismissed
+                                        if !hasShownSwipeHint {
+                                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                                                 withAnimation {
-                                                    showSwipeHint = false
-                                                    hasShownSwipeHint = true
+                                                    showSwipeHint = true
+                                                    // Auto-dismiss after 3 seconds if user hasn't dismissed it
+                                                    DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
+                                                        withAnimation {
+                                                            showSwipeHint = false
+                                                            hasShownSwipeHint = true
+                                                        }
+                                                    }
                                                 }
                                             }
                                         }
