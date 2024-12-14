@@ -164,6 +164,12 @@ struct ContentView: View {
                 .id(refreshTrigger)
                 .environment(\.modelContext, modelContext)
                 .environmentObject(themeManager)
+                .onAppear {
+                    print("DEBUG: ManageExercisesView sheet appeared")
+                }
+                .onDisappear {
+                    print("DEBUG: ManageExercisesView sheet disappeared")
+                }
         }
     }
     

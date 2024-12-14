@@ -1,5 +1,24 @@
 import SwiftUI
 import SwiftData
+import UIKit
+
+struct TextInputPreloader: UIViewRepresentable {
+    func makeUIView(context: Context) -> UIView {
+        let view = UIView()
+        DispatchQueue.main.async {
+            let textField = UITextField()
+            view.addSubview(textField)
+            textField.becomeFirstResponder()
+            DispatchQueue.main.async {
+                textField.resignFirstResponder()
+                textField.removeFromSuperview()
+            }
+        }
+        return view
+    }
+    
+    func updateUIView(_ uiView: UIView, context: Context) {}
+}
 
 struct ManageExercisesView: View {
     @Environment(\.dismiss) private var dismiss
@@ -15,11 +34,25 @@ struct ManageExercisesView: View {
     @State private var showingEditSheet = false
     @State private var editedExerciseName: String = ""
     @State private var impactFeedback = UIImpactFeedbackGenerator(style: .heavy)
-    @FocusState private var isTextFieldFocused: Bool
+    @FocusState private var isTextFieldFocused: Bool {
+        didSet {
+            print("DEBUG: FocusState didSet called with value: \(isTextFieldFocused)")
+        }
+    }
+    @State private var isViewReady: Bool = false
+    @State private var showFocusRing: Bool = false
 
     let allPossibleExercises = ExerciseData.allExercises
 
+    init(refreshTrigger: Binding<Bool>, exercises: Binding<[Exercise]>, currentIndex: Binding<Int>) {
+        print("DEBUG: ManageExercisesView initialized")
+        self._refreshTrigger = refreshTrigger
+        self._exercises = exercises
+        self._currentIndex = currentIndex
+    }
+
     var body: some View {
+        let _ = print("DEBUG: Body evaluation started")
         VStack(spacing: 0) {
             // Header
             HStack {
@@ -31,6 +64,13 @@ struct ManageExercisesView: View {
             .padding(.horizontal, 20)
             .padding(.top, 16)
             .padding(.bottom, 24)
+            .onAppear {
+                print("DEBUG: ManageExercisesView - onAppear")
+            }
+            
+            // Hidden preloader
+            TextInputPreloader()
+                .frame(width: 0, height: 0)
 
             // Add Exercise Section
             VStack(spacing: 16) {
@@ -49,13 +89,21 @@ struct ManageExercisesView: View {
                         )
                         .foregroundColor(.white)
                         .onChange(of: newExerciseName) { _, _ in
+                            print("DEBUG: TextField value changed to: \(newExerciseName)")
                             updateSuggestions()
                         }
-                        .onChange(of: isTextFieldFocused) { _, isFocused in
-                            if isFocused {
+                        .onChange(of: isTextFieldFocused) { oldValue, newValue in
+                            let timestamp = Date().timeIntervalSince1970
+                            print("DEBUG: [\(timestamp)] TextField focus changed from: \(oldValue) to: \(newValue)")
+                            if newValue {
                                 impactFeedback.prepare()
                                 impactFeedback.impactOccurred(intensity: 0.7)
                             }
+                        }
+                        .onAppear {
+                            print("DEBUG: TextField - onAppear")
+                            // Initialize keyboard system
+                            UITextField.appearance().tintColor = .yellow
                         }
                         .submitLabel(.done)
                         .autocorrectionDisabled()
@@ -240,9 +288,11 @@ struct ManageExercisesView: View {
     }
 
     private func updateSuggestions() {
+        let startTime = CFAbsoluteTimeGetCurrent()
         guard newExerciseName.count >= 2 else {
             suggestedExercises = []
             showSuggestions = false
+            print("DEBUG: Suggestions cleared - took \((CFAbsoluteTimeGetCurrent() - startTime) * 1000)ms")
             return
         }
 
@@ -252,6 +302,7 @@ struct ManageExercisesView: View {
 
         suggestedExercises = Array(filteredExercises.prefix(5))
         showSuggestions = !suggestedExercises.isEmpty
+        print("DEBUG: Suggestions updated - took \((CFAbsoluteTimeGetCurrent() - startTime) * 1000)ms")
     }
 
     private func moveExercise(from source: IndexSet, to destination: Int) {
