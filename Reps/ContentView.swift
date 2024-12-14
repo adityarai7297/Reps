@@ -93,10 +93,11 @@ struct ContentView: View {
                                 .transition(.opacity)
                                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                                 .onAppear {
-                                    DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
+                                    DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
                                         withAnimation(.easeOut(duration: 0.5)) {
                                             showSwipeHint = false
                                             hasShownSwipeHint = true
+                                            print("DEBUG: Swipe hint dismissed, hasShownSwipeHint set to true")
                                         }
                                     }
                                 }
@@ -179,12 +180,19 @@ struct ContentView: View {
             let loadedExercises = try modelContext.fetch(fetchRequest)
             exercises = loadedExercises
             
+            print("DEBUG: hasShownSwipeHint = \(hasShownSwipeHint)")
+            print("DEBUG: loadedExercises.count = \(loadedExercises.count)")
+            
             if !hasShownSwipeHint && loadedExercises.count >= 2 {
+                print("DEBUG: Should show swipe hint")
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                     withAnimation(.easeIn(duration: 0.5)) {
                         showSwipeHint = true
+                        print("DEBUG: Setting showSwipeHint to true")
                     }
                 }
+            } else {
+                print("DEBUG: Swipe hint conditions not met: hasShownSwipeHint=\(hasShownSwipeHint), exercises=\(loadedExercises.count)")
             }
         } catch {
             print("Failed to load exercises: \(error)")
