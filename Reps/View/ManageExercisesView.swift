@@ -43,6 +43,20 @@ struct ManageExercisesView: View {
     @State private var showFocusRing: Bool = false
 
     let allPossibleExercises = ExerciseData.allExercises
+    let commonExercises = [
+        "Barbell Bench Press",
+        "Barbell Squat",
+        "Deadlift",
+        "Pull-Ups",
+        "Overhead Press",
+        "Bent-Over Row"
+    ]
+
+    var filteredCommonExercises: [String] {
+        commonExercises.filter { suggestion in
+            !exercises.contains { $0.name.caseInsensitiveCompare(suggestion) == .orderedSame }
+        }
+    }
 
     init(refreshTrigger: Binding<Bool>, exercises: Binding<[Exercise]>, currentIndex: Binding<Int>) {
         print("DEBUG: ManageExercisesView initialized")
@@ -116,7 +130,30 @@ struct ManageExercisesView: View {
                 }
                 .padding(.horizontal, 20)
 
-                // Suggestions
+                // Common Exercises
+                if newExerciseName.isEmpty && !filteredCommonExercises.isEmpty {
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        HStack(spacing: 8) {
+                            ForEach(filteredCommonExercises, id: \.self) { suggestion in
+                                Button(action: {
+                                    newExerciseName = suggestion
+                                    impactFeedback.impactOccurred()
+                                    addExercise()
+                                }) {
+                                    Text(suggestion)
+                                        .foregroundColor(.white)
+                                        .padding(.horizontal, 12)
+                                        .padding(.vertical, 8)
+                                        .background(Color.yellow.opacity(0.2))
+                                        .cornerRadius(8)
+                                }
+                            }
+                        }
+                        .padding(.horizontal, 20)
+                    }
+                }
+
+                // Search Suggestions
                 if showSuggestions && !suggestedExercises.isEmpty {
                     ScrollView(.horizontal, showsIndicators: false) {
                         HStack(spacing: 8) {
