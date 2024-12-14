@@ -47,147 +47,99 @@ struct LogbookView: View {
             .padding(.top, 16)
             .padding(.bottom, 24)
 
-            ScrollView {
-                VStack(spacing: 24) {
-                    // Section Buttons
-                    HStack(spacing: 16) {
-                        // Exercise History Button
-                        SectionButton(
-                            title: "Exercise History",
-                            icon: "dumbbell.fill",
-                            action: {
-                                hapticFeedback.impactOccurred()
-                                showingExerciseHistory = true
-                            },
-                            colors: [
-                                        Color(red: 0.6, green: 0.2, blue: 0.8),  // Bright purple
-                                        Color(red: 0.4, green: 0.0, blue: 0.8),  // Deep purple
-                                        Color(red: 0.2, green: 0.0, blue: 0.6)   // Dark purple-blue
-                                    ]
-                        )
-                        
-                        // Graphs Button
-                        SectionButton(
-                            title: "Graphs",
-                            icon: "chart.line.uptrend.xyaxis",
-                            action: {
-                                hapticFeedback.impactOccurred()
-                                showingGraphs = true
-                            },
-                            colors: [
-                                        Color(red: 0.0, green: 0.6, blue: 1.0),  // Bright blue
-                                        Color(red: 0.0, green: 0.4, blue: 0.9),  // Medium blue
-                                        Color(red: 0.0, green: 0.2, blue: 0.8)   // Deep blue
-                                    ]
-                        )
-                    }
-                    .padding(.horizontal, 20)
-
-                    // Activity Overview with GitHub-style calendar
-                    VStack(alignment: .leading, spacing: 16) {
-                        ZStack {
-                            GitHubStyleCalendarView(selectedDate: $selectedDate, workoutData: workoutData)
-                                .frame(height: 180)
-                                .padding(.vertical, 20)
-                                .background(Color.black.opacity(0.3))
-                                .cornerRadius(16)
-                                .blur(radius: showActivityHint || showSwipeHint ? 3 : 0)
-                            
-                            if showActivityHint {
-                                VStack {
-                                    Image(systemName: activityHintStep == 1 ? "chart.bar" : "hand.tap")
-                                        .font(.system(size: 40))
-                                        .foregroundColor(.white)
-                                        .padding(.bottom, 8)
-                                    Text(activityHintStep == 1 ? "Your workout activity will\nstart appearing here" : "Select any day to see history")
-                                        .multilineTextAlignment(.center)
-                                        .foregroundColor(.white)
-                                        .font(.headline)
-                                }
-                                .padding(20)
-                                .background(Color.black.opacity(0.8))
-                                .cornerRadius(15)
-                                .onTapGesture {
-                                    withAnimation {
-                                        if activityHintStep == 1 {
-                                            activityHintStep = 2
-                                        } else {
-                                            showActivityHint = false
-                                            hasShownActivityHint = true
-                                            
-                                            // Show swipe hint after activity hint is dismissed
-                                            if !hasShownSwipeHint {
-                                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                                                    withAnimation {
-                                                        showSwipeHint = true
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                            
-                            if showSwipeHint && !showActivityHint {
-                                VStack {
-                                    Image(systemName: "hand.draw")
-                                        .font(.system(size: 40))
-                                        .foregroundColor(.white)
-                                        .padding(.bottom, 8)
-                                    Text("Swipe left and right to\nnavigate through months")
-                                        .multilineTextAlignment(.center)
-                                        .foregroundColor(.white)
-                                        .font(.headline)
-                                    
-                                    Button(action: {
-                                        withAnimation {
-                                            showSwipeHint = false
-                                            hasShownSwipeHint = true
-                                        }
-                                    }) {
-                                        Text("Got it!")
-                                            .font(.system(size: 16, weight: .medium))
-                                            .foregroundColor(.black)
-                                            .padding(.horizontal, 20)
-                                            .padding(.vertical, 8)
-                                            .background(Color.white)
-                                            .cornerRadius(8)
-                                    }
-                                    .padding(.top, 12)
-                                }
-                                .padding(20)
-                                .background(Color.black.opacity(0.8))
-                                .cornerRadius(15)
-                            }
-                        }
-                    }
-                    .padding(.horizontal, 20)
-
-                    // Selected Date Workout History
-                    if let date = selectedDate,
-                       let workoutsForDate = groupedByDate[Calendar.current.startOfDay(for: date)] {
-                        VStack(alignment: .leading, spacing: 16) {
-                            Text(Formatter.date(date))
-                                .font(.system(size: 20, weight: .bold))
-                                .foregroundColor(.white)
-                            
-                            ForEach(Array(workoutsForDate.keys.sorted()), id: \.self) { exerciseName in
-                                DailyWorkoutCard(
-                                    exerciseName: exerciseName,
-                                    histories: workoutsForDate[exerciseName] ?? [],
-                                    onDelete: { history in
-                                        deleteHistory(history)
-                                    },
-                                    onEdit: { history in
-                                        historyToEdit = history
-                                    }
-                                )
-                            }
-                        }
-                        .padding(.horizontal, 20)
-                    }
+            VStack(spacing: 24) {
+                // Section Buttons
+                HStack(spacing: 16) {
+                    // Exercise History Button
+                    SectionButton(
+                        title: "Exercise History",
+                        icon: "dumbbell.fill",
+                        action: {
+                            hapticFeedback.impactOccurred()
+                            showingExerciseHistory = true
+                        },
+                        colors: [
+                                    Color(red: 0.6, green: 0.2, blue: 0.8),  // Bright purple
+                                    Color(red: 0.4, green: 0.0, blue: 0.8),  // Deep purple
+                                    Color(red: 0.2, green: 0.0, blue: 0.6)   // Dark purple-blue
+                                ]
+                    )
+                    
+                    // Graphs Button
+                    SectionButton(
+                        title: "Graphs",
+                        icon: "chart.line.uptrend.xyaxis",
+                        action: {
+                            hapticFeedback.impactOccurred()
+                            showingGraphs = true
+                        },
+                        colors: [
+                                    Color(red: 0.0, green: 0.6, blue: 1.0),  // Bright blue
+                                    Color(red: 0.0, green: 0.4, blue: 0.9),  // Medium blue
+                                    Color(red: 0.0, green: 0.2, blue: 0.8)   // Deep blue
+                                ]
+                    )
                 }
-                .padding(.bottom, 20)
+                .padding(.horizontal, 20)
+
+                // Activity Overview with GitHub-style calendar
+                VStack(alignment: .leading, spacing: 16) {
+                    ZStack {
+                        GitHubStyleCalendarView(selectedDate: $selectedDate, workoutData: workoutData)
+                            .frame(height: 180)
+                            .padding(.vertical, 20)
+                            .background(Color.black.opacity(0.3))
+                            .cornerRadius(16)
+                            .blur(radius: showActivityHint || showSwipeHint ? 3 : 0)
+                        
+                        if showActivityHint {
+                            VStack {
+                                Image(systemName: activityHintStep == 1 ? "chart.bar" : "hand.tap")
+                                    .font(.system(size: 40))
+                                    .foregroundColor(.white)
+                                    .padding(.bottom, 8)
+                                Text(activityHintStep == 1 ? "Your workout activity will\nstart appearing here" : "Select any day to see history")
+                                    .multilineTextAlignment(.center)
+                                    .foregroundColor(.white)
+                                    .font(.headline)
+                            }
+                        }
+                    }
+                    .padding(.horizontal, 20)
+                }
+
+                // Exercise History Section (Scrollable)
+                if let selectedDate = selectedDate {
+                    // Date Header (Fixed)
+                    Text(Formatter.date(selectedDate))
+                        .font(.system(size: 20, weight: .bold))
+                        .foregroundColor(.white)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(.horizontal, 20)
+                        .padding(.bottom, 8)
+                }
+
+                ScrollView {
+                    VStack(spacing: 24) {
+                        if let selectedDate = selectedDate,
+                           let exercisesForDate = groupedByDate[selectedDate] {
+                            ForEach(Array(exercisesForDate.keys.sorted()), id: \.self) { exerciseName in
+                                if let histories = exercisesForDate[exerciseName] {
+                                    DailyWorkoutCard(
+                                        exerciseName: exerciseName,
+                                        histories: histories,
+                                        onDelete: deleteHistory,
+                                        onEdit: { history in
+                                            historyToEdit = history
+                                        }
+                                    )
+                                }
+                            }
+                        }
+                    }
+                    .padding(.bottom, 20)
+                }
+                .frame(maxHeight: .infinity)
             }
         }
         .background(Color.black)
