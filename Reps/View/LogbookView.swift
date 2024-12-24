@@ -20,6 +20,7 @@ struct LogbookView: View {
     @State private var activityHintStep = 1
     @AppStorage("hasShownSwipeHint") private var hasShownSwipeHint = false
     @State private var showSwipeHint = false
+    @State private var showingBodyMap = false
 
     var workoutData: [Date: Int] {
         groupedByDate.reduce(into: [:]) { result, entry in
@@ -78,6 +79,21 @@ struct LogbookView: View {
                                     Color(red: 0.0, green: 0.4, blue: 0.9),  // Medium blue
                                     Color(red: 0.0, green: 0.2, blue: 0.8)   // Deep blue
                                 ]
+                    )
+                    
+                    // Body Map Button
+                    SectionButton(
+                        title: "Body Map",
+                        icon: "figure.stand",
+                        action: {
+                            hapticFeedback.impactOccurred()
+                            showingBodyMap = true
+                        },
+                        colors: [
+                            Color(red: 0.8, green: 0.2, blue: 0.4),  // Pink-red
+                            Color(red: 0.6, green: 0.0, blue: 0.4),  // Deep magenta
+                            Color(red: 0.4, green: 0.0, blue: 0.4)   // Dark purple
+                        ]
                     )
                 }
                 .padding(.horizontal, 20)
@@ -231,6 +247,9 @@ struct LogbookView: View {
             EditExerciseHistoryView(history: history)
                 .presentationDetents([.medium])
                 .presentationDragIndicator(.visible)
+        }
+        .sheet(isPresented: $showingBodyMap) {
+            BodyMapView()
         }
     }
 
