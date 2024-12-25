@@ -20,11 +20,12 @@ struct VerticalPager<Content: View>: View {
             let height = geometry.size.height
             
             ZStack {
-                // Only render current and target view during animation
-                ForEach((currentIndex...min(pageCount - 1, currentIndex + 1)), id: \.self) { index in
+                // Render previous, current, and next views during animation
+                ForEach((max(0, currentIndex - 1)...min(pageCount - 1, currentIndex + 1)), id: \.self) { index in
                     contentAtIndex(index)
                         .frame(width: geometry.size.width, height: height)
                         .offset(y: (CGFloat(index) - animatedIndex) * height + bounceOffset)
+                        .zIndex(index == currentIndex ? 1 : 0)  // Keep current view on top
                 }
             }
             .onChange(of: currentIndex) { oldIndex, newIndex in
@@ -50,11 +51,9 @@ struct VerticalPager<Content: View>: View {
                             if currentIndex < pageCount - 1 {
                                 currentIndex += 1
                             } else {
-                                impactFeedback.impactOccurred() // For bounce
-                                withAnimation(.spring(response: 0.08, dampingFraction: 0.7)) {
+                                impactFeedback.impactOccurred()
+                                withAnimation(.spring()) {
                                     bounceOffset = bounceAmount
-                                }
-                                withAnimation(.spring(response: 0.08, dampingFraction: 0.7).delay(0.05)) {
                                     bounceOffset = 0
                                 }
                             }
@@ -62,11 +61,9 @@ struct VerticalPager<Content: View>: View {
                             if currentIndex > 0 {
                                 currentIndex -= 1
                             } else {
-                                impactFeedback.impactOccurred() // For bounce
-                                withAnimation(.spring(response: 0.08, dampingFraction: 0.7)) {
+                                impactFeedback.impactOccurred()
+                                withAnimation(.spring()) {
                                     bounceOffset = -bounceAmount
-                                }
-                                withAnimation(.spring(response: 0.08, dampingFraction: 0.7).delay(0.05)) {
                                     bounceOffset = 0
                                 }
                             }

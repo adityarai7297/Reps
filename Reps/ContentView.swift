@@ -58,6 +58,7 @@ struct ContentView: View {
                         )
                         .background(
                             GradientPair.animatedGradient(GradientTheme.gradientAt(index: index))
+                                .transition(.opacity)
                         )
                     }
                     .blur(radius: showSwipeHint ? 10 : 0)
