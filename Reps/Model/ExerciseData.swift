@@ -1,5 +1,30 @@
 import Foundation
 
+enum MuscleGroup: String, Codable {
+    case arms = "Arms"
+    case triceps = "Triceps"
+    case biceps = "Biceps"
+    case hands = "Hands"
+    case forearms = "Forearms"
+    case delts = "Delts"
+    case rearDelts = "RearDelts"
+    case frontDelts = "FrontDelts"
+    case legs = "Legs"
+    case hamstrings = "Hamstrings"
+    case glutes = "Glutes"
+    case knees = "Knees"
+    case calfs = "Calfs"
+    case quadriceps = "Quadriceps"
+    case chest = "Chest"
+    case back = "Back"
+    case infraspinatus = "Infraspinatus"
+    case lats = "Lats"
+    case traps = "Traps"
+    case lowerBack = "LowerBack"
+    case obliques = "Obliques"
+    case abdominals = "Abdominals"
+}
+
 struct ExerciseData {
     static let allExercises = [
         
@@ -275,71 +300,71 @@ struct ExerciseData {
         "Tempo Bench Press"
     ]
     
-    static let muscleGroupMapping: [String: [String]] = [
+    static let muscleGroupMapping: [String: [MuscleGroup]] = [
         // Chest exercises
-        "Barbell Bench Press": ["Chest", "Front Deltoids", "Triceps"],
-        "Dumbbell Bench Press": ["Chest", "Front Deltoids", "Triceps"],
-        "Single Arm Dumbbell Bench Press": ["Chest", "Front Deltoids", "Triceps"],
-        "Incline Barbell Bench Press": ["Upper Chest", "Front Deltoids", "Triceps"],
-        "Incline Dumbbell Bench Press": ["Upper Chest", "Front Deltoids", "Triceps"],
-        "Decline Barbell Bench Press": ["Lower Chest", "Front Deltoids", "Triceps"],
-        "Decline Dumbbell Bench Press": ["Lower Chest", "Front Deltoids", "Triceps"],
-        "Chest Flyes": ["Chest"],
-        "Dumbbell Chest Fly": ["Chest"],
-        "Cable Chest Fly": ["Chest"],
-        "Cable Crossovers": ["Chest"],
-        "Push-Ups": ["Chest", "Front Deltoids", "Triceps", "Core"],
-        "Pec Deck Machine": ["Chest"],
+        "Barbell Bench Press": [.chest, .frontDelts, .triceps],
+        "Dumbbell Bench Press": [.chest, .frontDelts, .triceps],
+        "Single Arm Dumbbell Bench Press": [.chest, .frontDelts, .triceps],
+        "Incline Barbell Bench Press": [.chest, .frontDelts, .triceps],
+        "Incline Dumbbell Bench Press": [.chest, .frontDelts, .triceps],
+        "Decline Barbell Bench Press": [.chest, .frontDelts, .triceps],
+        "Decline Dumbbell Bench Press": [.chest, .frontDelts, .triceps],
+        "Chest Flyes": [.chest],
+        "Dumbbell Chest Fly": [.chest],
+        "Cable Chest Fly": [.chest],
+        "Cable Crossovers": [.chest],
+        "Push-Ups": [.chest, .frontDelts, .triceps, .abdominals],
+        "Pec Deck Machine": [.chest],
         
         // Back exercises
-        "Barbell Deadlift": ["Lower Back", "Hamstrings", "Glutes", "Traps"],
-        "Pull-Ups": ["Lats", "Biceps", "Rear Deltoids"],
-        "Chin-Ups": ["Lats", "Biceps", "Rear Deltoids"],
-        "Lat Pulldown": ["Lats", "Biceps", "Rear Deltoids"],
-        "Barbell Row": ["Upper Back", "Lats", "Biceps", "Rear Deltoids"],
-        "Dumbbell Row": ["Upper Back", "Lats", "Biceps", "Rear Deltoids"],
-        "T-Bar Row": ["Upper Back", "Lats", "Biceps"],
-        "Face Pulls": ["Rear Deltoids", "Traps", "Rotator Cuff"],
+        "Barbell Deadlift": [.lowerBack, .hamstrings, .glutes, .traps],
+        "Pull-Ups": [.lats, .biceps, .rearDelts],
+        "Chin-Ups": [.lats, .biceps, .rearDelts],
+        "Lat Pulldown": [.lats, .biceps, .rearDelts],
+        "Barbell Row": [.back, .lats, .biceps, .rearDelts],
+        "Dumbbell Row": [.back, .lats, .biceps, .rearDelts],
+        "T-Bar Row": [.back, .lats, .biceps],
+        "Face Pulls": [.rearDelts, .traps, .infraspinatus],
         
         // Shoulder exercises
-        "Barbell Overhead Press (OHP)": ["Front Deltoids", "Side Deltoids", "Triceps"],
-        "Dumbbell Shoulder Press": ["Front Deltoids", "Side Deltoids", "Triceps"],
-        "Arnold Press": ["Front Deltoids", "Side Deltoids", "Triceps"],
-        "Lateral Raises": ["Side Deltoids"],
-        "Front Raises": ["Front Deltoids"],
-        "Rear Delt Flyes": ["Rear Deltoids"],
+        "Barbell Overhead Press (OHP)": [.frontDelts, .delts, .triceps],
+        "Dumbbell Shoulder Press": [.frontDelts, .delts, .triceps],
+        "Arnold Press": [.frontDelts, .delts, .triceps],
+        "Lateral Raises": [.delts],
+        "Front Raises": [.frontDelts],
+        "Rear Delt Flyes": [.rearDelts],
         
         // Arm exercises
-        "Barbell Bicep Curl": ["Biceps"],
-        "Dumbbell Bicep Curl": ["Biceps"],
-        "Hammer Curl": ["Biceps", "Forearms"],
-        "Tricep Dips": ["Triceps", "Chest"],
-        "Skull Crushers": ["Triceps"],
-        "Close-Grip Bench Press": ["Triceps", "Chest"],
-        "Tricep Pushdowns": ["Triceps"],
+        "Barbell Bicep Curl": [.biceps],
+        "Dumbbell Bicep Curl": [.biceps],
+        "Hammer Curl": [.biceps, .forearms],
+        "Tricep Dips": [.triceps, .chest],
+        "Skull Crushers": [.triceps],
+        "Close-Grip Bench Press": [.triceps, .chest],
+        "Tricep Pushdowns": [.triceps],
         
         // Leg exercises
-        "Barbell Squat": ["Quads", "Glutes", "Hamstrings", "Core"],
-        "Front Squats": ["Quads", "Core"],
-        "Bulgarian Split Squats": ["Quads", "Glutes", "Hamstrings"],
-        "Leg Press": ["Quads", "Glutes", "Hamstrings"],
-        "Lunges": ["Quads", "Glutes", "Hamstrings"],
-        "Romanian Deadlift": ["Hamstrings", "Glutes", "Lower Back"],
-        "Leg Curls": ["Hamstrings"],
-        "Leg Extensions": ["Quads"],
-        "Calf Raises": ["Calves"],
-        "Hip Thrusts": ["Glutes", "Hamstrings"],
+        "Barbell Squat": [.quadriceps, .glutes, .hamstrings, .abdominals],
+        "Front Squats": [.quadriceps, .abdominals],
+        "Bulgarian Split Squats": [.quadriceps, .glutes, .hamstrings],
+        "Leg Press": [.quadriceps, .glutes, .hamstrings],
+        "Lunges": [.quadriceps, .glutes, .hamstrings],
+        "Romanian Deadlift": [.hamstrings, .glutes, .lowerBack],
+        "Leg Curls": [.hamstrings],
+        "Leg Extensions": [.quadriceps],
+        "Calf Raises": [.calfs],
+        "Hip Thrusts": [.glutes, .hamstrings],
         
         // Core exercises
-        "Planks": ["Core", "Abs"],
-        "Hanging Leg Raise": ["Abs", "Hip Flexors"],
-        "Crunches": ["Abs"],
-        "Russian Twists": ["Obliques", "Abs"],
-        "Ab Wheel Rollout": ["Abs", "Core"],
+        "Planks": [.abdominals],
+        "Hanging Leg Raise": [.abdominals],
+        "Crunches": [.abdominals],
+        "Russian Twists": [.obliques, .abdominals],
+        "Ab Wheel Rollout": [.abdominals],
         
         // Olympic Lifts
-        "Clean and Jerk": ["Full Body", "Quads", "Glutes", "Shoulders", "Traps"],
-        "Snatch": ["Full Body", "Quads", "Glutes", "Shoulders", "Traps"],
-        "Power Clean": ["Full Body", "Quads", "Glutes", "Traps"]
+        "Clean and Jerk": [.quadriceps, .glutes, .delts, .traps],
+        "Snatch": [.quadriceps, .glutes, .delts, .traps],
+        "Power Clean": [.quadriceps, .glutes, .traps]
     ]
 }

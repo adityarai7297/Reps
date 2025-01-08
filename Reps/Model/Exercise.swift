@@ -6,11 +6,20 @@ final class Exercise  {
     @Attribute(.unique) var id: UUID
     var name: String
     var history: [ExerciseHistory] = []
-    var targetedMuscleGroups: [String] = []
+    private var _targetedMuscleGroups: [String] = []
+    
+    var targetedMuscleGroups: [MuscleGroup] {
+        get {
+            _targetedMuscleGroups.compactMap { MuscleGroup(rawValue: $0) }
+        }
+        set {
+            _targetedMuscleGroups = newValue.map { $0.rawValue }
+        }
+    }
 
-    init(name: String, targetedMuscleGroups: [String] = []) {
+    init(name: String, targetedMuscleGroups: [MuscleGroup] = []) {
         self.id = UUID()
         self.name = name
-        self.targetedMuscleGroups = targetedMuscleGroups
+        self._targetedMuscleGroups = targetedMuscleGroups.map { $0.rawValue }
     }
 }

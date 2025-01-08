@@ -23,7 +23,7 @@ struct BodyMapView: View {
         }
     }
     
-    private func getMuscleGroups(for exerciseName: String) -> [String] {
+    private func getMuscleGroups(for exerciseName: String) -> [MuscleGroup] {
         if let exercise = exercises.first(where: { $0.name == exerciseName }) {
             return exercise.targetedMuscleGroups
         }
@@ -62,9 +62,9 @@ struct BodyMapView: View {
                                             
                                             let muscleGroups = getMuscleGroups(for: history.exerciseName)
                                             if !muscleGroups.isEmpty {
-                                                HStack {
+                                                FlowLayout(alignment: .leading, spacing: 8) {
                                                     ForEach(muscleGroups, id: \.self) { muscle in
-                                                        Text(muscle)
+                                                        Text(muscle.rawValue)
                                                             .font(.system(size: 12))
                                                             .padding(.horizontal, 8)
                                                             .padding(.vertical, 4)
@@ -102,5 +102,77 @@ struct BodyMapView: View {
             }
         }
         .preferredColorScheme(.dark)
+    }
+}
+
+struct FlowLayout: Layout {
+    var alignment: HorizontalAlignment = .leading
+    var spacing: CGFloat = 8
+    
+    func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
+        let result = FlowResult(
+            in: proposal.width ?? 0,
+            subviews: subviews,
+            alignment: alignment,
+            spacing: spacing
+        )
+        return result.size
+    }
+    
+    func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) {
+        let result = FlowResult(
+            in: bounds.width,
+            subviews: subviews,
+            alignment: alignment,
+            spacing: spacing
+        )
+        for (index, subview) in subviews.enumerated() {
+            let point = result.points[index]
+            subview.place(at: CGPoint(x: point.x + bounds.minX, y: point.y + bounds.minY), proposal: .unspecified)
+        }
+    }
+    
+    struct FlowResult {
+        var size: CGSize = .zero
+        var points: [CGPoint] = []
+        
+        init(in maxWidth: CGFloat, subviews: Subviews, alignment: HorizontalAlignment, spacing: CGFloat) {
+            var currentX: CGFloat = 0
+            var currentY: CGFloat = 0
+            var lineHeight: CGFloat = 0
+            var lineItems: [(CGSize, Int)] = []
+            
+            for (index, subview) in subviews.enumerated() {
+                let size = subview.sizeThatFits(.unspecified)
+                
+                if currentX + size.width > maxWidth && !lineItems.isEmpty {
+                    // Place current line
+                    let xOffset = alignment == .trailing ? (maxWidth - currentX + spacing) : 0
+                    for (itemSize, itemIndex) in lineItems {
+                        points.append(CGPoint(x: xOffset + currentX - itemSize.width - spacing, y: currentY))
+                        currentX -= itemSize.width + spacing
+                    }
+                    
+                    // Move to next line
+                    currentY += lineHeight + spacing
+                    currentX = size.width + spacing
+                    lineHeight = size.height
+                    lineItems = [(size, index)]
+                } else {
+                    currentX += size.width + spacing
+                    lineHeight = max(lineHeight, size.height)
+                    lineItems.append((size, index))
+                }
+            }
+            
+            // Place remaining line
+            let xOffset = alignment == .trailing ? (maxWidth - currentX + spacing) : 0
+            for (itemSize, itemIndex) in lineItems {
+                points.append(CGPoint(x: xOffset + currentX - itemSize.width - spacing, y: currentY))
+                currentX -= itemSize.width + spacing
+            }
+            
+            size = CGSize(width: maxWidth, height: currentY + lineHeight)
+        }
     }
 } 

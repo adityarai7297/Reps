@@ -1,5 +1,5 @@
 {
-  "originHash" : "6440619bc34d2f495175fd8a7989d224b2888674d5f826715dbf266cf1bf6b68",
+  "originHash" : "b4c41ef48ab167bd124ec52f0dbe97a47911c1fb82af726244e0554fe25cad5c",
   "pins" : [
     {
       "identity" : "fscalendar",
@@ -17,6 +17,24 @@
       "state" : {
         "revision" : "84cbf2dd9ecf1e98e592e0718310f90fef52d6be",
         "version" : "2.1.0"
+      }
+    },
+    {
+      "identity" : "macaw",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/exyte/Macaw.git",
+      "state" : {
+        "revision" : "29ec199cbc9c814f8ceffc1a33b8775b7349dcdd",
+        "version" : "0.9.10"
+      }
+    },
+    {
+      "identity" : "swxmlhash",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/drmohundro/SWXMLHash",
+      "state" : {
+        "revision" : "6469881a3f30417c5bb02404ea4b69207f297592",
+        "version" : "6.0.0"
       }
     }
   ],
