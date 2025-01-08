@@ -80,6 +80,7 @@ struct ManageExercisesView: View {
             .padding(.bottom, 24)
             .onAppear {
                 print("DEBUG: ManageExercisesView - onAppear")
+                updateExistingExerciseMuscleGroups()
             }
             
             // Hidden preloader
@@ -243,7 +244,8 @@ struct ManageExercisesView: View {
         if exercises.contains(where: { $0.name.caseInsensitiveCompare(newExerciseName) == .orderedSame }) {
             showDuplicateAlert = true
         } else {
-            let newExercise = Exercise(name: newExerciseName)
+            let muscleGroups = ExerciseData.muscleGroupMapping[newExerciseName] ?? []
+            let newExercise = Exercise(name: newExerciseName, targetedMuscleGroups: muscleGroups)
             exercises.append(newExercise)
             modelContext.insert(newExercise)
             saveContext()
@@ -384,6 +386,17 @@ struct ManageExercisesView: View {
                 }
             }
         }
+    }
+
+    private func updateExistingExerciseMuscleGroups() {
+        for exercise in exercises {
+            if exercise.targetedMuscleGroups.isEmpty {
+                if let muscleGroups = ExerciseData.muscleGroupMapping[exercise.name] {
+                    exercise.targetedMuscleGroups = muscleGroups
+                }
+            }
+        }
+        saveContext()
     }
 }
 
