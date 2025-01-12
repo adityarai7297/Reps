@@ -1,103 +1,129 @@
 import SwiftUI
 import SwiftData
+import Macaw
 
 struct BodyMapView: View {
     @Environment(\.dismiss) private var dismiss
     @Query(sort: \ExerciseHistory.timestamp, order: .reverse) private var exerciseHistories: [ExerciseHistory]
     @Query private var exercises: [Exercise]
     
-    private var last10DaysExercises: [(Date, [ExerciseHistory])] {
-        let calendar = Calendar.current
-        let today = Date()
-        let last10Days = (0..<10).compactMap { days in
-            calendar.date(byAdding: .day, value: -days, to: today)
+    // Time window for exercise analysis (10 days)
+    private let analysisTimeWindow: TimeInterval = 10 * 24 * 60 * 60
+    
+    // Calculate muscle group activity in the last 10 days
+    private var muscleGroupActivity: [MuscleGroup: Int] {
+        let now = Date()
+        let cutoffDate = now.addingTimeInterval(-analysisTimeWindow)
+        
+        var activity: [MuscleGroup: Int] = [:]
+        
+        for history in exerciseHistories {
+            guard history.timestamp >= cutoffDate else { continue }
+            
+            if let exercise = exercises.first(where: { $0.name == history.exerciseName }) {
+                for muscleGroup in exercise.targetedMuscleGroups {
+                    activity[muscleGroup, default: 0] += 1
+                }
+            }
         }
         
-        return last10Days.map { date in
-            let startOfDay = calendar.startOfDay(for: date)
-            let endOfDay = calendar.date(byAdding: .day, value: 1, to: startOfDay)!
-            let dayExercises = exerciseHistories.filter { history in
-                history.timestamp >= startOfDay && history.timestamp < endOfDay
+        return activity
+    }
+    
+    // Get color intensity for a muscle group based on activity
+    private func colorIntensity(for muscleGroup: MuscleGroup) -> Double {
+        let maxActivity = muscleGroupActivity.values.max() ?? 1
+        let activity = muscleGroupActivity[muscleGroup] ?? 0
+        return Double(activity) / Double(maxActivity)
+    }
+    
+    // Get highlight color for a muscle group
+    private func highlightColor(for muscleGroup: MuscleGroup) -> Macaw.Color {
+        let intensity = colorIntensity(for: muscleGroup)
+        return Macaw.Color.red.with(a: intensity * 0.7 + 0.3) // Minimum opacity of 0.3
+    }
+    
+    // Find nodes by group name recursively
+    private func findNodesByTag(_ tag: String, in node: Macaw.Node) -> [Macaw.Node] {
+        var nodes: [Macaw.Node] = []
+        
+        if let group = node as? Macaw.Group {
+            // Check if this group has the tag we're looking for
+            if group.tag.contains(tag) {
+                // Add all shapes in this group
+                for content in group.contents {
+                    if let shape = content as? Macaw.Shape {
+                        nodes.append(shape)
+                    }
+                }
             }
-            return (startOfDay, dayExercises)
+            
+            // Search through all contents of the group
+            for content in group.contents {
+                nodes.append(contentsOf: findNodesByTag(tag, in: content))
+            }
+        }
+        
+        return nodes
+    }
+    
+    // Helper function to print all titles in the SVG
+    private func printAllTags(_ node: Macaw.Node) {
+        if let group = node as? Macaw.Group {
+            if let title = group.contents.first(where: { $0 is Macaw.Text }) as? Macaw.Text {
+                print("Found Group with title: '\(title.text)'")
+            }
+            for content in group.contents {
+                printAllTags(content)
+            }
         }
     }
     
-    private func getMuscleGroups(for exerciseName: String) -> [MuscleGroup] {
-        if let exercise = exercises.first(where: { $0.name == exerciseName }) {
-            return exercise.targetedMuscleGroups
+    // Add this helper function
+    private func printAllGroupTags(_ node: Macaw.Node) {
+        if let group = node as? Macaw.Group {
+            print("Group tags: \(group.tag)")
+            for content in group.contents {
+                printAllGroupTags(content)
+            }
         }
-        return []
-    }
-    
-    private func formattedDate(_ date: Date) -> String {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "MMM d"
-        return formatter.string(from: date)
     }
     
     var body: some View {
         NavigationView {
-            ZStack {
-                Color.black.ignoresSafeArea()
-                
-                ScrollView {
-                    VStack(spacing: 20) {
-                        ForEach(last10DaysExercises, id: \.0) { date, histories in
-                            VStack(alignment: .leading, spacing: 12) {
-                                Text(formattedDate(date))
-                                    .font(.headline)
-                                    .foregroundColor(.gray)
-                                
-                                if histories.isEmpty {
-                                    Text("No exercises")
-                                        .foregroundColor(.gray)
-                                        .italic()
-                                } else {
-                                    ForEach(histories) { history in
-                                        VStack(alignment: .leading, spacing: 8) {
-                                            Text(history.exerciseName)
-                                                .font(.system(size: 16, weight: .medium))
-                                                .foregroundColor(.white)
-                                            
-                                            let muscleGroups = getMuscleGroups(for: history.exerciseName)
-                                            if !muscleGroups.isEmpty {
-                                                FlowLayout(alignment: .leading, spacing: 8) {
-                                                    ForEach(muscleGroups, id: \.self) { muscle in
-                                                        Text(muscle.rawValue)
-                                                            .font(.system(size: 12))
-                                                            .padding(.horizontal, 8)
-                                                            .padding(.vertical, 4)
-                                                            .background(Color.white.opacity(0.2))
-                                                            .cornerRadius(8)
-                                                    }
-                                                }
-                                            }
-                                        }
-                                        .padding(.vertical, 8)
-                                        .padding(.horizontal, 12)
-                                        .background(Color.white.opacity(0.05))
-                                        .cornerRadius(12)
-                                    }
-                                }
-                            }
-                            .padding(.horizontal)
+            GeometryReader { geometry in
+                ZStack {
+                    Color.black.ignoresSafeArea()
+                    
+                    SVGView(named: "body_map") { node in
+                        print("Processing SVG node: \(type(of: node))")
+                        // Print all group tags first
+                        printAllGroupTags(node)
+                        
+                        for muscleGroup in MuscleGroup.allCases {
+                            let nodes = findNodesByTag(muscleGroup.rawValue, in: node)
+                            print("Searching for muscle group: \(muscleGroup.rawValue)")
+                            print("Found \(nodes.count) nodes")
+                            let color = highlightColor(for: muscleGroup)
                             
-                            if date != last10DaysExercises.last?.0 {
-                                Divider()
-                                    .background(Color.gray.opacity(0.3))
+                            for node in nodes {
+                                if let shape = node as? Macaw.Shape {
+                                    shape.fill = color
+                                }
                             }
                         }
                     }
-                    .padding(.vertical)
+                    .frame(width: min(geometry.size.width * 0.8, 400),
+                           height: min(geometry.size.width * 0.8, 400))
+                    .padding()
                 }
-            }
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .principal) {
-                    Text("Recent Exercises")
-                        .font(.headline)
-                        .foregroundColor(.white)
+                .navigationBarTitleDisplayMode(.inline)
+                .toolbar {
+                    ToolbarItem(placement: .principal) {
+                        Text("Body Map")
+                            .font(.headline)
+                            .foregroundColor(.white)
+                    }
                 }
             }
         }
@@ -105,74 +131,96 @@ struct BodyMapView: View {
     }
 }
 
-struct FlowLayout: Layout {
-    var alignment: HorizontalAlignment = .leading
-    var spacing: CGFloat = 8
-    
-    func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
-        let result = FlowResult(
-            in: proposal.width ?? 0,
-            subviews: subviews,
-            alignment: alignment,
-            spacing: spacing
-        )
-        return result.size
-    }
-    
-    func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) {
-        let result = FlowResult(
-            in: bounds.width,
-            subviews: subviews,
-            alignment: alignment,
-            spacing: spacing
-        )
-        for (index, subview) in subviews.enumerated() {
-            let point = result.points[index]
-            subview.place(at: CGPoint(x: point.x + bounds.minX, y: point.y + bounds.minY), proposal: .unspecified)
+// Custom UIView to handle SVG rendering
+class SVGContainerView: UIView {
+    var svgNode: Node? {
+        didSet {
+            setNeedsDisplay()
         }
     }
     
-    struct FlowResult {
-        var size: CGSize = .zero
-        var points: [CGPoint] = []
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+        backgroundColor = .clear
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
+    override func draw(_ rect: CGRect) {
+        guard let context = UIGraphicsGetCurrentContext(), let node = svgNode else { return }
         
-        init(in maxWidth: CGFloat, subviews: Subviews, alignment: HorizontalAlignment, spacing: CGFloat) {
-            var currentX: CGFloat = 0
-            var currentY: CGFloat = 0
-            var lineHeight: CGFloat = 0
-            var lineItems: [(CGSize, Int)] = []
+        // Calculate scale to fit the view
+        let viewSize = min(bounds.width, bounds.height)
+        let scale = viewSize / 2666.6667 // Original SVG size
+        
+        // Clear the context and set up the coordinate system
+        context.clear(rect)
+        context.translateBy(x: 0, y: bounds.height)
+        context.scaleBy(x: scale, y: -scale)  // Flip the context because Core Graphics is y-flipped
+        
+        // Create MacawView and render
+        let macawView = MacawView()
+        macawView.node = node
+        macawView.draw(CGRect(origin: .zero, size: rect.size))
+    }
+}
+
+// Updated SVGView
+struct SVGView: UIViewRepresentable {
+    let named: String
+    var onLoad: ((Node) -> Void)?
+    
+    func makeUIView(context: Context) -> SVGContainerView {
+        let view = SVGContainerView(frame: .zero)
+        
+        if let path = Bundle.main.path(forResource: named, ofType: "svg"),
+           var svgString = try? String(contentsOfFile: path, encoding: .utf8) {
             
-            for (index, subview) in subviews.enumerated() {
-                let size = subview.sizeThatFits(.unspecified)
-                
-                if currentX + size.width > maxWidth && !lineItems.isEmpty {
-                    // Place current line
-                    let xOffset = alignment == .trailing ? (maxWidth - currentX + spacing) : 0
-                    for (itemSize, itemIndex) in lineItems {
-                        points.append(CGPoint(x: xOffset + currentX - itemSize.width - spacing, y: currentY))
-                        currentX -= itemSize.width + spacing
-                    }
-                    
-                    // Move to next line
-                    currentY += lineHeight + spacing
-                    currentX = size.width + spacing
-                    lineHeight = size.height
-                    lineItems = [(size, index)]
-                } else {
-                    currentX += size.width + spacing
-                    lineHeight = max(lineHeight, size.height)
-                    lineItems.append((size, index))
-                }
+            // First, let's modify the SVG string to add IDs based on titles
+            let modifiedSVG = addIDsToGroups(svgString)
+            print("Modified SVG preview: \(String(modifiedSVG.prefix(500)))")
+            
+            if let node = try? SVGParser.parse(text: modifiedSVG) {
+                print("SVG loaded successfully")
+                onLoad?(node)
+                view.svgNode = node
             }
+        } else {
+            print("Failed to load SVG")
+        }
+        return view
+    }
+    
+    func updateUIView(_ uiView: SVGContainerView, context: Context) {}
+    
+    // Helper function to add IDs to groups based on their titles
+    private func addIDsToGroups(_ svg: String) -> String {
+        var modified = svg
+        
+        // Regular expression to find groups with titles
+        let pattern = #"<g[^>]*>\s*<title>([^<]+)</title>"#
+        
+        do {
+            let regex = try NSRegularExpression(pattern: pattern)
+            let range = NSRange(svg.startIndex..., in: svg)
             
-            // Place remaining line
-            let xOffset = alignment == .trailing ? (maxWidth - currentX + spacing) : 0
-            for (itemSize, itemIndex) in lineItems {
-                points.append(CGPoint(x: xOffset + currentX - itemSize.width - spacing, y: currentY))
-                currentX -= itemSize.width + spacing
-            }
+            // Replace each match with a group that has both an ID and the title
+            modified = regex.stringByReplacingMatches(
+                in: svg,
+                range: range,
+                withTemplate: "<g id=\"$1\">"
+            )
             
-            size = CGSize(width: maxWidth, height: currentY + lineHeight)
+            return modified
+        } catch {
+            print("Regex error: \(error)")
+            return svg
         }
     }
+}
+
+#Preview {
+    BodyMapView()
 } 

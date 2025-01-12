@@ -1,6 +1,6 @@
 import Foundation
 
-enum MuscleGroup: String, Codable {
+enum MuscleGroup: String, Codable, CaseIterable {
     case arms = "Arms"
     case triceps = "Triceps"
     case biceps = "Biceps"

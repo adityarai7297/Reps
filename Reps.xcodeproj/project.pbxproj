@@ -29,6 +29,7 @@
 		408827B22D054A95000DC83C /* GradientTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 408827B12D054A8F000DC83C /* GradientTheme.swift */; };
 		409C3FA62D1B57ED00073D7C /* BodyMapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 409C3FA52D1B57DF00073D7C /* BodyMapView.swift */; };
 		409C3FAB2D2E433F00073D7C /* Macaw in Frameworks */ = {isa = PBXBuildFile; productRef = 409C3FAA2D2E433F00073D7C /* Macaw */; };
+		409C3FAE2D2E5B2100073D7C /* body_map.svg in Resources */ = {isa = PBXBuildFile; fileRef = 409C3FAD2D2E5B2100073D7C /* body_map.svg */; };
 		40DEBA822CB7AEEC00ED44ED /* ExerciseData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40DEBA812CB7AEE200ED44ED /* ExerciseData.swift */; };
 		40DEBA842CC1840800ED44ED /* EditExerciseHistoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40DEBA832CC183FA00ED44ED /* EditExerciseHistoryView.swift */; };
 		40FEBBC52CA721490051C2AA /* FSCalendarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40FEBBC42CA721490051C2AA /* FSCalendarView.swift */; };
@@ -77,6 +78,7 @@
 		408827AD2D054A10000DC83C /* AnimatedGradientModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnimatedGradientModifier.swift; sourceTree = "<group>"; };
 		408827B12D054A8F000DC83C /* GradientTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GradientTheme.swift; sourceTree = "<group>"; };
 		409C3FA52D1B57DF00073D7C /* BodyMapView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BodyMapView.swift; sourceTree = "<group>"; };
+		409C3FAD2D2E5B2100073D7C /* body_map.svg */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = body_map.svg; sourceTree = "<group>"; };
 		40DEBA812CB7AEE200ED44ED /* ExerciseData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExerciseData.swift; sourceTree = "<group>"; };
 		40DEBA832CC183FA00ED44ED /* EditExerciseHistoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditExerciseHistoryView.swift; sourceTree = "<group>"; };
 		40FEBBC42CA721490051C2AA /* FSCalendarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FSCalendarView.swift; sourceTree = "<group>"; };
@@ -127,6 +129,7 @@
 		13FEA2342C27C9D200D04BF2 = {
 			isa = PBXGroup;
 			children = (
+				409C3FAC2D2E5AB800073D7C /* Resources */,
 				13FEA23F2C27C9D200D04BF2 /* Reps */,
 				13FEA23E2C27C9D200D04BF2 /* Products */,
 			);
@@ -194,6 +197,14 @@
 				132EF34D2C367BE000E75796 /* GradientBackground.swift */,
 			);
 			path = ViewModifiers;
+			sourceTree = "<group>";
+		};
+		409C3FAC2D2E5AB800073D7C /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				409C3FAD2D2E5B2100073D7C /* body_map.svg */,
+			);
+			path = Resources;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -315,6 +326,7 @@
 			files = (
 				13FEA2492C27C9D300D04BF2 /* Preview Assets.xcassets in Resources */,
 				13FEA2452C27C9D300D04BF2 /* Assets.xcassets in Resources */,
+				409C3FAE2D2E5B2100073D7C /* body_map.svg in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
