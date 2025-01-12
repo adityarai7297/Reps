@@ -28,8 +28,9 @@
 		408827AE2D054A15000DC83C /* AnimatedGradientModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 408827AD2D054A10000DC83C /* AnimatedGradientModifier.swift */; };
 		408827B22D054A95000DC83C /* GradientTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 408827B12D054A8F000DC83C /* GradientTheme.swift */; };
 		409C3FA62D1B57ED00073D7C /* BodyMapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 409C3FA52D1B57DF00073D7C /* BodyMapView.swift */; };
-		409C3FAB2D2E433F00073D7C /* Macaw in Frameworks */ = {isa = PBXBuildFile; productRef = 409C3FAA2D2E433F00073D7C /* Macaw */; };
 		409C3FAE2D2E5B2100073D7C /* body_map.svg in Resources */ = {isa = PBXBuildFile; fileRef = 409C3FAD2D2E5B2100073D7C /* body_map.svg */; };
+		409C3FB12D344FB200073D7C /* SVGKit in Frameworks */ = {isa = PBXBuildFile; productRef = 409C3FB02D344FB200073D7C /* SVGKit */; };
+		409C3FB32D344FB200073D7C /* SVGKitSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 409C3FB22D344FB200073D7C /* SVGKitSwift */; };
 		40DEBA822CB7AEEC00ED44ED /* ExerciseData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40DEBA812CB7AEE200ED44ED /* ExerciseData.swift */; };
 		40DEBA842CC1840800ED44ED /* EditExerciseHistoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40DEBA832CC183FA00ED44ED /* EditExerciseHistoryView.swift */; };
 		40FEBBC52CA721490051C2AA /* FSCalendarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40FEBBC42CA721490051C2AA /* FSCalendarView.swift */; };
@@ -93,8 +94,9 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				409C3FAB2D2E433F00073D7C /* Macaw in Frameworks */,
 				408827AA2D053982000DC83C /* IrregularGradient in Frameworks */,
+				409C3FB32D344FB200073D7C /* SVGKitSwift in Frameworks */,
+				409C3FB12D344FB200073D7C /* SVGKit in Frameworks */,
 				40FEBBC72CA721E80051C2AA /* FSCalendar in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -229,7 +231,8 @@
 			packageProductDependencies = (
 				40FEBBC62CA721E80051C2AA /* FSCalendar */,
 				408827A92D053982000DC83C /* IrregularGradient */,
-				409C3FAA2D2E433F00073D7C /* Macaw */,
+				409C3FB02D344FB200073D7C /* SVGKit */,
+				409C3FB22D344FB200073D7C /* SVGKitSwift */,
 			);
 			productName = Reps;
 			productReference = 13FEA23D2C27C9D200D04BF2 /* Reps.app */;
@@ -306,7 +309,7 @@
 			packageReferences = (
 				40FEBBC32CA7210B0051C2AA /* XCRemoteSwiftPackageReference "FSCalendar" */,
 				408827A82D053982000DC83C /* XCRemoteSwiftPackageReference "IrregularGradient" */,
-				409C3FA92D2E433F00073D7C /* XCRemoteSwiftPackageReference "Macaw" */,
+				409C3FAF2D344FB200073D7C /* XCRemoteSwiftPackageReference "SVGKit" */,
 			);
 			productRefGroup = 13FEA23E2C27C9D200D04BF2 /* Products */;
 			projectDirPath = "";
@@ -745,12 +748,12 @@
 				minimumVersion = 2.1.0;
 			};
 		};
-		409C3FA92D2E433F00073D7C /* XCRemoteSwiftPackageReference "Macaw" */ = {
+		409C3FAF2D344FB200073D7C /* XCRemoteSwiftPackageReference "SVGKit" */ = {
 			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/exyte/Macaw.git";
+			repositoryURL = "https://github.com/SVGKit/SVGKit.git";
 			requirement = {
 				kind = upToNextMajorVersion;
-				minimumVersion = 0.9.10;
+				minimumVersion = 3.0.0;
 			};
 		};
 		40FEBBC32CA7210B0051C2AA /* XCRemoteSwiftPackageReference "FSCalendar" */ = {
@@ -769,10 +772,15 @@
 			package = 408827A82D053982000DC83C /* XCRemoteSwiftPackageReference "IrregularGradient" */;
 			productName = IrregularGradient;
 		};
-		409C3FAA2D2E433F00073D7C /* Macaw */ = {
+		409C3FB02D344FB200073D7C /* SVGKit */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 409C3FA92D2E433F00073D7C /* XCRemoteSwiftPackageReference "Macaw" */;
-			productName = Macaw;
+			package = 409C3FAF2D344FB200073D7C /* XCRemoteSwiftPackageReference "SVGKit" */;
+			productName = SVGKit;
+		};
+		409C3FB22D344FB200073D7C /* SVGKitSwift */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 409C3FAF2D344FB200073D7C /* XCRemoteSwiftPackageReference "SVGKit" */;
+			productName = SVGKitSwift;
 		};
 		40FEBBC62CA721E80051C2AA /* FSCalendar */ = {
 			isa = XCSwiftPackageProductDependency;
