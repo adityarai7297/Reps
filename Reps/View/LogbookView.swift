@@ -6,21 +6,18 @@ struct LogbookView: View {
     @Environment(\.modelContext) private var modelContext
     @EnvironmentObject private var themeManager: ThemeManager
     @State private var groupedByDate: [Date: [String: [ExerciseHistory]]] = [:]
-    @State private var exerciseHistories: [ExerciseHistory] = []
     @State private var selectedDate: Date? = nil
-    @State private var expandedExercise: String? = nil
     @Binding var setCount: Int
     @Binding var refreshTrigger: Bool
     @State private var hapticFeedback = UIImpactFeedbackGenerator(style: .medium)
-    @State private var showingExerciseHistory = false
-    @State private var showingGraphs = false
     @State private var historyToEdit: ExerciseHistory? = nil
     @AppStorage("hasShownActivityHint") private var hasShownActivityHint = false
     @State private var showActivityHint = false
     @State private var activityHintStep = 1
     @AppStorage("hasShownSwipeHint") private var hasShownSwipeHint = false
     @State private var showSwipeHint = false
-    @State private var showingBodyMap = false
+    @StateObject private var chatViewModel = ChatViewModel()
+    @State private var inputText = ""
 
     var workoutData: [Date: Int] {
         groupedByDate.reduce(into: [:]) { result, entry in
@@ -48,208 +45,82 @@ struct LogbookView: View {
             .padding(.top, 16)
             .padding(.bottom, 24)
 
-            VStack(spacing: 24) {
-                // Section Buttons
-                HStack(spacing: 16) {
-                    // Exercise History Button
-                    SectionButton(
-                        title: "Exercise History",
-                        icon: "dumbbell.fill",
-                        action: {
-                            hapticFeedback.impactOccurred()
-                            showingExerciseHistory = true
-                        },
-                        colors: [
-                                    Color(red: 0.6, green: 0.2, blue: 0.8),  // Bright purple
-                                    Color(red: 0.4, green: 0.0, blue: 0.8),  // Deep purple
-                                    Color(red: 0.2, green: 0.0, blue: 0.6)   // Dark purple-blue
-                                ]
-                    )
-                    
-                    // Graphs Button
-                    SectionButton(
-                        title: "Graphs",
-                        icon: "chart.line.uptrend.xyaxis",
-                        action: {
-                            hapticFeedback.impactOccurred()
-                            showingGraphs = true
-                        },
-                        colors: [
-                                    Color(red: 0.0, green: 0.6, blue: 1.0),  // Bright blue
-                                    Color(red: 0.0, green: 0.4, blue: 0.9),  // Medium blue
-                                    Color(red: 0.0, green: 0.2, blue: 0.8)   // Deep blue
-                                ]
-                    )
-                    
-                    // Body Map Button
-                    SectionButton(
-                        title: "Body Map",
-                        icon: "figure.stand",
-                        action: {
-                            hapticFeedback.impactOccurred()
-                            showingBodyMap = true
-                        },
-                        colors: [
-                            Color(red: 0.8, green: 0.2, blue: 0.4),  // Pink-red
-                            Color(red: 0.6, green: 0.0, blue: 0.4),  // Deep magenta
-                            Color(red: 0.4, green: 0.0, blue: 0.4)   // Dark purple
-                        ]
-                    )
-                }
-                .padding(.horizontal, 20)
-
-                // Activity Overview with GitHub-style calendar
-                VStack(alignment: .leading, spacing: 16) {
-                    ZStack {
-                        GitHubStyleCalendarView(selectedDate: $selectedDate, workoutData: workoutData)
-                            .frame(height: 180)
-                            .padding(.vertical, 20)
-                            .background(Color.black.opacity(0.3))
-                            .cornerRadius(16)
-                            .blur(radius: showActivityHint || showSwipeHint ? 3 : 0)
-                        
-                        if showActivityHint {
-                            VStack {
-                                Image(systemName: activityHintStep == 1 ? "chart.bar" : "hand.tap")
-                                    .font(.system(size: 40))
-                                    .foregroundColor(.white)
-                                    .padding(.bottom, 8)
-                                Text(activityHintStep == 1 ? "Your workout activity will\nstart appearing here" : "Select any day to see history")
-                                    .multilineTextAlignment(.center)
-                                    .foregroundColor(.white)
-                                    .font(.headline)
-                            }
-                        }
+            // Chat Messages
+            ScrollView {
+                LazyVStack(spacing: 0) {
+                    ForEach(chatViewModel.messages) { message in
+                        ChatBubble(message: message, selectedDate: $selectedDate, workoutData: workoutData)
                     }
-                    .padding(.horizontal, 20)
                 }
+            }
+            .frame(maxHeight: .infinity)
 
-                // Exercise History Section (Scrollable)
-                if let selectedDate = selectedDate {
-                    // Date Header (Fixed)
+            // Selected Date History
+            if let selectedDate = selectedDate {
+                VStack(alignment: .leading, spacing: 8) {
                     Text(Formatter.date(selectedDate))
                         .font(.system(size: 20, weight: .bold))
                         .foregroundColor(.white)
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .padding(.horizontal, 20)
                         .padding(.bottom, 8)
-                }
 
-                ScrollView {
-                    VStack(spacing: 24) {
-                        if let selectedDate = selectedDate,
-                           let exercisesForDate = groupedByDate[selectedDate] {
-                            ForEach(Array(exercisesForDate.keys.sorted()), id: \.self) { exerciseName in
-                                if let histories = exercisesForDate[exerciseName] {
-                                    DailyWorkoutCard(
-                                        exerciseName: exerciseName,
-                                        histories: histories,
-                                        onDelete: deleteHistory,
-                                        onEdit: { history in
-                                            historyToEdit = history
-                                        }
-                                    )
+                    if let exercisesForDate = groupedByDate[selectedDate] {
+                        ScrollView {
+                            VStack(spacing: 24) {
+                                ForEach(Array(exercisesForDate.keys.sorted()), id: \.self) { exerciseName in
+                                    if let histories = exercisesForDate[exerciseName] {
+                                        DailyWorkoutCard(
+                                            exerciseName: exerciseName,
+                                            histories: histories,
+                                            onDelete: deleteHistory,
+                                            onEdit: { history in
+                                                historyToEdit = history
+                                            }
+                                        )
+                                    }
                                 }
                             }
+                            .padding(.horizontal, 20)
                         }
                     }
-                    .padding(.bottom, 20)
                 }
-                .frame(maxHeight: .infinity)
+            }
+
+            // Chat Input
+            ChatInputField(text: $inputText) {
+                handleUserInput()
             }
         }
         .background(Color.black)
         .onAppear {
             loadAllExerciseHistory()
             
-            // Show activity hint if it hasn't been shown before
-            if !hasShownActivityHint {
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                    withAnimation(.easeIn(duration: 0.5)) {
-                        activityHintStep = 1
-                        showActivityHint = true
-                        // Dismiss first hint after 3 seconds and show second hint
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
-                            withAnimation {
-                                activityHintStep = 2
-                                // Dismiss second hint after 3 seconds
-                                DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
-                                    withAnimation {
-                                        showActivityHint = false
-                                        hasShownActivityHint = true
-                                        
-                                        // Show swipe hint after activity hint is dismissed
-                                        if !hasShownSwipeHint {
-                                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                                                withAnimation {
-                                                    showSwipeHint = true
-                                                    // Auto-dismiss after 3 seconds if user hasn't dismissed it
-                                                    DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
-                                                        withAnimation {
-                                                            showSwipeHint = false
-                                                            hasShownSwipeHint = true
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
+            // Add initial greeting
+            if chatViewModel.messages.isEmpty {
+                chatViewModel.addMessage("Hi! I'm here to help you track your fitness journey. Ask me about your consistency or anything else!", isUser: false)
             }
-            
-            // Select the most recent date with workout data
-            if selectedDate == nil {
-                if let mostRecentDate = workoutData.keys.sorted().last {
-                    selectedDate = mostRecentDate
-                }
-            }
-        }
-        .sheet(isPresented: $showingExerciseHistory) {
-            NavigationView {
-                ExerciseHistoryModalView(
-                    exerciseHistories: exerciseHistories,
-                    onDelete: { history in
-                        deleteHistory(history)
-                    }
-                )
-                .navigationBarTitleDisplayMode(.inline)
-                .toolbar {
-                    ToolbarItem(placement: .principal) {
-                        Text("Exercise History")
-                            .font(.headline)
-                            .foregroundColor(.white)
-                    }
-                }
-            }
-            .background(Color.black)
-            .preferredColorScheme(.dark)
-        }
-        .sheet(isPresented: $showingGraphs) {
-            NavigationView {
-                GraphsView()
-                    .navigationBarTitleDisplayMode(.inline)
-                    .toolbar {
-                        ToolbarItem(placement: .principal) {
-                            Text("Graphs")
-                                .font(.headline)
-                                .foregroundColor(.white)
-                        }
-                    }
-            }
-            .background(Color.black)
-            .preferredColorScheme(.dark)
         }
         .sheet(item: $historyToEdit) { history in
             EditExerciseHistoryView(history: history)
                 .presentationDetents([.medium])
                 .presentationDragIndicator(.visible)
         }
-        .sheet(isPresented: $showingBodyMap) {
-            BodyMapView()
+    }
+
+    private func handleUserInput() {
+        let text = inputText.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !text.isEmpty else { return }
+        
+        chatViewModel.addMessage(text, isUser: true)
+        inputText = ""
+        
+        // Process user input
+        if text.lowercased().contains("consistency") {
+            chatViewModel.addMessage("Here's a view of your workout consistency:", isUser: false)
+            chatViewModel.addMessage("Each square represents a day, and darker colors indicate more sets completed.", isUser: false, containsCalendar: true)
+        } else {
+            chatViewModel.addMessage("I'm here to help! You can ask me about your consistency, and I'll show you a calendar view of your workouts.", isUser: false)
         }
     }
 
@@ -270,8 +141,6 @@ struct LogbookView: View {
                 Dictionary(grouping: histories) { $0.exerciseName }
             }
 
-            // Store all histories for "By Exercise" tab
-            exerciseHistories = allHistory
             calculateSetCountForToday()
         } catch {
             print("Failed to load exercise history: \(error)")
@@ -282,7 +151,7 @@ struct LogbookView: View {
         modelContext.delete(history)
         do {
             try modelContext.save()
-            loadAllExerciseHistory() // Reload all data
+            loadAllExerciseHistory()
             calculateSetCountForToday()
             refreshTrigger.toggle()
             hapticFeedback.impactOccurred()
@@ -357,31 +226,21 @@ struct DailyWorkoutCard: View {
     let histories: [ExerciseHistory]
     let onDelete: (ExerciseHistory) -> Void
     let onEdit: (ExerciseHistory) -> Void
-    private let hapticFeedback = UIImpactFeedbackGenerator(style: .medium)
     
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            // Exercise Name Header
-            HStack {
-                Text(exerciseName)
-                    .font(.system(size: 18, weight: .semibold))
-                    .foregroundColor(.white)
-                Spacer()
-            }
-            .padding(16)
-            .frame(maxWidth: .infinity)
-            .background(Color.gray.opacity(0.2))
-            .cornerRadius(12)
+        VStack(alignment: .leading, spacing: 16) {
+            Text(exerciseName)
+                .font(.headline)
+                .foregroundColor(.white)
             
-            // History Items
             ForEach(histories) { history in
-                HStack(spacing: 16) {
-                    // Stats
-                    VStack(alignment: .leading, spacing: 8) {
-                        StatRow(label: "Weight", value: "\(Formatter.decimal(history.weight)) lbs")
-                        StatRow(label: "Reps", value: Formatter.decimal(history.reps))
-                        StatRow(label: "RPE", value: "\(Formatter.decimal(history.rpe))%")
-                        StatRow(label: "Time", value: Formatter.time(history.timestamp))
+                HStack {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("\(Formatter.decimal(history.weight)) lbs × \(Formatter.decimal(history.reps))")
+                            .foregroundColor(.white)
+                        Text("RPE: \(Formatter.decimal(history.rpe))%")
+                            .foregroundColor(.gray)
+                            .font(.subheadline)
                     }
                     
                     Spacer()
@@ -389,7 +248,6 @@ struct DailyWorkoutCard: View {
                     // Action buttons
                     HStack(spacing: 12) {
                         Button(action: {
-                            hapticFeedback.impactOccurred()
                             onEdit(history)
                         }) {
                             Image(systemName: "pencil")
@@ -400,7 +258,6 @@ struct DailyWorkoutCard: View {
                         }
                         
                         Button(action: {
-                            hapticFeedback.impactOccurred()
                             onDelete(history)
                         }) {
                             Image(systemName: "trash")
@@ -416,7 +273,9 @@ struct DailyWorkoutCard: View {
                 .cornerRadius(8)
             }
         }
-        .padding(.vertical, 8)
+        .padding(16)
+        .background(Color.gray.opacity(0.15))
+        .cornerRadius(8)
     }
 }
 
