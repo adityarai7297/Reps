@@ -14,8 +14,9 @@ struct GradientBackground: ViewModifier {
                 .irregularGradient(
                     colors: [colors.0, colors.1],
                     background: colors.0.opacity(0.3),
-                    speed: 0.8
+                    speed: 0.4
                 )
+                .scaleEffect(1.5)
             
             content
         }

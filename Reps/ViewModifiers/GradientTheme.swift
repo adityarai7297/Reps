@@ -18,9 +18,10 @@ struct GradientPair {
         Rectangle()
             .irregularGradient(
                 colors: [pair.start, pair.end],
-                background: pair.start.opacity(0.3),
-                speed: 0.8
+                background: Color.black,
+                speed: 0.4
             )
+            .scaleEffect(1.5)
     }
 }
 
