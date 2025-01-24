@@ -38,10 +38,14 @@ struct ChatBubble: View {
                     )
             }
             
-            VStack(alignment: message.isUser ? .trailing : .leading, spacing: message.containsCalendar ? 16 : 4) {
+            VStack(alignment: message.isUser ? .trailing : .leading, spacing: message.containsCalendar ? 24 : 4) {
                 if message.containsCalendar {
                     GitHubStyleCalendarView(selectedDate: $selectedDate, workoutData: workoutData)
                         .frame(height: 180)
+                        .padding(.vertical, 16)
+                        .padding(.bottom, 8)
+                        .background(Color.black.opacity(0.3))
+                        .cornerRadius(12)
                 }
                 
                 Text(message.text)
@@ -59,7 +63,7 @@ struct ChatBubble: View {
             .frame(maxWidth: message.containsCalendar ? .infinity : UIScreen.main.bounds.width * 0.7, alignment: message.isUser ? .trailing : .leading)
         }
         .padding(.horizontal, 16)
-        .padding(.vertical, 8)
+        .padding(.vertical, message.containsCalendar ? 16 : 8)
         .onAppear {
             if !message.isUser {
                 // Simulate typing animation for system messages
