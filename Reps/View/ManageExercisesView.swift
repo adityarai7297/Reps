@@ -2,24 +2,6 @@ import SwiftUI
 import SwiftData
 import UIKit
 
-struct TextInputPreloader: UIViewRepresentable {
-    func makeUIView(context: Context) -> UIView {
-        let view = UIView()
-        DispatchQueue.main.async {
-            let textField = UITextField()
-            view.addSubview(textField)
-            textField.becomeFirstResponder()
-            DispatchQueue.main.async {
-                textField.resignFirstResponder()
-                textField.removeFromSuperview()
-            }
-        }
-        return view
-    }
-    
-    func updateUIView(_ uiView: UIView, context: Context) {}
-}
-
 struct ManageExercisesView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
@@ -34,11 +16,7 @@ struct ManageExercisesView: View {
     @State private var showingEditSheet = false
     @State private var editedExerciseName: String = ""
     @State private var impactFeedback = UIImpactFeedbackGenerator(style: .heavy)
-    @FocusState private var isTextFieldFocused: Bool {
-        didSet {
-            print("DEBUG: FocusState didSet called with value: \(isTextFieldFocused)")
-        }
-    }
+    @FocusState private var isTextFieldFocused: Bool
     @State private var isViewReady: Bool = false
     @State private var showFocusRing: Bool = false
 
@@ -83,10 +61,6 @@ struct ManageExercisesView: View {
                 updateExistingExerciseMuscleGroups()
             }
             
-            // Hidden preloader
-            TextInputPreloader()
-                .frame(width: 0, height: 0)
-
             // Add Exercise Section
             VStack(spacing: 16) {
                 HStack {

@@ -1,5 +1,23 @@
 import SwiftUI
 
+struct TextInputPreloader: UIViewRepresentable {
+    func makeUIView(context: Context) -> UIView {
+        let view = UIView()
+        DispatchQueue.main.async {
+            let textField = UITextField()
+            view.addSubview(textField)
+            textField.becomeFirstResponder()
+            DispatchQueue.main.async {
+                textField.resignFirstResponder()
+                textField.removeFromSuperview()
+            }
+        }
+        return view
+    }
+    
+    func updateUIView(_ uiView: UIView, context: Context) {}
+}
+
 struct ChatBubble: View {
     let message: ChatMessage
     @Binding var selectedDate: Date?
@@ -24,8 +42,6 @@ struct ChatBubble: View {
                 if message.containsCalendar {
                     GitHubStyleCalendarView(selectedDate: $selectedDate, workoutData: workoutData)
                         .frame(height: 180)
-                        .padding(.vertical, 16)
-                        .padding(.bottom, 8)
                 }
                 
                 Text(message.text)
@@ -43,7 +59,7 @@ struct ChatBubble: View {
             .frame(maxWidth: message.containsCalendar ? .infinity : UIScreen.main.bounds.width * 0.7, alignment: message.isUser ? .trailing : .leading)
         }
         .padding(.horizontal, 16)
-        .padding(.vertical, message.containsCalendar ? 12 : 4)
+        .padding(.vertical, 8)
         .onAppear {
             if !message.isUser {
                 // Simulate typing animation for system messages
@@ -61,25 +77,55 @@ struct ChatBubble: View {
 struct ChatInputField: View {
     @Binding var text: String
     let onSubmit: () -> Void
+    @FocusState private var isTextFieldFocused: Bool
+    @State private var impactFeedback = UIImpactFeedbackGenerator(style: .medium)
     
     var body: some View {
-        HStack(spacing: 12) {
-            TextField("Ask me anything...", text: $text)
-                .padding(.horizontal, 16)
-                .padding(.vertical, 12)
-                .background(Color.gray.opacity(0.3))
-                .cornerRadius(20)
-                .foregroundColor(.white)
+        VStack(spacing: 0) {
+            // Hidden preloader
+            TextInputPreloader()
+                .frame(width: 0, height: 0)
             
-            Button(action: onSubmit) {
-                Image(systemName: "arrow.up.circle.fill")
-                    .font(.system(size: 32))
-                    .foregroundColor(.blue)
+            HStack(spacing: 12) {
+                TextField("Ask me anything...", text: $text)
+                    .focused($isTextFieldFocused)
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 12)
+                    .background(
+                        RoundedRectangle(cornerRadius: 20)
+                            .fill(Color.gray.opacity(0.3))
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 20)
+                                    .stroke(isTextFieldFocused ? Color.blue : Color.clear, lineWidth: 1.5)
+                            )
+                    )
+                    .foregroundColor(.white)
+                    .onChange(of: isTextFieldFocused) { _, newValue in
+                        if newValue {
+                            impactFeedback.prepare()
+                            impactFeedback.impactOccurred(intensity: 0.7)
+                        }
+                    }
+                    .onAppear {
+                        UITextField.appearance().tintColor = .systemBlue
+                    }
+                    .submitLabel(.send)
+                    .onSubmit {
+                        if !text.isEmpty {
+                            onSubmit()
+                        }
+                    }
+                
+                Button(action: onSubmit) {
+                    Image(systemName: "arrow.up.circle.fill")
+                        .font(.system(size: 32))
+                        .foregroundColor(.blue)
+                }
+                .disabled(text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
             }
-            .disabled(text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+            .padding(.horizontal, 16)
+            .padding(.vertical, 8)
+            .background(Color.black)
         }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 8)
-        .background(Color.black)
     }
 } 
