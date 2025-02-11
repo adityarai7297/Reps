@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		132EF34E2C367BE000E75796 /* GradientBackground.swift in Sources */ = {isa = PBXBuildFile; fileRef = 132EF34D2C367BE000E75796 /* GradientBackground.swift */; };
 		1339416F2C86B37800B1EF2B /* Exercise.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1339416E2C86B37800B1EF2B /* Exercise.swift */; };
 		133941712C86B39F00B1EF2B /* ExerciseHistory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 133941702C86B39F00B1EF2B /* ExerciseHistory.swift */; };
 		133941732C86B6AF00B1EF2B /* ExerciseHistoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 133941722C86B6AF00B1EF2B /* ExerciseHistoryView.swift */; };
@@ -24,15 +23,17 @@
 		408827942CF95E7E000DC83C /* ThemeManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 408827932CF95E71000DC83C /* ThemeManager.swift */; };
 		4088279C2D010F7C000DC83C /* LoadingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4088279B2D010F47000DC83C /* LoadingView.swift */; };
 		408827AA2D053982000DC83C /* IrregularGradient in Frameworks */ = {isa = PBXBuildFile; productRef = 408827A92D053982000DC83C /* IrregularGradient */; };
-		408827AE2D054A15000DC83C /* AnimatedGradientModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 408827AD2D054A10000DC83C /* AnimatedGradientModifier.swift */; };
 		408827B22D054A95000DC83C /* GradientTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 408827B12D054A8F000DC83C /* GradientTheme.swift */; };
 		409C3FAE2D2E5B2100073D7C /* body_map.svg in Resources */ = {isa = PBXBuildFile; fileRef = 409C3FAD2D2E5B2100073D7C /* body_map.svg */; };
 		409C3FB12D344FB200073D7C /* SVGKit in Frameworks */ = {isa = PBXBuildFile; productRef = 409C3FB02D344FB200073D7C /* SVGKit */; };
 		409C3FB32D344FB200073D7C /* SVGKitSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 409C3FB22D344FB200073D7C /* SVGKitSwift */; };
 		409C3FB72D41749800073D7C /* ChatBubble.swift in Sources */ = {isa = PBXBuildFile; fileRef = 409C3FB62D41749800073D7C /* ChatBubble.swift */; };
 		409C3FB92D4174AE00073D7C /* ChatMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 409C3FB82D4174AE00073D7C /* ChatMessage.swift */; };
+		409C3FC62D4476D100073D7C /* TextInputPreloader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 409C3FC52D4476D100073D7C /* TextInputPreloader.swift */; };
+		40C87D422D5C0DCF00A28D08 /* GlassMorphismBackground.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40C87D3F2D5C0DCF00A28D08 /* GlassMorphismBackground.swift */; };
 		40DEBA822CB7AEEC00ED44ED /* ExerciseData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40DEBA812CB7AEE200ED44ED /* ExerciseData.swift */; };
 		40DEBA842CC1840800ED44ED /* EditExerciseHistoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40DEBA832CC183FA00ED44ED /* EditExerciseHistoryView.swift */; };
+		40EA18332D4F1A020090AFB5 /* WorkoutPlanOnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40EA18322D4F1A020090AFB5 /* WorkoutPlanOnboardingView.swift */; };
 		40FEBBC52CA721490051C2AA /* FSCalendarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40FEBBC42CA721490051C2AA /* FSCalendarView.swift */; };
 		40FEBBC72CA721E80051C2AA /* FSCalendar in Frameworks */ = {isa = PBXBuildFile; productRef = 40FEBBC62CA721E80051C2AA /* FSCalendar */; };
 /* End PBXBuildFile section */
@@ -55,7 +56,6 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		132EF34D2C367BE000E75796 /* GradientBackground.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GradientBackground.swift; sourceTree = "<group>"; };
 		1339416E2C86B37800B1EF2B /* Exercise.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Exercise.swift; sourceTree = "<group>"; };
 		133941702C86B39F00B1EF2B /* ExerciseHistory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExerciseHistory.swift; sourceTree = "<group>"; };
 		133941722C86B6AF00B1EF2B /* ExerciseHistoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExerciseHistoryView.swift; sourceTree = "<group>"; };
@@ -75,13 +75,15 @@
 		13FEA2722C2D483400D04BF2 /* ExerciseView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExerciseView.swift; sourceTree = "<group>"; };
 		408827932CF95E71000DC83C /* ThemeManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThemeManager.swift; sourceTree = "<group>"; };
 		4088279B2D010F47000DC83C /* LoadingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoadingView.swift; sourceTree = "<group>"; };
-		408827AD2D054A10000DC83C /* AnimatedGradientModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnimatedGradientModifier.swift; sourceTree = "<group>"; };
 		408827B12D054A8F000DC83C /* GradientTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GradientTheme.swift; sourceTree = "<group>"; };
 		409C3FAD2D2E5B2100073D7C /* body_map.svg */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = body_map.svg; sourceTree = "<group>"; };
 		409C3FB62D41749800073D7C /* ChatBubble.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatBubble.swift; sourceTree = "<group>"; };
 		409C3FB82D4174AE00073D7C /* ChatMessage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatMessage.swift; sourceTree = "<group>"; };
+		409C3FC52D4476D100073D7C /* TextInputPreloader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextInputPreloader.swift; sourceTree = "<group>"; };
+		40C87D3F2D5C0DCF00A28D08 /* GlassMorphismBackground.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlassMorphismBackground.swift; sourceTree = "<group>"; };
 		40DEBA812CB7AEE200ED44ED /* ExerciseData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExerciseData.swift; sourceTree = "<group>"; };
 		40DEBA832CC183FA00ED44ED /* EditExerciseHistoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditExerciseHistoryView.swift; sourceTree = "<group>"; };
+		40EA18322D4F1A020090AFB5 /* WorkoutPlanOnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkoutPlanOnboardingView.swift; sourceTree = "<group>"; };
 		40FEBBC42CA721490051C2AA /* FSCalendarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FSCalendarView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -175,6 +177,9 @@
 		13FEA26D2C29436C00D04BF2 /* View */ = {
 			isa = PBXGroup;
 			children = (
+				40C87D3F2D5C0DCF00A28D08 /* GlassMorphismBackground.swift */,
+				40EA18322D4F1A020090AFB5 /* WorkoutPlanOnboardingView.swift */,
+				409C3FC52D4476D100073D7C /* TextInputPreloader.swift */,
 				409C3FB62D41749800073D7C /* ChatBubble.swift */,
 				4088279B2D010F47000DC83C /* LoadingView.swift */,
 				40DEBA832CC183FA00ED44ED /* EditExerciseHistoryView.swift */,
@@ -194,9 +199,7 @@
 			isa = PBXGroup;
 			children = (
 				408827B12D054A8F000DC83C /* GradientTheme.swift */,
-				408827AD2D054A10000DC83C /* AnimatedGradientModifier.swift */,
 				408827932CF95E71000DC83C /* ThemeManager.swift */,
-				132EF34D2C367BE000E75796 /* GradientBackground.swift */,
 			);
 			path = ViewModifiers;
 			sourceTree = "<group>";
@@ -365,16 +368,17 @@
 				4088279C2D010F7C000DC83C /* LoadingView.swift in Sources */,
 				133941712C86B39F00B1EF2B /* ExerciseHistory.swift in Sources */,
 				1339416F2C86B37800B1EF2B /* Exercise.swift in Sources */,
-				408827AE2D054A15000DC83C /* AnimatedGradientModifier.swift in Sources */,
+				40EA18332D4F1A020090AFB5 /* WorkoutPlanOnboardingView.swift in Sources */,
 				40FEBBC52CA721490051C2AA /* FSCalendarView.swift in Sources */,
 				409C3FB72D41749800073D7C /* ChatBubble.swift in Sources */,
+				409C3FC62D4476D100073D7C /* TextInputPreloader.swift in Sources */,
 				408827B22D054A95000DC83C /* GradientTheme.swift in Sources */,
+				40C87D422D5C0DCF00A28D08 /* GlassMorphismBackground.swift in Sources */,
 				1371B14F2C2ED42500A4254A /* VerticalPager.swift in Sources */,
 				408827942CF95E7E000DC83C /* ThemeManager.swift in Sources */,
 				13FEA2412C27C9D200D04BF2 /* RepsApp.swift in Sources */,
 				13FEA2732C2D483400D04BF2 /* ExerciseView.swift in Sources */,
 				40DEBA842CC1840800ED44ED /* EditExerciseHistoryView.swift in Sources */,
-				132EF34E2C367BE000E75796 /* GradientBackground.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

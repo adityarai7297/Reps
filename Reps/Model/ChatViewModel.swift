@@ -1,20 +1,4 @@
-import Foundation
-
-struct ChatMessage: Identifiable {
-    let id = UUID()
-    let text: String
-    let isUser: Bool
-    let timestamp: Date
-    var containsCalendar: Bool = false
-    var suggestedQuestions: [String] = []
-}
-
-struct ChatTopic: Identifiable {
-    let id = UUID()
-    let title: String
-    let icon: String
-    let suggestedQuestions: [String]
-}
+import SwiftUI
 
 class ChatViewModel: ObservableObject {
     @Published var messages: [ChatMessage] = []

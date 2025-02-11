@@ -244,7 +244,6 @@ struct ExerciseView: View {
             }
             .padding(.horizontal)
             .foregroundColor(.black)
-            .background(color)
 
             if showSetHint {
                 ZStack {

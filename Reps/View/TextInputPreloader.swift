@@ -1,5 +1,4 @@
 import SwiftUI
-import UIKit
 
 struct TextInputPreloader: UIViewRepresentable {
     func makeUIView(context: Context) -> UIView {

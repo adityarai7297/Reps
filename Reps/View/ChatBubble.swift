@@ -1,28 +1,11 @@
 import SwiftUI
 
-struct TextInputPreloader: UIViewRepresentable {
-    func makeUIView(context: Context) -> UIView {
-        let view = UIView()
-        DispatchQueue.main.async {
-            let textField = UITextField()
-            view.addSubview(textField)
-            textField.becomeFirstResponder()
-            DispatchQueue.main.async {
-                textField.resignFirstResponder()
-                textField.removeFromSuperview()
-            }
-        }
-        return view
-    }
-    
-    func updateUIView(_ uiView: UIView, context: Context) {}
-}
-
 struct ChatBubble: View {
     let message: ChatMessage
     @Binding var selectedDate: Date?
     let workoutData: [Date: Int]
     @State private var isTyping = false
+    let onQuestionSelected: (String) -> Void
     
     var body: some View {
         HStack(alignment: .bottom, spacing: 8) {
@@ -83,6 +66,9 @@ struct ChatInputField: View {
     let onSubmit: () -> Void
     @FocusState private var isTextFieldFocused: Bool
     @State private var impactFeedback = UIImpactFeedbackGenerator(style: .medium)
+    @State private var showTopics = false
+    @ObservedObject var chatViewModel: ChatViewModel
+    let onQuestionSelected: (String) -> Void
     
     var body: some View {
         VStack(spacing: 0) {
@@ -91,6 +77,17 @@ struct ChatInputField: View {
                 .frame(width: 0, height: 0)
             
             HStack(spacing: 12) {
+                // Topics Button
+                Button(action: {
+                    impactFeedback.impactOccurred()
+                    showTopics = true
+                }) {
+                    Image(systemName: "list.bullet.circle.fill")
+                        .font(.system(size: 24))
+                        .foregroundColor(.blue)
+                }
+                
+                // Text Input
                 TextField("Ask me anything...", text: $text)
                     .focused($isTextFieldFocused)
                     .padding(.horizontal, 16)
@@ -120,6 +117,7 @@ struct ChatInputField: View {
                         }
                     }
                 
+                // Send Button
                 Button(action: onSubmit) {
                     Image(systemName: "arrow.up.circle.fill")
                         .font(.system(size: 32))
@@ -131,5 +129,83 @@ struct ChatInputField: View {
             .padding(.vertical, 8)
             .background(Color.black)
         }
+        .sheet(isPresented: $showTopics) {
+            TopicsSheet(chatViewModel: chatViewModel, onQuestionSelected: { question in
+                text = question
+                showTopics = false
+                onSubmit()
+            })
+        }
+    }
+}
+
+struct TopicsSheet: View {
+    @ObservedObject var chatViewModel: ChatViewModel
+    let onQuestionSelected: (String) -> Void
+    @Environment(\.dismiss) private var dismiss
+    
+    var body: some View {
+        NavigationView {
+            ScrollView {
+                VStack(spacing: 20) {
+                    ForEach(chatViewModel.topics) { topic in
+                        VStack(alignment: .leading, spacing: 16) {
+                            // Topic Header
+                            HStack {
+                                Image(systemName: topic.icon)
+                                    .font(.system(size: 24))
+                                    .foregroundColor(.yellow)
+                                Text(topic.title)
+                                    .font(.system(size: 20, weight: .bold))
+                                    .foregroundColor(.white)
+                            }
+                            .padding(.horizontal, 20)
+                            
+                            // Questions Grid
+                            LazyVGrid(columns: [
+                                GridItem(.flexible()),
+                                GridItem(.flexible())
+                            ], spacing: 12) {
+                                ForEach(topic.suggestedQuestions, id: \.self) { question in
+                                    Button(action: {
+                                        onQuestionSelected(question)
+                                    }) {
+                                        Text(question)
+                                            .font(.system(size: 15))
+                                            .foregroundColor(.white)
+                                            .multilineTextAlignment(.leading)
+                                            .padding(.horizontal, 16)
+                                            .padding(.vertical, 12)
+                                            .frame(maxWidth: .infinity, alignment: .leading)
+                                            .background(
+                                                RoundedRectangle(cornerRadius: 12)
+                                                    .fill(Color.blue.opacity(0.15))
+                                                    .overlay(
+                                                        RoundedRectangle(cornerRadius: 12)
+                                                            .stroke(Color.blue.opacity(0.3), lineWidth: 1)
+                                                    )
+                                            )
+                                    }
+                                }
+                            }
+                            .padding(.horizontal, 20)
+                        }
+                        .padding(.vertical, 16)
+                    }
+                }
+                .padding(.vertical, 20)
+            }
+            .background(Color.black)
+            .navigationTitle("Topics")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button("Done") {
+                        dismiss()
+                    }
+                }
+            }
+        }
+        .preferredColorScheme(.dark)
     }
 } 

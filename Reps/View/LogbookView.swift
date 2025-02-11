@@ -18,43 +18,29 @@ struct LogbookView: View {
     @State private var showSwipeHint = false
     @StateObject private var chatViewModel = ChatViewModel()
     @State private var inputText = ""
-
-    var workoutData: [Date: Int] {
-        groupedByDate.reduce(into: [:]) { result, entry in
-            let (date, exercisesDict) = entry
-            let totalSets = exercisesDict.values.reduce(0) { $0 + $1.count }
-            result[date] = totalSets
-        }
-    }
+    @State private var workoutData: [Date: Int] = [:]
+    @State private var showTopics = true
+    @State private var showWorkoutPlanModal = false
 
     var body: some View {
-        VStack(spacing: 20) {
-            // Header
-            HStack {
-                Text("Dashboard")
-                    .font(.system(size: 34, weight: .bold))
-                    .foregroundColor(.white)
-                Spacer()
-                
-                // Profile image placeholder
-                Circle()
-                    .fill(Color.gray.opacity(0.3))
-                    .frame(width: 32, height: 32)
-            }
-            .padding(.horizontal, 20)
-            .padding(.top, 16)
-            .padding(.bottom, 24)
-
+        VStack(spacing: 0) {
             // Chat Messages
             ScrollView {
                 LazyVStack(spacing: 0) {
                     ForEach(chatViewModel.messages) { message in
-                        ChatBubble(message: message, selectedDate: $selectedDate, workoutData: workoutData)
+                        ChatBubble(
+                            message: message,
+                            selectedDate: $selectedDate,
+                            workoutData: workoutData,
+                            onQuestionSelected: { question in
+                                handleUserInput(question)
+                            }
+                        )
                     }
                 }
             }
             .frame(maxHeight: .infinity)
-
+            
             // Selected Date History
             if let selectedDate = selectedDate {
                 VStack(alignment: .leading, spacing: 8) {
@@ -64,41 +50,36 @@ struct LogbookView: View {
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .padding(.horizontal, 20)
                         .padding(.bottom, 8)
-
-                    if let exercisesForDate = groupedByDate[selectedDate] {
-                        ScrollView {
-                            VStack(spacing: 24) {
-                                ForEach(Array(exercisesForDate.keys.sorted()), id: \.self) { exerciseName in
-                                    if let histories = exercisesForDate[exerciseName] {
-                                        DailyWorkoutCard(
-                                            exerciseName: exerciseName,
-                                            histories: histories,
-                                            onDelete: deleteHistory,
-                                            onEdit: { history in
-                                                historyToEdit = history
-                                            }
-                                        )
-                                    }
-                                }
-                            }
-                            .padding(.horizontal, 20)
-                        }
-                    }
                 }
             }
-
+            
+            
+            
             // Chat Input
-            ChatInputField(text: $inputText) {
-                handleUserInput()
-            }
+            ChatInputField(
+                text: $inputText,
+                onSubmit: { handleUserInput(inputText) },
+                chatViewModel: chatViewModel,
+                onQuestionSelected: { question in
+                    handleUserInput(question)
+                }
+            )
         }
         .background(Color.black)
         .onAppear {
             loadAllExerciseHistory()
             
-            // Add initial greeting
+            // Add initial greeting with suggested questions
             if chatViewModel.messages.isEmpty {
-                chatViewModel.addMessage("Hi! I'm here to help you track your fitness journey. Ask me about your consistency or anything else!", isUser: false)
+                chatViewModel.addMessage(
+                    "Hi! I'm here to help you track your fitness journey. Ask me about your consistency or anything else!",
+                    isUser: false,
+                    suggestedQuestions: [
+                        "Show me my workout history",
+                        "What should I focus on today?",
+                        "How can you help me?"
+                    ]
+                )
             }
         }
         .sheet(item: $historyToEdit) { history in
@@ -106,21 +87,58 @@ struct LogbookView: View {
                 .presentationDetents([.medium])
                 .presentationDragIndicator(.visible)
         }
+        .sheet(isPresented: $showWorkoutPlanModal) {
+            WorkoutPlanOnboardingView()
+        }
     }
 
-    private func handleUserInput() {
-        let text = inputText.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !text.isEmpty else { return }
-        
-        chatViewModel.addMessage(text, isUser: true)
+    private func handleUserInput(_ text: String) {
+        let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return }
+
+        // Always display the user's input as a chat bubble
+        chatViewModel.addMessage(trimmed, isUser: true)
         inputText = ""
-        
-        // Process user input
-        if text.lowercased().contains("consistency") {
-            chatViewModel.addMessage("Here's a view of your workout consistency:", isUser: false)
-            chatViewModel.addMessage("Each square represents a day, and darker colors indicate more sets completed.", isUser: false, containsCalendar: true)
+        showTopics = false
+
+        let lowercasedText = trimmed.lowercased()
+
+        // Process commands in a standardized way
+        if lowercasedText.contains("make me a workout plan") {
+            showWorkoutPlanModal = true
+            chatViewModel.addMessage("Let's create your custom workout plan!", isUser: false)
+            return
+        } else if lowercasedText.contains("consistency") {
+            chatViewModel.addMessage(
+                "Here's a view of your workout consistency:",
+                isUser: false,
+                suggestedQuestions: [
+                    "What's my best workout day?",
+                    "How can I improve my consistency?",
+                    "Show me my progress"
+                ]
+            )
+            chatViewModel.addMessage(
+                "Each square represents a day, and darker colors indicate more sets completed.",
+                isUser: false,
+                containsCalendar: true,
+                suggestedQuestions: [
+                    "What's my average sets per workout?",
+                    "Which exercise do I do most often?",
+                    "Set a consistency goal for me"
+                ]
+            )
+            return
         } else {
-            chatViewModel.addMessage("I'm here to help! You can ask me about your consistency, and I'll show you a calendar view of your workouts.", isUser: false)
+            chatViewModel.addMessage(
+                "I'm here to help! You can ask me about your consistency, and I'll show you a calendar view of your workouts.",
+                isUser: false,
+                suggestedQuestions: [
+                    "Show me my consistency",
+                    "What exercises should I do?",
+                    "Help me set a workout goal"
+                ]
+            )
         }
     }
 

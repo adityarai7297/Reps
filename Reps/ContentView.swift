@@ -23,8 +23,6 @@ struct ContentView: View {
     var body: some View {
         NavigationView {
             ZStack {
-                themeManager.backgroundColor.ignoresSafeArea()
-                
                 if exercises == nil {
                     // Loading state
                     LoadingView()
@@ -56,11 +54,11 @@ struct ContentView: View {
                             color: .clear,
                             userId: userId
                         )
-                        .background(
-                            GradientPair.animatedGradient(GradientTheme.gradientAt(index: index))
-                                .transition(.opacity)
-                        )
                     }
+                    .modifier(GlassMorphismBackground(colors: (
+                        GradientTheme.gradientAt(index: currentIndex).start,
+                        GradientTheme.gradientAt(index: currentIndex).end
+                    )))
                     .blur(radius: showSwipeHint ? 10 : 0)
                     .animation(.easeInOut(duration: 0.3), value: showSwipeHint)
                     .overlay(

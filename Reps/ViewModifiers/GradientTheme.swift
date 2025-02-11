@@ -1,5 +1,4 @@
 import SwiftUI
-import IrregularGradient
 
 struct GradientPair {
     let start: Color
@@ -16,12 +15,7 @@ struct GradientPair {
     
     static func animatedGradient(_ pair: GradientPair) -> some View {
         Rectangle()
-            .irregularGradient(
-                colors: [pair.start, pair.end],
-                background: Color.black,
-                speed: 0.4
-            )
-            .scaleEffect(1.5)
+            .glassMorphismBackground(colors: (pair.start, pair.end))
     }
 }
 
