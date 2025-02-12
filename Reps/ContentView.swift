@@ -54,6 +54,7 @@ struct ContentView: View {
                             color: .clear,
                             userId: userId
                         )
+                        .opacity(showingLogbook ? 0 : 1) // Hide wheel picker when logbook is shown
                     }
                     .modifier(GlassMorphismBackground(colors: (
                         GradientTheme.gradientAt(index: currentIndex).start,
@@ -124,37 +125,50 @@ struct ContentView: View {
             }
             .preferredColorScheme(.dark)
             .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button(action: {
-                        impactFeedback.impactOccurred()
-                        showingLogbook.toggle()
-                    }) {
-                        Image(systemName: "calendar")
-                            .font(.title2)
-                            .foregroundColor(themeManager.navigationIconColor)
-                            .scaleEffect(x: 1.1, y: 1.1)
+                if !showingLogbook {  // Only show toolbar items when logbook is not shown
+                    ToolbarItem(placement: .navigationBarLeading) {
+                        Button(action: {
+                            impactFeedback.impactOccurred()
+                            showingLogbook.toggle()
+                        }) {
+                            Image(systemName: "calendar")
+                                .font(.title2)
+                                .foregroundColor(themeManager.navigationIconColor)
+                                .scaleEffect(x: 1.1, y: 1.1)
+                        }
                     }
-                }
-                
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button(action: {
-                        impactFeedback.impactOccurred()
-                        currentIndex = 0
-                        showingManageExercises.toggle()
-                    }) {
-                        Image(systemName: "list.bullet.rectangle")
-                            .font(.title2)
-                            .foregroundColor(themeManager.navigationIconColor)
-                            .scaleEffect(x: 0.9, y: 1)
+                    
+                    ToolbarItem(placement: .navigationBarTrailing) {
+                        Button(action: {
+                            impactFeedback.impactOccurred()
+                            currentIndex = 0
+                            showingManageExercises.toggle()
+                        }) {
+                            Image(systemName: "list.bullet.rectangle")
+                                .font(.title2)
+                                .foregroundColor(themeManager.navigationIconColor)
+                                .scaleEffect(x: 0.9, y: 1)
+                        }
                     }
                 }
             }
         }
         .environmentObject(themeManager)
-        .sheet(isPresented: $showingLogbook) {
-            LogbookView(setCount: $setCount, refreshTrigger: $refreshTrigger)
-                .environment(\.modelContext, modelContext)
-                .environmentObject(themeManager)
+        .overlay {
+            if showingLogbook {
+                LogbookView(
+                    setCount: $setCount,
+                    refreshTrigger: $refreshTrigger,
+                    isPresented: $showingLogbook
+                )
+                    .environment(\.modelContext, modelContext)
+                    .environmentObject(themeManager)
+                    .transition(.opacity)
+                    .glassMorphismBackground(colors: (
+                        GradientTheme.gradientAt(index: currentIndex).start,
+                        GradientTheme.gradientAt(index: currentIndex).end
+                    ))
+            }
         }
         .sheet(isPresented: $showingManageExercises) {
             ManageExercisesView(refreshTrigger: $refreshTrigger, exercises: Binding(

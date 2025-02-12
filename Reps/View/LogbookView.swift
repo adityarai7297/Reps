@@ -9,6 +9,7 @@ struct LogbookView: View {
     @State private var selectedDate: Date? = nil
     @Binding var setCount: Int
     @Binding var refreshTrigger: Bool
+    @Binding var isPresented: Bool
     @State private var hapticFeedback = UIImpactFeedbackGenerator(style: .medium)
     @State private var historyToEdit: ExerciseHistory? = nil
     @AppStorage("hasShownActivityHint") private var hasShownActivityHint = false
@@ -19,68 +20,178 @@ struct LogbookView: View {
     @StateObject private var chatViewModel = ChatViewModel()
     @State private var inputText = ""
     @State private var workoutData: [Date: Int] = [:]
-    @State private var showTopics = true
+    @State private var showTopics = false
     @State private var showWorkoutPlanModal = false
+    @State private var animateGradient = false
+    @Environment(\.dismiss) private var dismiss
+    @State private var keyboardHeight: CGFloat = 0
 
     var body: some View {
-        VStack(spacing: 0) {
-            // Chat Messages
-            ScrollView {
-                LazyVStack(spacing: 0) {
-                    ForEach(chatViewModel.messages) { message in
-                        ChatBubble(
-                            message: message,
-                            selectedDate: $selectedDate,
-                            workoutData: workoutData,
-                            onQuestionSelected: { question in
-                                handleUserInput(question)
-                            }
-                        )
+        ZStack {
+            // Animated gradient background
+            LinearGradient(
+                colors: [.purple.opacity(0.15), .blue.opacity(0.15)],
+                startPoint: animateGradient ? .topLeading : .bottomLeading,
+                endPoint: animateGradient ? .bottomTrailing : .topTrailing
+            )
+            .ignoresSafeArea()
+            .onAppear {
+                withAnimation(.linear(duration: 5.0).repeatForever(autoreverses: true)) {
+                    animateGradient.toggle()
+                }
+            }
+            
+            VStack(spacing: 0) {
+                // Header with dismiss button
+                HStack {
+                    Text("Logbook")
+                        .font(.title2.bold())
+                        .foregroundColor(.white.opacity(0.9))
+                    
+                    Spacer()
+                    
+                    Button(action: {
+                        withAnimation(.spring(response: 0.3)) {
+                            isPresented = false
+                        }
+                    }) {
+                        Image(systemName: "xmark.circle.fill")
+                            .font(.title2)
+                            .foregroundColor(.white.opacity(0.6))
                     }
                 }
+                .padding(.top, 60)
+                .padding(.horizontal, 20)
+                .padding(.bottom, 20)
+                
+                ScrollViewReader { proxy in
+                    ScrollView {
+                        LazyVStack(spacing: 0) {
+                            // Chat Messages
+                            ForEach(chatViewModel.messages) { message in
+                                ChatBubble(
+                                    message: message,
+                                    selectedDate: $selectedDate,
+                                    workoutData: workoutData
+                                )
+                                .id(message.id)
+                            }
+                            
+                            // Selected Date History
+                            if let selectedDate = selectedDate {
+                                VStack(alignment: .leading, spacing: 8) {
+                                    Text(Formatter.date(selectedDate))
+                                        .font(.system(size: 20, weight: .bold))
+                                        .foregroundColor(.white)
+                                        .frame(maxWidth: .infinity, alignment: .leading)
+                                        .padding(.horizontal, 20)
+                                        .padding(.bottom, 8)
+                                }
+                            }
+                        }
+                    }
+                    .onChange(of: chatViewModel.messages.count) { _, _ in
+                        if let lastMessage = chatViewModel.messages.last {
+                            withAnimation {
+                                proxy.scrollTo(lastMessage.id, anchor: .bottom)
+                            }
+                        }
+                    }
+                }
+                
+                // Chat Input Field
+                ChatInputField(
+                    text: $inputText,
+                    onSubmit: { handleUserInput(inputText) },
+                    showTopics: $showTopics,
+                    chatViewModel: chatViewModel
+                )
             }
-            .frame(maxHeight: .infinity)
             
-            // Selected Date History
-            if let selectedDate = selectedDate {
-                VStack(alignment: .leading, spacing: 8) {
-                    Text(Formatter.date(selectedDate))
-                        .font(.system(size: 20, weight: .bold))
-                        .foregroundColor(.white)
-                        .frame(maxWidth: .infinity, alignment: .leading)
+            // Full screen translucent overlay
+            if showTopics {
+                ZStack {
+                    // Translucent background
+                    Rectangle()
+                        .fill(.ultraThinMaterial)
+                        .ignoresSafeArea()
+                        .onTapGesture {
+                            withAnimation(.spring(response: 0.3)) {
+                                showTopics = false
+                            }
+                        }
+                    
+                    // Content
+                    VStack(spacing: 0) {
+                        // Header
+                        HStack {
+                            Text("Suggested Topics")
+                                .font(.title2.bold())
+                                .foregroundColor(.white.opacity(0.9))
+                            
+                            Spacer()
+                            
+                            Button(action: {
+                                withAnimation(.spring(response: 0.3)) {
+                                    showTopics = false
+                                }
+                            }) {
+                                Image(systemName: "xmark.circle.fill")
+                                    .font(.title2)
+                                    .foregroundColor(.white.opacity(0.6))
+                            }
+                        }
+                        .padding(.top, 60)
                         .padding(.horizontal, 20)
-                        .padding(.bottom, 8)
+                        
+                        // Topics Grid
+                        ScrollView(showsIndicators: false) {
+                            VStack(spacing: 20) {
+                                ForEach(chatViewModel.topics) { topic in
+                                    TopicCard(
+                                        topic: topic
+                                    )
+                                    .background(
+                                        RoundedRectangle(cornerRadius: 16)
+                                            .fill(.ultraThinMaterial)
+                                            .shadow(color: .black.opacity(0.1), radius: 10, x: 0, y: 5)
+                                    )
+                                }
+                            }
+                            .padding(.top, 20)
+                            .padding(.horizontal, 20)
+                            .padding(.bottom, 40)
+                        }
+                    }
                 }
+                .transition(.opacity)
             }
             
-            
-            
-            // Chat Input
-            ChatInputField(
-                text: $inputText,
-                onSubmit: { handleUserInput(inputText) },
-                chatViewModel: chatViewModel,
-                onQuestionSelected: { question in
-                    handleUserInput(question)
-                }
-            )
+            // Add a transparent tap area that covers everything when keyboard is shown
+            if keyboardHeight > 0 {
+                Color.black.opacity(0.001)  // Nearly invisible but can receive touches
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .contentShape(Rectangle())
+                    .onTapGesture {
+                        dismissKeyboard()
+                    }
+            }
         }
-        .background(Color.black)
+        .ignoresSafeArea(.keyboard, edges: .bottom)
         .onAppear {
+            setupKeyboardNotifications()
             loadAllExerciseHistory()
             
-            // Add initial greeting with suggested questions
+            // Add initial greeting without suggested questions
             if chatViewModel.messages.isEmpty {
                 chatViewModel.addMessage(
                     "Hi! I'm here to help you track your fitness journey. Ask me about your consistency or anything else!",
-                    isUser: false,
-                    suggestedQuestions: [
-                        "Show me my workout history",
-                        "What should I focus on today?",
-                        "How can you help me?"
-                    ]
+                    isUser: false
                 )
             }
+        }
+        .onDisappear {
+            NotificationCenter.default.removeObserver(self)
         }
         .sheet(item: $historyToEdit) { history in
             EditExerciseHistoryView(history: history)
@@ -89,6 +200,29 @@ struct LogbookView: View {
         }
         .sheet(isPresented: $showWorkoutPlanModal) {
             WorkoutPlanOnboardingView()
+        }
+    }
+
+    private func dismissKeyboard() {
+        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+    }
+
+    private func setupKeyboardNotifications() {
+        NotificationCenter.default.addObserver(
+            forName: UIResponder.keyboardWillShowNotification,
+            object: nil,
+            queue: .main
+        ) { notification in
+            let keyboardFrame = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect ?? .zero
+            keyboardHeight = keyboardFrame.height
+        }
+
+        NotificationCenter.default.addObserver(
+            forName: UIResponder.keyboardWillHideNotification,
+            object: nil,
+            queue: .main
+        ) { _ in
+            keyboardHeight = 0
         }
     }
 
@@ -111,33 +245,18 @@ struct LogbookView: View {
         } else if lowercasedText.contains("consistency") {
             chatViewModel.addMessage(
                 "Here's a view of your workout consistency:",
-                isUser: false,
-                suggestedQuestions: [
-                    "What's my best workout day?",
-                    "How can I improve my consistency?",
-                    "Show me my progress"
-                ]
+                isUser: false
             )
             chatViewModel.addMessage(
                 "Each square represents a day, and darker colors indicate more sets completed.",
                 isUser: false,
-                containsCalendar: true,
-                suggestedQuestions: [
-                    "What's my average sets per workout?",
-                    "Which exercise do I do most often?",
-                    "Set a consistency goal for me"
-                ]
+                containsCalendar: true
             )
             return
         } else {
             chatViewModel.addMessage(
                 "I'm here to help! You can ask me about your consistency, and I'll show you a calendar view of your workouts.",
-                isUser: false,
-                suggestedQuestions: [
-                    "Show me my consistency",
-                    "What exercises should I do?",
-                    "Help me set a workout goal"
-                ]
+                isUser: false
             )
         }
     }
