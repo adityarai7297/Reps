@@ -46,7 +46,7 @@ struct ChatBubble: View {
                 
                 // Message bubble with dynamic gradient or glass effect
                 Text(message.text)
-                    .padding(.horizontal, 16)
+                    .padding(.horizontal, 12)
                     .padding(.vertical, 12)
                     .foregroundColor(message.isUser ? .black.opacity(0.8) : .white)
                     .background(
@@ -76,7 +76,7 @@ struct ChatBubble: View {
             .opacity(isAppearing ? 1 : 0)
             .offset(y: isAppearing ? 0 : 20)
         }
-        .padding(.horizontal, 16)
+        .padding(.horizontal, 8)
         .padding(.vertical, message.containsCalendar ? 16 : 8)
         .onAppear {
             if !message.isUser {
@@ -163,42 +163,25 @@ struct ChatInputField: View {
     var body: some View {
         KeyboardAdaptiveView {
             VStack(spacing: 0) {
-                HStack(spacing: 12) {
-                    // Text Input with dynamic background
-                    CustomTextField(text: $text, onSubmit: {
-                        if !text.isEmpty {
-                            onSubmit()
-                            text = ""
-                            isFocused = false
-                        }
-                    })
-                        .focused($isFocused)
-                        .frame(height: 40)
-                        .padding(.horizontal, 16)
-                        .background(
-                            RoundedRectangle(cornerRadius: 20)
-                                .fill(Color.gray.opacity(0.3))
-                        )
-                        .foregroundColor(.white)
-                    
-                    // Send Button with dynamic effects
-                    Button(action: {
-                        if !text.isEmpty {
-                            onSubmit()
-                            text = ""
-                            isFocused = false
-                        }
-                    }) {
-                        Image(systemName: "arrow.up.circle.fill")
-                            .font(.system(size: 32))
-                            .foregroundColor(text.isEmpty ? .gray : .blue)
-                            .scaleEffect(text.isEmpty ? 0.9 : 1.0)
+                // Text Input with dynamic background
+                CustomTextField(text: $text, onSubmit: {
+                    if !text.isEmpty {
+                        onSubmit()
+                        text = ""
+                        isFocused = false
                     }
-                    .disabled(text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
-                }
-                .padding(.horizontal, 16)
-                .padding(.vertical, 12)
-                .padding(.bottom, 8)
+                })
+                    .focused($isFocused)
+                    .frame(height: 40)
+                    .padding(.horizontal, 16)
+                    .background(
+                        RoundedRectangle(cornerRadius: 20)
+                            .fill(Color.gray.opacity(0.3))
+                    )
+                    .foregroundColor(.white)
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 12)
+                    .padding(.bottom, 8)
             }
             .background(.ultraThinMaterial)
         }
@@ -355,3 +338,21 @@ struct TopicCard: View {
         }
     }
 } 
+
+
+struct ChatBubble_Previews: PreviewProvider {
+    static var previews: some View {
+        ChatBubble(
+            message: ChatMessage(
+                text: "Hello, how are you?",
+                isUser: false,
+                timestamp: Date()
+            ),
+            selectedDate: .constant(Date()),
+            workoutData: [:]
+        )
+        .previewLayout(.sizeThatFits)
+        .padding()
+        .background(Color.black)
+    }
+}

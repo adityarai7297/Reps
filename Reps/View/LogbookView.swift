@@ -84,7 +84,7 @@ struct LogbookView: View {
                                         .font(.system(size: 20, weight: .bold))
                                         .foregroundColor(.white)
                                         .frame(maxWidth: .infinity, alignment: .leading)
-                                        .padding(.horizontal, 20)
+                                        //.padding(.horizontal, 12)
                                         .padding(.bottom, 8)
                                 }
                             }
@@ -142,7 +142,7 @@ struct LogbookView: View {
                             }
                         }
                         .padding(.top, 60)
-                        .padding(.horizontal, 20)
+                        //.padding(.horizontal, 20)
                         
                         // Topics Grid
                         ScrollView(showsIndicators: false) {
@@ -159,7 +159,7 @@ struct LogbookView: View {
                                 }
                             }
                             .padding(.top, 20)
-                            .padding(.horizontal, 20)
+                            //.padding(.horizontal, 20)
                             .padding(.bottom, 40)
                         }
                     }
@@ -512,12 +512,12 @@ struct ExerciseHistoryModalView: View {
                                     .background(Color.gray.opacity(0.15))
                                     .cornerRadius(8)
                                 }
-                                .padding(.horizontal)
+                                //.padding(.horizontal)
                             }
                         }
                     }
                 }
-                .padding(.horizontal, 20)
+                //.padding(.horizontal, 20)
                 .padding(.vertical, 16)
             }
         }
@@ -563,7 +563,7 @@ struct ExerciseGroupCard: View {
                         Text(Formatter.date(date))
                             .font(.system(size: 16, weight: .medium))
                             .foregroundColor(.gray)
-                            .padding(.horizontal, 20)
+                            //.padding(.horizontal, 20)
                             .padding(.top, 12)
                         
                         ForEach(groupedHistories[date] ?? []) { history in
@@ -598,7 +598,7 @@ struct ExerciseGroupCard: View {
                             .padding(16)
                             .background(Color.black.opacity(0.3))
                             .cornerRadius(12)
-                            .padding(.horizontal, 20)
+                            //.padding(.horizontal, 20)
                         }
                     }
                 }
@@ -675,7 +675,7 @@ struct GitHubStyleCalendarView: View {
                                     }
                                 }
                             }
-                            .padding(.horizontal, 8)
+                            //.padding(.horizontal, 8)
                         }
                     }
                     .environment(\.layoutDirection, .rightToLeft)
@@ -688,7 +688,7 @@ struct GitHubStyleCalendarView: View {
                     }
                 }
             }
-            .padding(.horizontal, 16)
+            //.padding(.horizontal, 16)
             
             // Legend
             HStack(spacing: 6) {
@@ -706,7 +706,7 @@ struct GitHubStyleCalendarView: View {
                     .foregroundColor(.gray)
             }
             .padding(.top, 20)
-            .padding(.horizontal, 16)
+            //.padding(.horizontal, 16)
         }
         .padding(.vertical, 12)
     }
@@ -803,3 +803,14 @@ extension Array {
     }
 }
 
+struct LogbookView_Previews: PreviewProvider {
+    static var previews: some View {
+        LogbookView(
+            setCount: .constant(0),
+            refreshTrigger: .constant(false),
+            isPresented: .constant(true)
+        )
+        .environmentObject(ThemeManager())
+        .modelContainer(for: ExerciseHistory.self)
+    }
+}
