@@ -84,6 +84,33 @@ struct UserOnboardingView: View {
             ],
             allowsMultipleSelection: true,
             type: .multipleChoice
+        ),
+        OnboardingQuestion(
+            title: "Preferred Training Split",
+            options: [
+                "Bro Split",
+                "Push/Pull/Legs ",
+                "Upper/Lower ",
+                "Full Body",
+                "Arms Legs Torso",
+                "Vertical/Horizontal Push/pull"
+            ],
+            allowsMultipleSelection: true,
+            type: .multipleChoice
+        ),
+        OnboardingQuestion(
+            title: "Preferred Training equipment",
+            options: [
+                "Barbell",
+                "Dumbbell",
+                "Kettlebell",
+                "Cable",
+                "Machine",
+                "Resistance Bands",
+                "Bodyweight Only",
+            ],
+            allowsMultipleSelection: true,
+            type: .multipleChoice
         )
     ]
     
@@ -132,7 +159,7 @@ struct UserOnboardingView: View {
                             // Save onboarding data and dismiss
                             saveOnboardingData()
                         }) {
-                            Text("Get Started")
+                            Text("Finish")
                                 .fontWeight(.semibold)
                                 .foregroundColor(.white)
                                 .padding(.horizontal, 20)

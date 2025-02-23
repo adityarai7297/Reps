@@ -212,6 +212,9 @@ struct LogbookView: View {
                     isUser: false
                 )
             })
+            .presentationDetents([.large])
+            .presentationDragIndicator(.hidden)
+            .interactiveDismissDisabled()
         }
     }
 

@@ -2,10 +2,11 @@
 final class UserOnboardingData {
     var trainingLevel: String
     var primaryGoals: [String]
-    var workoutSplit: String
     var trainingDaysPerWeek: String
+    var workoutSplit: String
     var availableEquipment: [String]
     var focusAreas: [String]
+    var trainingIntensity: String
     var hasInjuries: Bool
     var preferredTrainingStyles: [String]
     var completedOnboarding: Bool
@@ -14,19 +15,21 @@ final class UserOnboardingData {
     init(
         trainingLevel: String = "",
         primaryGoals: [String] = [],
-        workoutSplit: String = "",
         trainingDaysPerWeek: String = "",
+        workoutSplit: String = "",
         availableEquipment: [String] = [],
         focusAreas: [String] = [],
+        trainingIntensity: String = "",
         hasInjuries: Bool = false,
         preferredTrainingStyles: [String] = []
     ) {
         self.trainingLevel = trainingLevel
         self.primaryGoals = primaryGoals
-        self.workoutSplit = workoutSplit
         self.trainingDaysPerWeek = trainingDaysPerWeek
+        self.workoutSplit = workoutSplit
         self.availableEquipment = availableEquipment
         self.focusAreas = focusAreas
+        self.trainingIntensity = trainingIntensity
         self.hasInjuries = hasInjuries
         self.preferredTrainingStyles = preferredTrainingStyles
         self.completedOnboarding = false
@@ -45,12 +48,12 @@ extension UserOnboardingData {
             self.primaryGoals = Array(goals)
         }
         
-        if let split = selectedOptions["What's your preferred workout split?"]?.first {
-            self.workoutSplit = split
-        }
-        
         if let daysPerWeek = selectedOptions["How many days per week can you train?"]?.first {
             self.trainingDaysPerWeek = daysPerWeek
+        }
+        
+        if let split = selectedOptions["What's your preferred workout split?"]?.first {
+            self.workoutSplit = split
         }
         
         if let equipment = selectedOptions["What equipment do you have access to?"] {
@@ -59,6 +62,10 @@ extension UserOnboardingData {
         
         if let areas = selectedOptions["Which areas would you like to focus on?"] {
             self.focusAreas = Array(areas)
+        }
+        
+        if let intensity = selectedOptions["What's your preferred training intensity?"]?.first {
+            self.trainingIntensity = intensity
         }
         
         if let hasInjuries = selectedOptions["Do you have any injuries or limitations?"]?.first {
