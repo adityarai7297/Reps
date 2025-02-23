@@ -42,70 +42,76 @@ struct LogbookView: View {
             }
             
             VStack(spacing: 0) {
-                // Header with dismiss button
-                HStack {
-                    Text("Logbook")
-                        .font(.title2.bold())
-                        .foregroundColor(.white.opacity(0.9))
-                    
-                    Spacer()
-                    
-                    Button(action: {
-                        withAnimation(.spring(response: 0.3)) {
-                            isPresented = false
-                        }
-                    }) {
-                        Image(systemName: "xmark.circle.fill")
-                            .font(.title2)
-                            .foregroundColor(.white.opacity(0.6))
-                    }
-                }
-                .padding(.top, 60)
-                .padding(.horizontal, 20)
-                .padding(.bottom, 20)
-                
-                ScrollViewReader { proxy in
-                    ScrollView {
-                        LazyVStack(spacing: 0) {
-                            // Chat Messages
-                            ForEach(chatViewModel.messages) { message in
-                                ChatBubble(
-                                    message: message,
-                                    selectedDate: $selectedDate,
-                                    workoutData: workoutData
-                                )
-                                .id(message.id)
+                if showWorkoutPlanModal {
+                    // Show only the gradient background when onboarding is active
+                    Color.clear
+                } else {
+                    // Regular content
+                    // Header with dismiss button
+                    HStack {
+                        Text("Logbook")
+                            .font(.title2.bold())
+                            .foregroundColor(.white.opacity(0.9))
+                        
+                        Spacer()
+                        
+                        Button(action: {
+                            withAnimation(.spring(response: 0.3)) {
+                                isPresented = false
                             }
-                            
-                            // Selected Date History
-                            if let selectedDate = selectedDate {
-                                VStack(alignment: .leading, spacing: 8) {
-                                    Text(Formatter.date(selectedDate))
-                                        .font(.system(size: 20, weight: .bold))
-                                        .foregroundColor(.white)
-                                        .frame(maxWidth: .infinity, alignment: .leading)
-                                        //.padding(.horizontal, 12)
-                                        .padding(.bottom, 8)
+                        }) {
+                            Image(systemName: "xmark.circle.fill")
+                                .font(.title2)
+                                .foregroundColor(.white.opacity(0.6))
+                        }
+                    }
+                    .padding(.top, 60)
+                    .padding(.horizontal, 20)
+                    .padding(.bottom, 20)
+                    
+                    ScrollViewReader { proxy in
+                        ScrollView {
+                            LazyVStack(spacing: 0) {
+                                // Chat Messages
+                                ForEach(chatViewModel.messages) { message in
+                                    ChatBubble(
+                                        message: message,
+                                        selectedDate: $selectedDate,
+                                        workoutData: workoutData
+                                    )
+                                    .id(message.id)
+                                }
+                                
+                                // Selected Date History
+                                if let selectedDate = selectedDate {
+                                    VStack(alignment: .leading, spacing: 8) {
+                                        Text(Formatter.date(selectedDate))
+                                            .font(.system(size: 20, weight: .bold))
+                                            .foregroundColor(.white)
+                                            .frame(maxWidth: .infinity, alignment: .leading)
+                                            //.padding(.horizontal, 12)
+                                            .padding(.bottom, 8)
+                                    }
+                                }
+                            }
+                        }
+                        .onChange(of: chatViewModel.messages.count) { _, _ in
+                            if let lastMessage = chatViewModel.messages.last {
+                                withAnimation {
+                                    proxy.scrollTo(lastMessage.id, anchor: .bottom)
                                 }
                             }
                         }
                     }
-                    .onChange(of: chatViewModel.messages.count) { _, _ in
-                        if let lastMessage = chatViewModel.messages.last {
-                            withAnimation {
-                                proxy.scrollTo(lastMessage.id, anchor: .bottom)
-                            }
-                        }
-                    }
+                    
+                    // Chat Input Field
+                    ChatInputField(
+                        text: $inputText,
+                        onSubmit: { handleUserInput(inputText) },
+                        showTopics: $showTopics,
+                        chatViewModel: chatViewModel
+                    )
                 }
-                
-                // Chat Input Field
-                ChatInputField(
-                    text: $inputText,
-                    onSubmit: { handleUserInput(inputText) },
-                    showTopics: $showTopics,
-                    chatViewModel: chatViewModel
-                )
             }
             
             // Full screen translucent overlay
@@ -199,7 +205,13 @@ struct LogbookView: View {
                 .presentationDragIndicator(.visible)
         }
         .sheet(isPresented: $showWorkoutPlanModal) {
-            WorkoutPlanOnboardingView()
+            UserOnboardingView(onComplete: {
+                // Add a success message after onboarding completion
+                chatViewModel.addMessage(
+                    "Great! I've created a personalized workout plan based on your preferences. You can now start tracking your workouts and I'll help you stay on track with your fitness goals.",
+                    isUser: false
+                )
+            })
         }
     }
 
@@ -238,9 +250,9 @@ struct LogbookView: View {
         let lowercasedText = trimmed.lowercased()
 
         // Process commands in a standardized way
-        if lowercasedText.contains("make me a workout plan") {
+        if lowercasedText.contains("make") && lowercasedText.contains("workout plan") {
             showWorkoutPlanModal = true
-            chatViewModel.addMessage("Let's create your custom workout plan!", isUser: false)
+            chatViewModel.addMessage("Let's create your personalized workout plan! I'll ask you a few questions to understand your goals and preferences better.", isUser: false)
             return
         } else if lowercasedText.contains("consistency") {
             chatViewModel.addMessage(

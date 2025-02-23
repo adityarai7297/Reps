@@ -31,6 +31,8 @@
 		409C3FB92D4174AE00073D7C /* ChatMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 409C3FB82D4174AE00073D7C /* ChatMessage.swift */; };
 		409C3FC62D4476D100073D7C /* TextInputPreloader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 409C3FC52D4476D100073D7C /* TextInputPreloader.swift */; };
 		40C87D422D5C0DCF00A28D08 /* GlassMorphismBackground.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40C87D3F2D5C0DCF00A28D08 /* GlassMorphismBackground.swift */; };
+		40C87D442D5D67EC00A28D08 /* UserOnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40C87D432D5D67EC00A28D08 /* UserOnboardingView.swift */; };
+		40C87D462D5D681800A28D08 /* UserOnboardingData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40C87D452D5D681800A28D08 /* UserOnboardingData.swift */; };
 		40DEBA822CB7AEEC00ED44ED /* ExerciseData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40DEBA812CB7AEE200ED44ED /* ExerciseData.swift */; };
 		40DEBA842CC1840800ED44ED /* EditExerciseHistoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40DEBA832CC183FA00ED44ED /* EditExerciseHistoryView.swift */; };
 		40EA18332D4F1A020090AFB5 /* WorkoutPlanOnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40EA18322D4F1A020090AFB5 /* WorkoutPlanOnboardingView.swift */; };
@@ -81,6 +83,8 @@
 		409C3FB82D4174AE00073D7C /* ChatMessage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatMessage.swift; sourceTree = "<group>"; };
 		409C3FC52D4476D100073D7C /* TextInputPreloader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextInputPreloader.swift; sourceTree = "<group>"; };
 		40C87D3F2D5C0DCF00A28D08 /* GlassMorphismBackground.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlassMorphismBackground.swift; sourceTree = "<group>"; };
+		40C87D432D5D67EC00A28D08 /* UserOnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserOnboardingView.swift; sourceTree = "<group>"; };
+		40C87D452D5D681800A28D08 /* UserOnboardingData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserOnboardingData.swift; sourceTree = "<group>"; };
 		40DEBA812CB7AEE200ED44ED /* ExerciseData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExerciseData.swift; sourceTree = "<group>"; };
 		40DEBA832CC183FA00ED44ED /* EditExerciseHistoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditExerciseHistoryView.swift; sourceTree = "<group>"; };
 		40EA18322D4F1A020090AFB5 /* WorkoutPlanOnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkoutPlanOnboardingView.swift; sourceTree = "<group>"; };
@@ -123,6 +127,7 @@
 		1371B1502C2F9C8100A4254A /* Model */ = {
 			isa = PBXGroup;
 			children = (
+				40C87D452D5D681800A28D08 /* UserOnboardingData.swift */,
 				409C3FB82D4174AE00073D7C /* ChatMessage.swift */,
 				40DEBA812CB7AEE200ED44ED /* ExerciseData.swift */,
 				1339416E2C86B37800B1EF2B /* Exercise.swift */,
@@ -177,6 +182,7 @@
 		13FEA26D2C29436C00D04BF2 /* View */ = {
 			isa = PBXGroup;
 			children = (
+				40C87D432D5D67EC00A28D08 /* UserOnboardingView.swift */,
 				40C87D3F2D5C0DCF00A28D08 /* GlassMorphismBackground.swift */,
 				40EA18322D4F1A020090AFB5 /* WorkoutPlanOnboardingView.swift */,
 				409C3FC52D4476D100073D7C /* TextInputPreloader.swift */,
@@ -365,6 +371,7 @@
 				409C3FB92D4174AE00073D7C /* ChatMessage.swift in Sources */,
 				13BE7B272C8BD849001BED75 /* LogbookView.swift in Sources */,
 				133941732C86B6AF00B1EF2B /* ExerciseHistoryView.swift in Sources */,
+				40C87D442D5D67EC00A28D08 /* UserOnboardingView.swift in Sources */,
 				4088279C2D010F7C000DC83C /* LoadingView.swift in Sources */,
 				133941712C86B39F00B1EF2B /* ExerciseHistory.swift in Sources */,
 				1339416F2C86B37800B1EF2B /* Exercise.swift in Sources */,
@@ -378,6 +385,7 @@
 				408827942CF95E7E000DC83C /* ThemeManager.swift in Sources */,
 				13FEA2412C27C9D200D04BF2 /* RepsApp.swift in Sources */,
 				13FEA2732C2D483400D04BF2 /* ExerciseView.swift in Sources */,
+				40C87D462D5D681800A28D08 /* UserOnboardingData.swift in Sources */,
 				40DEBA842CC1840800ED44ED /* EditExerciseHistoryView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
