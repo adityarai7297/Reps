@@ -2,6 +2,7 @@ import SwiftUI
 import FirebaseCore
 import FirebaseAuth
 import SwiftData
+import Foundation
 
 // MARK: - Models
 struct OnboardingQuestion: Identifiable, Hashable {
@@ -20,6 +21,18 @@ struct OnboardingQuestion: Identifiable, Hashable {
     }
 }
 
+// MARK: - UserOnboardingData
+struct UserOnboardingData: Codable {
+    let trainingLevel: String
+    let primaryGoals: [String]
+    let trainingDaysPerWeek: String
+    let availableEquipment: [String]
+    let hasInjuries: Bool
+    let preferredTrainingStyles: [String]
+    let preferredTrainingSplit: [String]
+    let preferredEquipment: [String]
+}
+
 // MARK: - UserOnboardingView
 struct UserOnboardingView: View {
     @Environment(\.presentationMode) var presentationMode
@@ -32,7 +45,13 @@ struct UserOnboardingView: View {
     @State private var alertMessage = ""
     @State private var isLoading = false
     @State private var errorMessage = ""
+    @State private var navigationDirection: NavigationDirection = .forward
     var onComplete: (() -> Void)?
+    
+    enum NavigationDirection {
+        case forward
+        case backward
+    }
     
     // Define all onboarding questions
     let questions: [OnboardingQuestion] = [
@@ -154,8 +173,8 @@ struct UserOnboardingView: View {
                                 numberInput: numberInputBinding(for: question.title)
                             )
                             .transition(.asymmetric(
-                                insertion: .move(edge: .trailing),
-                                removal: .move(edge: .leading)
+                                insertion: navigationDirection == .forward ? .move(edge: .trailing) : .move(edge: .leading),
+                                removal: navigationDirection == .forward ? .move(edge: .leading) : .move(edge: .trailing)
                             ))
                         }
                     }
@@ -168,6 +187,7 @@ struct UserOnboardingView: View {
                 HStack(spacing: 20) {
                     if currentPage > 0 {
                         Button(action: {
+                            navigationDirection = .backward
                             withAnimation {
                                 currentPage -= 1
                             }
@@ -189,6 +209,7 @@ struct UserOnboardingView: View {
                     if currentPage < questions.count - 1 {
                         Button(action: {
                             if isCurrentQuestionValid() {
+                                navigationDirection = .forward
                                 withAnimation {
                                     currentPage += 1
                                 }
@@ -213,6 +234,7 @@ struct UserOnboardingView: View {
                     } else {
                         Button(action: {
                             if isCurrentQuestionValid() {
+                                navigationDirection = .forward
                                 saveOnboardingData()
                             } else {
                                 showingAlert = true
@@ -283,55 +305,48 @@ struct UserOnboardingView: View {
         // Set loading state
         isLoading = true
         
-        // First update the local model
+        // Create the onboarding data object
         let onboardingData = UserOnboardingData(
             trainingLevel: selectedOptionsBinding(for: "What is your current level of training?").wrappedValue.first ?? "",
             primaryGoals: Array(selectedOptionsBinding(for: "What are your primary goals?").wrappedValue),
             trainingDaysPerWeek: selectedOptionsBinding(for: "How many days per week can you train?").wrappedValue.first ?? "",
-            workoutSplit: selectedOptionsBinding(for: "What's your preferred workout split?").wrappedValue.first ?? "",
             availableEquipment: Array(selectedOptionsBinding(for: "What equipment do you have access to?").wrappedValue),
-            focusAreas: Array(selectedOptionsBinding(for: "Which areas would you like to focus on?").wrappedValue),
-            trainingIntensity: selectedOptionsBinding(for: "What's your preferred training intensity?").wrappedValue.first ?? "",
             hasInjuries: selectedOptionsBinding(for: "Do you have any injuries or limitations?").wrappedValue.contains("Yes"),
-            preferredTrainingStyles: Array(selectedOptionsBinding(for: "Preferred Training Style").wrappedValue)
+            preferredTrainingStyles: Array(selectedOptionsBinding(for: "Preferred Training Style").wrappedValue),
+            preferredTrainingSplit: Array(selectedOptionsBinding(for: "Preferred Training Split").wrappedValue),
+            preferredEquipment: Array(selectedOptionsBinding(for: "Preferred Training equipment").wrappedValue)
         )
         
-        // Save to SwiftData
-        modelContext.insert(onboardingData)
-        
-        print("Created onboarding data model: \(onboardingData)")
-        
-        // Verify Firebase is initialized
-        if FirebaseApp.app() == nil {
-            print("Firebase not initialized, attempting to configure...")
-            FirebaseApp.configure()
-        }
-        
-        // Then upload to Firebase
-        Task {
-            do {
-                print("Attempting to save to Firebase...")
+        // Convert to JSON and print
+        do {
+            let encoder = JSONEncoder()
+            encoder.outputFormatting = .prettyPrinted
+            let jsonData = try encoder.encode(onboardingData)
+            
+            if let jsonString = String(data: jsonData, encoding: .utf8) {
+                print("Onboarding Data JSON:")
+                print(jsonString)
                 
-                // Check if user is authenticated
-                if Auth.auth().currentUser == nil {
-                    print("User not authenticated, attempting to sign in anonymously...")
-                    try await Auth.auth().signInAnonymously()
-                }
-                
-                try await FirebaseService.shared.saveUserOnboardingData(onboardingData)
-                print("Firebase save successful")
-                await MainActor.run {
-                    isLoading = false
-                    onComplete?()
-                }
-            } catch {
-                print("Error saving to Firebase: \(error.localizedDescription)")
-                await MainActor.run {
-                    isLoading = false
-                    errorMessage = error.localizedDescription
+                // Save to a file in the Documents directory
+                if let documentsDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first {
+                    let fileURL = documentsDirectory.appendingPathComponent("onboarding_data.json")
+                    try jsonData.write(to: fileURL)
+                    print("Saved onboarding data to: \(fileURL.path)")
+                    
+                    // Show success alert
+                    alertMessage = "Onboarding data saved successfully!"
                     showingAlert = true
                 }
             }
+            
+            // Complete the onboarding process
+            isLoading = false
+            onComplete?()
+        } catch {
+            print("Error encoding onboarding data: \(error.localizedDescription)")
+            isLoading = false
+            alertMessage = "Error saving data: \(error.localizedDescription)"
+            showingAlert = true
         }
     }
 }
@@ -434,6 +449,31 @@ struct ProgressBar: View {
                 .cornerRadius(4)
             }
             .frame(height: 8)
+        }
+    }
+}
+
+// MARK: - LoadingView
+struct LoadingView: View {
+    var body: some View {
+        ZStack {
+            Color.black.opacity(0.4)
+                .edgesIgnoringSafeArea(.all)
+            
+            VStack(spacing: 20) {
+                ProgressView()
+                    .scaleEffect(1.5)
+                    .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                
+                Text("Saving...")
+                    .font(.headline)
+                    .foregroundColor(.white)
+            }
+            .padding(25)
+            .background(
+                RoundedRectangle(cornerRadius: 15)
+                    .fill(Color.gray.opacity(0.7))
+            )
         }
     }
 } 
