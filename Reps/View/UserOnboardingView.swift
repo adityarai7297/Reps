@@ -21,18 +21,6 @@ struct OnboardingQuestion: Identifiable, Hashable {
     }
 }
 
-// MARK: - UserOnboardingData
-struct UserOnboardingData: Codable {
-    let trainingLevel: String
-    let primaryGoals: [String]
-    let trainingDaysPerWeek: String
-    let availableEquipment: [String]
-    let hasInjuries: Bool
-    let preferredTrainingStyles: [String]
-    let preferredTrainingSplit: [String]
-    let preferredEquipment: [String]
-}
-
 // MARK: - UserOnboardingView
 struct UserOnboardingView: View {
     @Environment(\.presentationMode) var presentationMode
@@ -261,7 +249,7 @@ struct UserOnboardingView: View {
             }
             
             if isLoading {
-                LoadingView()
+                OnboardingLoadingView()
             }
         }
         .navigationBarHidden(true)
@@ -305,23 +293,37 @@ struct UserOnboardingView: View {
         // Set loading state
         isLoading = true
         
-        // Create the onboarding data object
+        // Create a dictionary to represent the onboarding data
+        let onboardingDataDict: [String: Any] = [
+            "trainingLevel": selectedOptionsBinding(for: "What is your current level of training?").wrappedValue.first ?? "",
+            "primaryGoals": Array(selectedOptionsBinding(for: "What are your primary goals?").wrappedValue),
+            "trainingDaysPerWeek": selectedOptionsBinding(for: "How many days per week can you train?").wrappedValue.first ?? "",
+            "availableEquipment": Array(selectedOptionsBinding(for: "What equipment do you have access to?").wrappedValue),
+            "hasInjuries": selectedOptionsBinding(for: "Do you have any injuries or limitations?").wrappedValue.contains("Yes"),
+            "preferredTrainingStyles": Array(selectedOptionsBinding(for: "Preferred Training Style").wrappedValue),
+            "preferredTrainingSplit": Array(selectedOptionsBinding(for: "Preferred Training Split").wrappedValue),
+            "preferredEquipment": Array(selectedOptionsBinding(for: "Preferred Training equipment").wrappedValue)
+        ]
+        
+        // Create the SwiftData model instance
         let onboardingData = UserOnboardingData(
             trainingLevel: selectedOptionsBinding(for: "What is your current level of training?").wrappedValue.first ?? "",
             primaryGoals: Array(selectedOptionsBinding(for: "What are your primary goals?").wrappedValue),
             trainingDaysPerWeek: selectedOptionsBinding(for: "How many days per week can you train?").wrappedValue.first ?? "",
+            workoutSplit: "", // Not collected in the current UI
             availableEquipment: Array(selectedOptionsBinding(for: "What equipment do you have access to?").wrappedValue),
+            focusAreas: [], // Not collected in the current UI
+            trainingIntensity: "", // Not collected in the current UI
             hasInjuries: selectedOptionsBinding(for: "Do you have any injuries or limitations?").wrappedValue.contains("Yes"),
-            preferredTrainingStyles: Array(selectedOptionsBinding(for: "Preferred Training Style").wrappedValue),
-            preferredTrainingSplit: Array(selectedOptionsBinding(for: "Preferred Training Split").wrappedValue),
-            preferredEquipment: Array(selectedOptionsBinding(for: "Preferred Training equipment").wrappedValue)
+            preferredTrainingStyles: Array(selectedOptionsBinding(for: "Preferred Training Style").wrappedValue)
         )
         
-        // Convert to JSON and print
+        // Save to SwiftData
+        modelContext.insert(onboardingData)
+        
+        // Convert dictionary to JSON and print
         do {
-            let encoder = JSONEncoder()
-            encoder.outputFormatting = .prettyPrinted
-            let jsonData = try encoder.encode(onboardingData)
+            let jsonData = try JSONSerialization.data(withJSONObject: onboardingDataDict, options: .prettyPrinted)
             
             if let jsonString = String(data: jsonData, encoding: .utf8) {
                 print("Onboarding Data JSON:")
@@ -332,16 +334,24 @@ struct UserOnboardingView: View {
                     let fileURL = documentsDirectory.appendingPathComponent("onboarding_data.json")
                     try jsonData.write(to: fileURL)
                     print("Saved onboarding data to: \(fileURL.path)")
-                    
-                    // Show success alert
-                    alertMessage = "Onboarding data saved successfully!"
-                    showingAlert = true
                 }
             }
             
-            // Complete the onboarding process
+            // Dismiss this view and return to chat
             isLoading = false
+            presentationMode.wrappedValue.dismiss()
+            
+            // Call the completion handler with success message
+            // This will be displayed in the chat view
             onComplete?()
+            
+            // Post a notification that can be observed by the chat view
+            NotificationCenter.default.post(
+                name: Notification.Name("WorkoutSavedSuccessfully"),
+                object: nil,
+                userInfo: ["message": "Workout saved successfully"]
+            )
+            
         } catch {
             print("Error encoding onboarding data: \(error.localizedDescription)")
             isLoading = false
@@ -453,8 +463,8 @@ struct ProgressBar: View {
     }
 }
 
-// MARK: - LoadingView
-struct LoadingView: View {
+// MARK: - OnboardingLoadingView
+struct OnboardingLoadingView: View {
     var body: some View {
         ZStack {
             Color.black.opacity(0.4)

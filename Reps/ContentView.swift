@@ -19,6 +19,8 @@ struct ContentView: View {
     @AppStorage("hasShownSwipeHint") private var hasShownSwipeHint = false
     @State private var showSwipeHint = false
     @State private var isAnimatingIcon = false
+    @State private var showSuccessMessage = false
+    @State private var successMessage = ""
     
     var body: some View {
         NavigationView {
@@ -105,10 +107,43 @@ struct ContentView: View {
                         }
                     )
                 }
+                
+                // Success message overlay
+                if showSuccessMessage {
+                    VStack {
+                        Text(successMessage)
+                            .font(.headline)
+                            .foregroundColor(.white)
+                            .padding()
+                            .background(
+                                RoundedRectangle(cornerRadius: 10)
+                                    .fill(Color.green.opacity(0.8))
+                            )
+                    }
+                    .transition(.move(edge: .top).combined(with: .opacity))
+                    .zIndex(100) // Ensure it's above everything else
+                }
             }
             .animation(.easeInOut(duration: 0.2), value: exercises)
             .onAppear {
                 loadExercises()
+                
+                // Add notification observer for workout saved message
+                NotificationCenter.default.addObserver(forName: Notification.Name("WorkoutSavedSuccessfully"), object: nil, queue: .main) { notification in
+                    if let message = notification.userInfo?["message"] as? String {
+                        self.successMessage = message
+                        withAnimation {
+                            self.showSuccessMessage = true
+                        }
+                        
+                        // Hide the message after 3 seconds
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
+                            withAnimation {
+                                self.showSuccessMessage = false
+                            }
+                        }
+                    }
+                }
             }
             .onChange(of: showingLogbook) { oldValue, newValue in
                 if !newValue {
