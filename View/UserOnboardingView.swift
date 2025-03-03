@@ -1,339 +1,363 @@
-// Define all onboarding questions
-let questions: [OnboardingQuestion] = [
-    OnboardingQuestion(
-        title: "What is your current level of training?",
-        options: ["Beginner", "Intermediate", "Advanced"],
-        allowsMultipleSelection: false,
-        type: .singleChoice
-    ),
-    OnboardingQuestion(
-        title: "What are your primary goals?",
-        options: [
-            "Muscle Building",
-            "Strength Gain",
-            "Weight Loss",
-            "General Fitness",
-            "Athletic Performance"
-        ],
-        allowsMultipleSelection: true,
-        type: .multipleChoice
-    ),
-    OnboardingQuestion(
-        title: "How many days per week can you train?",
-        options: ["2-3", "4-5", "6+"],
-        allowsMultipleSelection: false,
-        type: .singleChoice
-    ),
-    OnboardingQuestion(
-        title: "What's your preferred workout split?",
-        options: [
-            "Bro Split (One muscle group per day)",
-            "Push Pull Legs (PPL)",
-            "Full Body",
-            "Upper/Lower Split"
-        ],
-        allowsMultipleSelection: false,
-        type: .singleChoice
-    ),
-    OnboardingQuestion(
-        title: "What equipment do you have access to?",
-        options: [
-            "Cables",
-            "Barbell",
-            "Dumbbells",
-            "Machines",
-            "Resistance Bands",
-            "Bodyweight Only"
-        ],
-        allowsMultipleSelection: true,
-        type: .multipleChoice
-    ),
-    OnboardingQuestion(
-        title: "Which areas would you like to focus on?",
-        options: [
-            "Chest",
-            "Back",
-            "Shoulders",
-            "Arms",
-            "Legs",
-            "Core",
-            "Overall Balance"
-        ],
-        allowsMultipleSelection: true,
-        type: .multipleChoice
-    ),
-    OnboardingQuestion(
-        title: "What's your preferred training intensity?",
-        options: [
-            "High Intensity (Lower Reps)",
-            "Moderate Intensity (Mixed)",
-            "Lower Intensity (Higher Reps)"
-        ],
-        allowsMultipleSelection: false,
-        type: .singleChoice
-    ),
-    OnboardingQuestion(
-        title: "Do you have any injuries or limitations?",
-        options: ["Yes", "No"],
-        allowsMultipleSelection: false,
-        type: .singleChoice
-    ),
-    OnboardingQuestion(
-        title: "Preferred Training Style",
-        options: [
-            "Traditional Strength Training",
-            "High-Intensity Interval Training",
-            "Circuit Training",
-            "Powerlifting",
-            "Bodybuilding",
-            "Calisthenics"
-        ],
-        allowsMultipleSelection: true,
-        type: .multipleChoice
-    )
-] 
+import SwiftUI
+import SwiftData
 
-// MARK: - QuestionView
-struct QuestionView: View {
-    let question: OnboardingQuestion
-    @Binding var selectedOptions: Set<String>
-    @Binding var textInput: String
-    @Binding var numberInput: Double
-    let currentPage: Int
-    let totalPages: Int
-    let onNext: () -> Void
-    let onPrevious: () -> Void
-    let onComplete: () -> Void
+// MARK: - Models
+struct OnboardingQuestion: Identifiable, Hashable {
+    let id = UUID()
+    let title: String
+    let options: [String]
+    let allowsMultipleSelection: Bool
+    let minimumSelections: Int
+}
+
+// MARK: - Supporting Views
+struct ProgressBar: View {
+    let currentStep: Int
+    let totalSteps: Int
     
     var body: some View {
-        VStack(alignment: .leading, spacing: 24) {
-            Text(question.title)
-                .font(.title2)
-                .fontWeight(.bold)
-                .foregroundColor(.white)
-                .padding(.horizontal)
-            
-            VStack(spacing: 12) {
-                switch question.type {
-                case .singleChoice, .multipleChoice:
-                    ForEach(question.options, id: \.self) { option in
-                        OptionButton(
-                            title: option,
-                            isSelected: selectedOptions.contains(option),
-                            action: {
-                                toggleOption(option)
-                            }
-                        )
-                    }
-                case .textInput:
-                    OnboardingTextField(text: $textInput, onSubmit: {
-                        // Handle text submission if needed
-                    })
-                case .numberInput:
-                    CustomNumberField(value: $numberInput)
-                }
-            }
-            .padding(.horizontal)
-            
-            Spacer(minLength: 30)
-            
-            // Navigation Buttons
-            VStack(spacing: 20) {
-                Divider()
-                    .background(Color.white.opacity(0.3))
+        GeometryReader { geometry in
+            ZStack(alignment: .leading) {
+                Rectangle()
+                    .fill(Color.white.opacity(0.2))
                 
-                HStack(spacing: 20) {
-                    if currentPage > 0 {
-                        Button(action: onPrevious) {
-                            HStack {
-                                Image(systemName: "chevron.left")
-                                Text("Previous")
-                            }
-                            .foregroundColor(.white)
-                            .font(.headline)
-                            .padding(.horizontal, 20)
-                            .padding(.vertical, 12)
-                            .background(
-                                Capsule()
-                                    .fill(Color.purple.opacity(0.3))
-                            )
-                            .overlay(
-                                Capsule()
-                                    .stroke(Color.white.opacity(0.6), lineWidth: 1)
-                            )
-                        }
-                    }
-                    
-                    Spacer()
-                    
-                    if currentPage < totalPages - 1 {
-                        Button(action: onNext) {
-                            HStack {
-                                Text("Next")
-                                Image(systemName: "chevron.right")
-                            }
-                            .foregroundColor(.white)
-                            .font(.headline)
-                            .padding(.horizontal, 20)
-                            .padding(.vertical, 12)
-                            .background(
-                                Capsule()
-                                    .fill(Color.blue.opacity(0.3))
-                            )
-                            .overlay(
-                                Capsule()
-                                    .stroke(Color.white.opacity(0.6), lineWidth: 1)
-                            )
-                        }
-                    } else {
-                        Button(action: onComplete) {
-                            Text("Get Started")
-                                .font(.headline)
-                                .fontWeight(.semibold)
-                                .foregroundColor(.white)
-                                .padding(.horizontal, 24)
-                                .padding(.vertical, 12)
-                                .background(
-                                    Capsule()
-                                        .fill(Color.green.opacity(0.3))
-                                )
-                                .overlay(
-                                    Capsule()
-                                        .stroke(Color.white.opacity(0.6), lineWidth: 1)
-                                )
-                        }
-                    }
-                }
+                Rectangle()
+                    .fill(Color.white)
+                    .frame(width: geometry.size.width * CGFloat(currentStep) / CGFloat(totalSteps))
             }
-            .padding(.horizontal, 20)
-            .padding(.vertical, 16)
-            .background(Color.black.opacity(0.1))
-        }
-        .padding(.top)
-    }
-    
-    private func toggleOption(_ option: String) {
-        if question.allowsMultipleSelection {
-            if question.options.contains(option) {
-                selectedOptions.remove(option)
-            } else {
-                selectedOptions.insert(option)
-            }
-        } else {
-            selectedOptions = [option]
+            .clipShape(Capsule())
         }
     }
 }
 
-var body: some View {
-    ZStack {
-        // Animated gradient background
-        LinearGradient(
-            colors: [.purple.opacity(0.15), .blue.opacity(0.15)],
-            startPoint: .topLeading,
-            endPoint: .bottomTrailing
-        )
-        .ignoresSafeArea()
-        
-        VStack(spacing: 0) {
-            // Progress bar
-            ProgressBar(currentStep: currentPage + 1, totalSteps: questions.count)
-                .frame(height: 4)
-                .padding(.top, 60)
-                .padding(.horizontal)
-                .padding(.bottom, 20)
+struct OptionButton: View {
+    let title: String
+    let isSelected: Bool
+    let action: () -> Void
+    
+    var body: some View {
+        Button(action: action) {
+            HStack {
+                Text(title)
+                    .foregroundColor(.white)
+                Spacer()
+                if isSelected {
+                    Image(systemName: "checkmark.circle.fill")
+                        .foregroundColor(.white)
+                }
+            }
+            .padding()
+            .background(
+                RoundedRectangle(cornerRadius: 12)
+                    .fill(isSelected ? Color.white.opacity(0.3) : Color.white.opacity(0.1))
+            )
+        }
+    }
+}
+
+struct LoadingView: View {
+    var body: some View {
+        ZStack {
+            Color.black.opacity(0.4)
+                .ignoresSafeArea()
             
-            // Question content with TabView
-            TabView(selection: $currentPage) {
-                ForEach(Array(questions.enumerated()), id: \.element.id) { index, question in
-                    VStack(alignment: .leading, spacing: 24) {
-                        Text(question.title)
-                            .font(.title2)
-                            .fontWeight(.bold)
-                            .foregroundColor(.white)
-                            .padding(.horizontal)
-                        
-                        ScrollView {
+            ProgressView()
+                .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                .scaleEffect(1.5)
+        }
+    }
+}
+
+// MARK: - UserOnboardingView
+struct UserOnboardingView: View {
+    @Environment(\.dismiss) var dismiss
+    @Environment(\.modelContext) private var modelContext
+    @State private var currentPage = 0
+    @State private var selectedOptions: [String: Set<String>] = [:]
+    @State private var showingAlert = false
+    @State private var alertMessage = ""
+    @State private var isLoading = false
+    var onComplete: (() -> Void)?
+    
+    // Define all onboarding questions
+    let questions: [OnboardingQuestion] = [
+        OnboardingQuestion(
+            title: "What is your current level of training?",
+            options: ["Beginner", "Intermediate", "Advanced"],
+            allowsMultipleSelection: false,
+            minimumSelections: 1
+        ),
+        OnboardingQuestion(
+            title: "What are your primary goals?",
+            options: [
+                "Increasing Overall Strength",
+                "Muscle Hypertrophy",
+                "Power Development",
+                "Endurance",
+                "Weight Loss"
+            ],
+            allowsMultipleSelection: true,
+            minimumSelections: 1
+        ),
+        OnboardingQuestion(
+            title: "How many days per week can you train?",
+            options: ["1-2", "3-4", "5+"],
+            allowsMultipleSelection: false,
+            minimumSelections: 1
+        ),
+        OnboardingQuestion(
+            title: "What equipment do you have access to?",
+            options: [
+                "Commercial Gym",
+                "Home Gym",
+                "Resistance Bands",
+                "Bodyweight Only",
+                "Free Weights"
+            ],
+            allowsMultipleSelection: true,
+            minimumSelections: 1
+        ),
+        OnboardingQuestion(
+            title: "Do you have any injuries or limitations?",
+            options: ["Yes", "No"],
+            allowsMultipleSelection: false,
+            minimumSelections: 1
+        ),
+        OnboardingQuestion(
+            title: "Preferred Training Style",
+            options: [
+                "Traditional Strength Training",
+                "High-Intensity Interval Training",
+                "Circuit Training",
+                "Powerlifting",
+                "Bodybuilding"
+            ],
+            allowsMultipleSelection: true,
+            minimumSelections: 1
+        ),
+        OnboardingQuestion(
+            title: "Preferred Training Split",
+            options: [
+                "Bro Split",
+                "Push/Pull/Legs",
+                "Upper/Lower",
+                "Full Body",
+                "Arms Legs Torso",
+                "Vertical/Horizontal Push/pull"
+            ],
+            allowsMultipleSelection: true,
+            minimumSelections: 1
+        ),
+        OnboardingQuestion(
+            title: "Preferred Training Equipment",
+            options: [
+                "Barbell",
+                "Dumbbell",
+                "Kettlebell",
+                "Cable",
+                "Machine",
+                "Resistance Bands",
+                "Bodyweight Only"
+            ],
+            allowsMultipleSelection: true,
+            minimumSelections: 1
+        )
+    ]
+    
+    var body: some View {
+        GeometryReader { geometry in
+            ZStack {
+                // Background
+                LinearGradient(
+                    colors: [.purple.opacity(0.15), .blue.opacity(0.15)],
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                )
+                .ignoresSafeArea()
+                
+                VStack(spacing: 0) {
+                    // Progress bar
+                    ProgressBar(currentStep: currentPage + 1, totalSteps: questions.count)
+                        .frame(height: 4)
+                        .padding(.top, 60)
+                        .padding(.horizontal)
+                    
+                    // Current question
+                    let question = questions[currentPage]
+                    ScrollView {
+                        VStack(alignment: .leading, spacing: 24) {
+                            Text(question.title)
+                                .font(.title2)
+                                .fontWeight(.bold)
+                                .foregroundColor(.white)
+                                .padding(.horizontal)
+                                .padding(.top, 20)
+                            
                             VStack(spacing: 12) {
-                                switch question.type {
-                                case .singleChoice, .multipleChoice:
-                                    ForEach(question.options, id: \.self) { option in
-                                        OptionButton(
-                                            title: option,
-                                            isSelected: selectedOptionsBinding(for: question.title).wrappedValue.contains(option),
-                                            action: {
-                                                toggleOption(option, for: question)
-                                            }
-                                        )
-                                    }
-                                case .textInput:
-                                    OnboardingTextField(
-                                        text: textInputBinding(for: question.title),
-                                        onSubmit: {}
-                                    )
-                                case .numberInput:
-                                    CustomNumberField(
-                                        value: numberInputBinding(for: question.title)
+                                ForEach(question.options, id: \.self) { option in
+                                    OptionButton(
+                                        title: option,
+                                        isSelected: selectedOptions[question.title]?.contains(option) ?? false,
+                                        action: {
+                                            toggleOption(option, for: question)
+                                        }
                                     )
                                 }
                             }
                             .padding(.horizontal)
                         }
+                        .frame(minHeight: geometry.size.height - 200)
+                    }
+                    
+                    // Navigation buttons
+                    VStack(spacing: 16) {
+                        // Selection hint
+                        if !isCurrentQuestionValid() {
+                            Text("Select at least \(question.minimumSelections) option\(question.minimumSelections > 1 ? "s" : "")")
+                                .font(.subheadline)
+                                .foregroundColor(.white.opacity(0.7))
+                        }
                         
-                        // Navigation indicator
-                        if index < questions.count - 1 {
-                            HStack {
-                                Spacer()
-                                Text("Swipe to continue")
-                                    .foregroundColor(.white.opacity(0.6))
-                                    .font(.subheadline)
-                                Image(systemName: "chevron.right")
-                                    .foregroundColor(.white.opacity(0.6))
-                            }
-                            .padding()
-                        } else {
-                            Button(action: saveOnboardingData) {
-                                Text("Get Started")
-                                    .font(.headline)
-                                    .fontWeight(.semibold)
+                        // Buttons
+                        HStack(spacing: 20) {
+                            if currentPage > 0 {
+                                Button(action: {
+                                    withAnimation(.easeInOut(duration: 0.3)) {
+                                        currentPage -= 1
+                                    }
+                                }) {
+                                    HStack {
+                                        Image(systemName: "chevron.left")
+                                        Text("Previous")
+                                    }
                                     .foregroundColor(.white)
-                                    .frame(maxWidth: .infinity)
-                                    .padding(.vertical, 16)
+                                    .padding(.horizontal, 20)
+                                    .padding(.vertical, 12)
                                     .background(
-                                        RoundedRectangle(cornerRadius: 12)
-                                            .fill(Color.green.opacity(0.3))
+                                        Capsule()
+                                            .fill(.ultraThinMaterial)
                                     )
-                                    .overlay(
-                                        RoundedRectangle(cornerRadius: 12)
-                                            .stroke(Color.white.opacity(0.6), lineWidth: 1)
-                                    )
+                                }
                             }
-                            .padding()
+                            
+                            if currentPage < questions.count - 1 {
+                                Button(action: {
+                                    if isCurrentQuestionValid() {
+                                        withAnimation(.easeInOut(duration: 0.3)) {
+                                            currentPage += 1
+                                        }
+                                    } else {
+                                        showingAlert = true
+                                        alertMessage = "Please select at least \(question.minimumSelections) option\(question.minimumSelections > 1 ? "s" : "")"
+                                    }
+                                }) {
+                                    HStack {
+                                        Text("Next")
+                                        Image(systemName: "chevron.right")
+                                    }
+                                    .foregroundColor(.white)
+                                    .padding(.horizontal, 20)
+                                    .padding(.vertical, 12)
+                                    .background(
+                                        Capsule()
+                                            .fill(isCurrentQuestionValid() ? .ultraThinMaterial : .ultraThinMaterial.opacity(0.5))
+                                    )
+                                }
+                                .disabled(!isCurrentQuestionValid())
+                            } else {
+                                Button(action: {
+                                    if isCurrentQuestionValid() {
+                                        saveOnboardingData()
+                                    } else {
+                                        showingAlert = true
+                                        alertMessage = "Please select at least \(question.minimumSelections) option\(question.minimumSelections > 1 ? "s" : "")"
+                                    }
+                                }) {
+                                    HStack {
+                                        Text("Complete")
+                                        Image(systemName: "checkmark")
+                                    }
+                                    .foregroundColor(.white)
+                                    .padding(.horizontal, 20)
+                                    .padding(.vertical, 12)
+                                    .background(
+                                        Capsule()
+                                            .fill(isCurrentQuestionValid() ? .ultraThinMaterial : .ultraThinMaterial.opacity(0.5))
+                                    )
+                                }
+                                .disabled(!isCurrentQuestionValid())
+                            }
                         }
                     }
-                    .tag(index)
+                    .padding(.horizontal)
+                    .padding(.vertical, 20)
+                    .background(
+                        Rectangle()
+                            .fill(.ultraThinMaterial)
+                            .ignoresSafeArea()
+                    )
+                }
+                
+                if isLoading {
+                    LoadingView()
                 }
             }
-            .tabViewStyle(.page(indexDisplayMode: .never))
+        }
+        .navigationBarHidden(true)
+        .alert(isPresented: $showingAlert) {
+            Alert(
+                title: Text("Required"),
+                message: Text(alertMessage),
+                dismissButton: .default(Text("OK"))
+            )
         }
     }
-    .navigationBarHidden(true)
-    .alert("Error", isPresented: $showingAlert) {
-        Button("OK", role: .cancel) { }
-    } message: {
-        Text(alertMessage)
-    }
-}
-
-private func toggleOption(_ option: String, for question: OnboardingQuestion) {
-    let binding = selectedOptionsBinding(for: question.title)
-    if question.allowsMultipleSelection {
-        if binding.wrappedValue.contains(option) {
-            binding.wrappedValue.remove(option)
+    
+    private func toggleOption(_ option: String, for question: OnboardingQuestion) {
+        var currentSelection = selectedOptions[question.title] ?? Set<String>()
+        
+        if question.allowsMultipleSelection {
+            if currentSelection.contains(option) {
+                currentSelection.remove(option)
+            } else {
+                currentSelection.insert(option)
+            }
         } else {
-            binding.wrappedValue.insert(option)
+            currentSelection = [option]
         }
-    } else {
-        binding.wrappedValue = [option]
+        
+        selectedOptions[question.title] = currentSelection
+    }
+    
+    private func isCurrentQuestionValid() -> Bool {
+        let question = questions[currentPage]
+        let selectedCount = selectedOptions[question.title]?.count ?? 0
+        return selectedCount >= question.minimumSelections
+    }
+    
+    private func saveOnboardingData() {
+        isLoading = true
+        
+        let onboardingData = UserOnboardingData(
+            trainingLevel: selectedOptions["What is your current level of training?"]?.first ?? "",
+            primaryGoals: Array(selectedOptions["What are your primary goals?"] ?? []),
+            trainingDaysPerWeek: selectedOptions["How many days per week can you train?"]?.first ?? "",
+            availableEquipment: Array(selectedOptions["What equipment do you have access to?"] ?? []),
+            hasInjuries: selectedOptions["Do you have any injuries or limitations?"]?.contains("Yes") ?? false,
+            preferredTrainingStyles: Array(selectedOptions["Preferred Training Style"] ?? [])
+        )
+        
+        modelContext.insert(onboardingData)
+        
+        do {
+            try modelContext.save()
+            onComplete?()
+            dismiss()
+        } catch {
+            showingAlert = true
+            alertMessage = "Failed to save: \(error.localizedDescription)"
+        }
+        
+        isLoading = false
     }
 } 

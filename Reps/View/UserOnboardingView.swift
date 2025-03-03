@@ -1,4 +1,6 @@
 import SwiftUI
+import FirebaseCore
+import FirebaseAuth
 import SwiftData
 
 // MARK: - Models
@@ -8,6 +10,7 @@ struct OnboardingQuestion: Identifiable, Hashable {
     let options: [String]
     let allowsMultipleSelection: Bool
     let type: QuestionType
+    let minimumSelections: Int
     
     enum QuestionType {
         case singleChoice
@@ -27,6 +30,8 @@ struct UserOnboardingView: View {
     @State private var numberInputs: [String: Double] = [:]
     @State private var showingAlert = false
     @State private var alertMessage = ""
+    @State private var isLoading = false
+    @State private var errorMessage = ""
     var onComplete: (() -> Void)?
     
     // Define all onboarding questions
@@ -35,7 +40,8 @@ struct UserOnboardingView: View {
             title: "What is your current level of training?",
             options: ["Beginner", "Intermediate", "Advanced"],
             allowsMultipleSelection: false,
-            type: .singleChoice
+            type: .singleChoice,
+            minimumSelections: 1
         ),
         OnboardingQuestion(
             title: "What are your primary goals?",
@@ -47,13 +53,15 @@ struct UserOnboardingView: View {
                 "Weight Loss"
             ],
             allowsMultipleSelection: true,
-            type: .multipleChoice
+            type: .multipleChoice,
+            minimumSelections: 1
         ),
         OnboardingQuestion(
             title: "How many days per week can you train?",
             options: ["1-2", "3-4", "5+"],
             allowsMultipleSelection: false,
-            type: .singleChoice
+            type: .singleChoice,
+            minimumSelections: 1
         ),
         OnboardingQuestion(
             title: "What equipment do you have access to?",
@@ -65,13 +73,15 @@ struct UserOnboardingView: View {
                 "Free Weights"
             ],
             allowsMultipleSelection: true,
-            type: .multipleChoice
+            type: .multipleChoice,
+            minimumSelections: 1
         ),
         OnboardingQuestion(
             title: "Do you have any injuries or limitations?",
             options: ["Yes", "No"],
             allowsMultipleSelection: false,
-            type: .singleChoice
+            type: .singleChoice,
+            minimumSelections: 1
         ),
         OnboardingQuestion(
             title: "Preferred Training Style",
@@ -83,7 +93,8 @@ struct UserOnboardingView: View {
                 "Bodybuilding"
             ],
             allowsMultipleSelection: true,
-            type: .multipleChoice
+            type: .multipleChoice,
+            minimumSelections: 1
         ),
         OnboardingQuestion(
             title: "Preferred Training Split",
@@ -96,7 +107,8 @@ struct UserOnboardingView: View {
                 "Vertical/Horizontal Push/pull"
             ],
             allowsMultipleSelection: true,
-            type: .multipleChoice
+            type: .multipleChoice,
+            minimumSelections: 1
         ),
         OnboardingQuestion(
             title: "Preferred Training equipment",
@@ -110,7 +122,8 @@ struct UserOnboardingView: View {
                 "Bodyweight Only",
             ],
             allowsMultipleSelection: true,
-            type: .multipleChoice
+            type: .multipleChoice,
+            minimumSelections: 1
         )
     ]
     
@@ -130,115 +143,195 @@ struct UserOnboardingView: View {
                     .padding(.top, 60)
                     .padding(.horizontal)
                 
+                // Question content
+                ZStack {
+                    ForEach(Array(questions.enumerated()), id: \.element.id) { index, question in
+                        if index == currentPage {
+                            QuestionView(
+                                question: question,
+                                selectedOptions: selectedOptionsBinding(for: question.title),
+                                textInput: textInputBinding(for: question.title),
+                                numberInput: numberInputBinding(for: question.title)
+                            )
+                            .transition(.asymmetric(
+                                insertion: .move(edge: .trailing),
+                                removal: .move(edge: .leading)
+                            ))
+                        }
+                    }
+                }
+                .animation(.easeInOut(duration: 0.3), value: currentPage)
+                
+                Spacer()
+                
                 // Navigation Buttons
-                HStack {
+                HStack(spacing: 20) {
                     if currentPage > 0 {
                         Button(action: {
                             withAnimation {
                                 currentPage -= 1
                             }
                         }) {
-                            Image(systemName: "chevron.left")
-                                .font(.title2)
-                                .foregroundColor(.white.opacity(0.8))
+                            HStack {
+                                Image(systemName: "chevron.left")
+                                Text("Previous")
+                            }
+                            .foregroundColor(.white)
+                            .padding(.horizontal, 20)
+                            .padding(.vertical, 10)
+                            .background(
+                                Capsule()
+                                    .fill(Color.blue.opacity(0.3))
+                            )
                         }
                     }
-                    Spacer()
+                    
                     if currentPage < questions.count - 1 {
                         Button(action: {
-                            withAnimation {
-                                currentPage += 1
+                            if isCurrentQuestionValid() {
+                                withAnimation {
+                                    currentPage += 1
+                                }
+                            } else {
+                                showingAlert = true
+                                alertMessage = "Please select at least one option"
                             }
                         }) {
-                            Image(systemName: "chevron.right")
-                                .font(.title2)
-                                .foregroundColor(.white.opacity(0.8))
+                            HStack {
+                                Text("Next")
+                                Image(systemName: "chevron.right")
+                            }
+                            .foregroundColor(.white)
+                            .padding(.horizontal, 20)
+                            .padding(.vertical, 10)
+                            .background(
+                                Capsule()
+                                    .fill(isCurrentQuestionValid() ? Color.blue.opacity(0.3) : Color.gray.opacity(0.2))
+                            )
                         }
+                        .disabled(!isCurrentQuestionValid())
                     } else {
                         Button(action: {
-                            // Save onboarding data and dismiss
-                            saveOnboardingData()
+                            if isCurrentQuestionValid() {
+                                saveOnboardingData()
+                            } else {
+                                showingAlert = true
+                                alertMessage = "Please select at least one option"
+                            }
                         }) {
-                            Text("Finish")
-                                .fontWeight(.semibold)
-                                .foregroundColor(.white)
-                                .padding(.horizontal, 20)
-                                .padding(.vertical, 10)
-                                .background(
-                                    Capsule()
-                                        .fill(.ultraThinMaterial)
-                                )
+                            HStack {
+                                Text("Finish")
+                                Image(systemName: "checkmark")
+                            }
+                            .foregroundColor(.white)
+                            .padding(.horizontal, 20)
+                            .padding(.vertical, 10)
+                            .background(
+                                Capsule()
+                                    .fill(isCurrentQuestionValid() ? Color.blue.opacity(0.3) : Color.gray.opacity(0.2))
+                            )
                         }
+                        .disabled(!isCurrentQuestionValid())
                     }
                 }
-                .padding()
-                
-                // Question content
-                TabView(selection: $currentPage) {
-                    ForEach(Array(questions.enumerated()), id: \.element.id) { index, question in
-                        QuestionView(
-                            question: question,
-                            selectedOptions: selectedOptionsBinding(for: question.title),
-                            textInput: textInputBinding(for: question.title),
-                            numberInput: numberInputBinding(for: question.title)
-                        )
-                        .tag(index)
-                    }
-                }
-                .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
+                .padding(.horizontal)
+                .padding(.bottom, 30)
+            }
+            
+            if isLoading {
+                LoadingView()
             }
         }
         .navigationBarHidden(true)
-        .alert("Error", isPresented: $showingAlert) {
+        .alert("Required", isPresented: $showingAlert) {
             Button("OK", role: .cancel) { }
         } message: {
             Text(alertMessage)
         }
     }
     
+    private func isCurrentQuestionValid() -> Bool {
+        let currentQuestion = questions[currentPage]
+        let selectedCount = selectedOptions[currentQuestion.title]?.count ?? 0
+        return selectedCount >= 1 // Require at least one selection
+    }
+    
     private func selectedOptionsBinding(for questionTitle: String) -> Binding<Set<String>> {
-        Binding(
-            get: { selectedOptions[questionTitle] ?? Set() },
-            set: { selectedOptions[questionTitle] = $0 }
+        return Binding(
+            get: { self.selectedOptions[questionTitle] ?? Set<String>() },
+            set: { self.selectedOptions[questionTitle] = $0 }
         )
     }
     
     private func textInputBinding(for questionTitle: String) -> Binding<String> {
-        Binding(
-            get: { textInputs[questionTitle] ?? "" },
-            set: { textInputs[questionTitle] = $0 }
+        return Binding(
+            get: { self.textInputs[questionTitle] ?? "" },
+            set: { self.textInputs[questionTitle] = $0 }
         )
     }
     
     private func numberInputBinding(for questionTitle: String) -> Binding<Double> {
-        Binding(
-            get: { numberInputs[questionTitle] ?? 0.0 },
-            set: { numberInputs[questionTitle] = $0 }
+        return Binding(
+            get: { self.numberInputs[questionTitle] ?? 0.0 },
+            set: { self.numberInputs[questionTitle] = $0 }
         )
     }
     
     private func saveOnboardingData() {
-        // Validate required fields
-        guard let trainingLevel = selectedOptions["What is your current level of training?"]?.first,
-              !trainingLevel.isEmpty else {
-            showingAlert = true
-            alertMessage = "Please select your training level"
-            return
-        }
+        print("Starting onboarding data save process...")
         
-        // Create and save user onboarding data
-        let onboardingData = UserOnboardingData()
-        onboardingData.update(with: selectedOptions)
+        // Set loading state
+        isLoading = true
         
+        // First update the local model
+        let onboardingData = UserOnboardingData(
+            trainingLevel: selectedOptionsBinding(for: "What is your current level of training?").wrappedValue.first ?? "",
+            primaryGoals: Array(selectedOptionsBinding(for: "What are your primary goals?").wrappedValue),
+            trainingDaysPerWeek: selectedOptionsBinding(for: "How many days per week can you train?").wrappedValue.first ?? "",
+            workoutSplit: selectedOptionsBinding(for: "What's your preferred workout split?").wrappedValue.first ?? "",
+            availableEquipment: Array(selectedOptionsBinding(for: "What equipment do you have access to?").wrappedValue),
+            focusAreas: Array(selectedOptionsBinding(for: "Which areas would you like to focus on?").wrappedValue),
+            trainingIntensity: selectedOptionsBinding(for: "What's your preferred training intensity?").wrappedValue.first ?? "",
+            hasInjuries: selectedOptionsBinding(for: "Do you have any injuries or limitations?").wrappedValue.contains("Yes"),
+            preferredTrainingStyles: Array(selectedOptionsBinding(for: "Preferred Training Style").wrappedValue)
+        )
+        
+        // Save to SwiftData
         modelContext.insert(onboardingData)
         
-        do {
-            try modelContext.save()
-            onComplete?()  // Call completion handler if provided
-            presentationMode.wrappedValue.dismiss()
-        } catch {
-            showingAlert = true
-            alertMessage = "Failed to save onboarding data: \(error.localizedDescription)"
+        print("Created onboarding data model: \(onboardingData)")
+        
+        // Verify Firebase is initialized
+        if FirebaseApp.app() == nil {
+            print("Firebase not initialized, attempting to configure...")
+            FirebaseApp.configure()
+        }
+        
+        // Then upload to Firebase
+        Task {
+            do {
+                print("Attempting to save to Firebase...")
+                
+                // Check if user is authenticated
+                if Auth.auth().currentUser == nil {
+                    print("User not authenticated, attempting to sign in anonymously...")
+                    try await Auth.auth().signInAnonymously()
+                }
+                
+                try await FirebaseService.shared.saveUserOnboardingData(onboardingData)
+                print("Firebase save successful")
+                await MainActor.run {
+                    isLoading = false
+                    onComplete?()
+                }
+            } catch {
+                print("Error saving to Firebase: \(error.localizedDescription)")
+                await MainActor.run {
+                    isLoading = false
+                    errorMessage = error.localizedDescription
+                    showingAlert = true
+                }
+            }
         }
     }
 }
@@ -251,131 +344,96 @@ struct QuestionView: View {
     @Binding var numberInput: Double
     
     var body: some View {
-        VStack(alignment: .leading, spacing: 24) {
+        VStack(alignment: .leading, spacing: 20) {
             Text(question.title)
                 .font(.title2)
                 .fontWeight(.bold)
-                .foregroundColor(.white)
+                .foregroundColor(.primary)
                 .padding(.horizontal)
             
             ScrollView {
-                VStack(spacing: 12) {
-                    switch question.type {
-                    case .singleChoice, .multipleChoice:
-                        ForEach(question.options, id: \.self) { option in
-                            OptionButton(
-                                title: option,
-                                isSelected: selectedOptions.contains(option),
-                                action: {
-                                    toggleOption(option)
+                VStack(alignment: .leading, spacing: 12) {
+                    ForEach(question.options, id: \.self) { option in
+                        OptionButton(
+                            option: option,
+                            isSelected: selectedOptions.contains(option),
+                            allowsMultipleSelection: question.allowsMultipleSelection
+                        ) {
+                            if question.allowsMultipleSelection {
+                                if selectedOptions.contains(option) {
+                                    selectedOptions.remove(option)
+                                } else {
+                                    selectedOptions.insert(option)
                                 }
-                            )
+                            } else {
+                                selectedOptions = [option]
+                            }
                         }
-                    case .textInput:
-                        OnboardingTextField(text: $textInput, onSubmit: {
-                            // Handle text submission if needed
-                        })
-                    case .numberInput:
-                        CustomNumberField(value: $numberInput)
                     }
                 }
                 .padding(.horizontal)
             }
         }
-        .padding(.top)
-    }
-    
-    private func toggleOption(_ option: String) {
-        if question.allowsMultipleSelection {
-            if selectedOptions.contains(option) {
-                selectedOptions.remove(option)
-            } else {
-                selectedOptions.insert(option)
-            }
-        } else {
-            selectedOptions = [option]
-        }
+        .padding(.vertical)
     }
 }
 
-// MARK: - Supporting Views
-struct ProgressBar: View {
-    let currentStep: Int
-    let totalSteps: Int
-    
-    var body: some View {
-        GeometryReader { geometry in
-            ZStack(alignment: .leading) {
-                Rectangle()
-                    .fill(Color.white.opacity(0.2))
-                    .frame(height: 4)
-                    .cornerRadius(2)
-                
-                Rectangle()
-                    .fill(Color.white)
-                    .frame(width: geometry.size.width * CGFloat(currentStep) / CGFloat(totalSteps), height: 4)
-                    .cornerRadius(2)
-            }
-        }
-        .frame(height: 4)
-    }
-}
-
+// MARK: - OptionButton
 struct OptionButton: View {
-    let title: String
+    let option: String
     let isSelected: Bool
+    let allowsMultipleSelection: Bool
     let action: () -> Void
     
     var body: some View {
         Button(action: action) {
             HStack {
-                Text(title)
-                    .foregroundColor(.white)
+                Text(option)
+                    .font(.body)
+                    .foregroundColor(isSelected ? .white : .primary)
+                    .padding(.vertical, 12)
+                
                 Spacer()
-                if isSelected {
-                    Image(systemName: "checkmark.circle.fill")
-                        .foregroundColor(.white)
-                }
+                
+                Image(systemName: isSelected 
+                      ? (allowsMultipleSelection ? "checkmark.square.fill" : "checkmark.circle.fill") 
+                      : (allowsMultipleSelection ? "square" : "circle"))
+                    .foregroundColor(isSelected ? .white : .gray)
             }
-            .padding()
+            .padding(.horizontal, 16)
             .background(
-                RoundedRectangle(cornerRadius: 12)
-                    .fill(isSelected ? Color.white.opacity(0.3) : Color.white.opacity(0.1))
+                RoundedRectangle(cornerRadius: 10)
+                    .fill(isSelected ? Color.blue : Color.gray.opacity(0.1))
             )
         }
     }
 }
 
-struct OnboardingTextField: View {
-    @Binding var text: String
-    let onSubmit: () -> Void
+// MARK: - ProgressBar
+struct ProgressBar: View {
+    let currentStep: Int
+    let totalSteps: Int
     
     var body: some View {
-        TextField("Enter your answer", text: $text)
-            .textFieldStyle(RoundedBorderTextFieldStyle())
-            .padding()
-            .background(Color.white.opacity(0.1))
-            .cornerRadius(12)
-            .onSubmit(onSubmit)
-    }
-}
-
-struct CustomNumberField: View {
-    @Binding var value: Double
-    
-    var body: some View {
-        TextField("Enter a number", value: $value, format: .number)
-            .keyboardType(.numberPad)
-            .textFieldStyle(RoundedBorderTextFieldStyle())
-            .padding()
-            .background(Color.white.opacity(0.1))
-            .cornerRadius(12)
-    }
-}
-
-// MARK: - Preview
-struct UserOnboardingView_Previews: PreviewProvider {
-    static var previews: some View {
-        UserOnboardingView()
+        VStack(alignment: .leading, spacing: 8) {
+            Text("Step \(currentStep) of \(totalSteps)")
+                .font(.subheadline)
+                .foregroundColor(.secondary)
+            
+            GeometryReader { geometry in
+                ZStack(alignment: .leading) {
+                    Rectangle()
+                        .frame(width: geometry.size.width, height: 8)
+                        .opacity(0.3)
+                        .foregroundColor(.gray)
+                    
+                    Rectangle()
+                        .frame(width: geometry.size.width * CGFloat(currentStep) / CGFloat(totalSteps), height: 8)
+                        .foregroundColor(.blue)
+                }
+                .cornerRadius(4)
+            }
+            .frame(height: 8)
+        }
     }
 } 

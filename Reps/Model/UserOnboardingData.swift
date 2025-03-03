@@ -6,7 +6,10 @@ final class UserOnboardingData {
     var trainingLevel: String
     var primaryGoals: [String]
     var trainingDaysPerWeek: String
+    var workoutSplit: String
     var availableEquipment: [String]
+    var focusAreas: [String]
+    var trainingIntensity: String
     var hasInjuries: Bool
     var preferredTrainingStyles: [String]
     var completedOnboarding: Bool
@@ -16,14 +19,20 @@ final class UserOnboardingData {
         trainingLevel: String = "",
         primaryGoals: [String] = [],
         trainingDaysPerWeek: String = "",
+        workoutSplit: String = "",
         availableEquipment: [String] = [],
+        focusAreas: [String] = [],
+        trainingIntensity: String = "",
         hasInjuries: Bool = false,
         preferredTrainingStyles: [String] = []
     ) {
         self.trainingLevel = trainingLevel
         self.primaryGoals = primaryGoals
         self.trainingDaysPerWeek = trainingDaysPerWeek
+        self.workoutSplit = workoutSplit
         self.availableEquipment = availableEquipment
+        self.focusAreas = focusAreas
+        self.trainingIntensity = trainingIntensity
         self.hasInjuries = hasInjuries
         self.preferredTrainingStyles = preferredTrainingStyles
         self.completedOnboarding = false
@@ -46,8 +55,20 @@ extension UserOnboardingData {
             self.trainingDaysPerWeek = daysPerWeek
         }
         
+        if let workoutSplit = selectedOptions["What's your preferred workout split?"]?.first {
+            self.workoutSplit = workoutSplit
+        }
+        
         if let equipment = selectedOptions["What equipment do you have access to?"] {
             self.availableEquipment = Array(equipment)
+        }
+        
+        if let focusAreas = selectedOptions["Which areas would you like to focus on?"] {
+            self.focusAreas = Array(focusAreas)
+        }
+        
+        if let trainingIntensity = selectedOptions["What's your preferred training intensity?"]?.first {
+            self.trainingIntensity = trainingIntensity
         }
         
         if let hasInjuries = selectedOptions["Do you have any injuries or limitations?"]?.first {
