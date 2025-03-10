@@ -263,7 +263,7 @@ struct UserOnboardingView: View {
     private func isCurrentQuestionValid() -> Bool {
         let currentQuestion = questions[currentPage]
         let selectedCount = selectedOptions[currentQuestion.title]?.count ?? 0
-        return selectedCount >= 1 // Require at least one selection
+        return selectedCount >= 1 //Require at least one selection
     }
     
     private func selectedOptionsBinding(for questionTitle: String) -> Binding<Set<String>> {
